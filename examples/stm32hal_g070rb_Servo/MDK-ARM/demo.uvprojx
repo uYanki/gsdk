@@ -2731,6 +2731,26 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\i2c_ssd1306.c</FilePath>
             </File>
+            <File>
+              <FileName>oled_font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\components\device\oled_font.h</FilePath>
+            </File>
+            <File>
+              <FileName>oled_framebuf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\components\device\oled_framebuf.h</FilePath>
+            </File>
+            <File>
+              <FileName>oled_framebuf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\oled_framebuf.c</FilePath>
+            </File>
+            <File>
+              <FileName>oled_font.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\oled_font.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

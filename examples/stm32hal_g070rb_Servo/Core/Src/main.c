@@ -66,6 +66,15 @@ void SystemClock_Config(void);
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 }
+
+static void SSD1306_Reset(void)
+{
+	DelayBlockMs(20);
+	HAL_GPIO_WritePin(OLED096_RST_PIN,GPIO_PIN_RESET);
+	DelayBlockMs(20);
+	HAL_GPIO_WritePin(OLED096_RST_PIN,GPIO_PIN_SET);
+}
+
 /* USER CODE END 0 */
 #include "./resources/oled_image_spaceman.h"
 /**
@@ -113,8 +122,6 @@ int main(void)
     /* USER CODE BEGIN 2 */
     DelayInit();
 
-#define OLED096_SCL_PIN GPIOB, GPIO_PIN_8
-#define OLED096_SDA_PIN GPIOB, GPIO_PIN_7
 
     i2c_mst_t i2c = {
         .SDA  = {OLED096_SDA_PIN},
@@ -125,12 +132,14 @@ int main(void)
     i2c_ssd1306_t ssd1306 = {
         .hI2C      = &i2c,
         .u8Cols    = 128,
-        .u8Rows    = 64 / 8,
+        .u8Rows    = 32 / 8,
         .u8SlvAddr = SSD1306_ADDRESS_LOW,
     };
 		
 		I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
+		
+		SSD1306_Reset();
 
     SSD1306_Init(&ssd1306);
     SSD1306_ClearScreen(&ssd1306);
