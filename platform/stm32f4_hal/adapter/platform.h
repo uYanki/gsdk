@@ -1,8 +1,7 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
-#include "stm32f4xx_hal.h"
-
+#include "stm32g0xx_hal.h"
 
 #ifdef __cplusplus
 extern "C" {
