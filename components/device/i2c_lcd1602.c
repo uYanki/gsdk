@@ -443,7 +443,7 @@ static void LCD1602_PlayVideo(i2c_lcd1602_t* pHandle, const uint8_t* cpu8Buffer,
     }
 }
 
-void LCD1602_Test(i2cmst_t* hI2C)
+void LCD1602_Test(i2c_mst_t* hI2C)
 {
     i2c_lcd1602_t lcd1602 = {
         .hI2C      = hI2C,

@@ -34,7 +34,7 @@ typedef struct {
 } rtc_time_t;
 
 typedef struct {
-    spimst_t* hSPI;
+    spi_mst_t* hSPI;
 } spi_ds1302_t;
 
 //---------------------------------------------------------------------------

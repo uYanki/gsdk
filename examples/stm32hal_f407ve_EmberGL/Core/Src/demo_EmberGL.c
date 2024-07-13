@@ -19,7 +19,7 @@
 // Variables
 //---------------------------------------------------------------------------
 
-static spimst_t spi = {
+static spi_mst_t spi = {
     .MISO = {GPIOA, GPIO_PIN_5}, /*SDA*/
     .MOSI = {GPIOA, GPIO_PIN_5},
     .SCLK = {GPIOA, GPIO_PIN_6}, /*SCL*/

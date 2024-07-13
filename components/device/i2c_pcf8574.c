@@ -164,7 +164,7 @@ err_t PCF8574_ScanMatrixkey4x4(i2c_pcf8574_t* pHandle, uint8_t* pu8KeyIndex)
 
 #if CONFIG_DEMOS_SW
 
-void PCF8574_Test(i2cmst_t* hI2C)
+void PCF8574_Test(i2c_mst_t* hI2C)
 {
     i2c_pcf8574_t pcf8574 = {
         .hI2C      = hI2C,
@@ -173,7 +173,7 @@ void PCF8574_Test(i2cmst_t* hI2C)
 
     PCF8574_Init(&pcf8574);
 
-#if 0 // led
+#if 0  // led
 
     LOGI("write port");
     PCF8574_WritePort(&pcf8574, PCF8574_PIN_NONE);  // all off

@@ -16,16 +16,16 @@
 // Prototypes
 //---------------------------------------------------------------------------
 
-static void    SWSPI_Master_SetClockIdle(spimst_t* pHandle);
-static uint8_t SWSPI_Master_ShiftIn(spimst_t* pHandle);
-static void    SWSPI_Master_ShiftOut(spimst_t* pHandle, uint8_t u8TxData);
-static uint8_t SWSPI_Master_ShiftInOut3Wire(spimst_t* pHandle, uint8_t u8TxData);
-static uint8_t SWSPI_Master_ShiftInOut4Wire(spimst_t* pHandle, uint8_t u8TxData);
+static void    SWSPI_Master_SetClockIdle(spi_mst_t* pHandle);
+static uint8_t SWSPI_Master_ShiftIn(spi_mst_t* pHandle);
+static void    SWSPI_Master_ShiftOut(spi_mst_t* pHandle, uint8_t u8TxData);
+static uint8_t SWSPI_Master_ShiftInOut3Wire(spi_mst_t* pHandle, uint8_t u8TxData);
+static uint8_t SWSPI_Master_ShiftInOut4Wire(spi_mst_t* pHandle, uint8_t u8TxData);
 
-static err_t SWSPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags);
-static err_t SWSPI_Master_TransmitBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size);
-static err_t SWSPI_Master_ReceiveBlock(spimst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size);
-static err_t SWSPI_Master_TransmitReceiveBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size);
+static err_t SWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags);
+static err_t SWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size);
+static err_t SWSPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size);
+static err_t SWSPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size);
 
 //---------------------------------------------------------------------------
 // Variables
@@ -42,7 +42,7 @@ const spimst_ops_t g_swSpiOps = {
 // Functions
 //---------------------------------------------------------------------------
 
-static err_t SWSPI_Master_SetClock(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle)
+static err_t SWSPI_Master_SetClock(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle)
 {
     uint32_t u32ClockCycleUs;
 
@@ -55,7 +55,7 @@ static err_t SWSPI_Master_SetClock(spimst_t* pHandle, uint32_t u32ClockSpeedHz, 
     return ERR_NONE;
 }
 
-static void SWSPI_Master_SetClockIdle(spimst_t* pHandle)
+static void SWSPI_Master_SetClockIdle(spi_mst_t* pHandle)
 {
     // clock steady state
 
@@ -78,7 +78,7 @@ static void SWSPI_Master_SetClockIdle(spimst_t* pHandle)
 /**
  * @brief msbfirst
  */
-static uint8_t SWSPI_Master_ShiftIn(spimst_t* pHandle)
+static uint8_t SWSPI_Master_ShiftIn(spi_mst_t* pHandle)
 {
     uint8_t u8RxData = 0x00, u8Mask = 0x80;
 
@@ -149,7 +149,7 @@ static uint8_t SWSPI_Master_ShiftIn(spimst_t* pHandle)
 /**
  * @brief msbfirst
  */
-static void SWSPI_Master_ShiftOut(spimst_t* pHandle, uint8_t u8TxData)
+static void SWSPI_Master_ShiftOut(spi_mst_t* pHandle, uint8_t u8TxData)
 {
     uint8_t u8Mask = 0x80;
 
@@ -212,7 +212,7 @@ static void SWSPI_Master_ShiftOut(spimst_t* pHandle, uint8_t u8TxData)
 /**
  * @brief msbfirst
  */
-static uint8_t SWSPI_Master_ShiftInOut3Wire(spimst_t* pHandle, uint8_t u8TxData)
+static uint8_t SWSPI_Master_ShiftInOut3Wire(spi_mst_t* pHandle, uint8_t u8TxData)
 {
     uint8_t u8RxData = 0x00, u8Mask = 0x80;
 
@@ -292,7 +292,7 @@ static uint8_t SWSPI_Master_ShiftInOut3Wire(spimst_t* pHandle, uint8_t u8TxData)
 /**
  * @brief lsbfirst
  */
-static uint8_t SWSPI_Master_ShiftInOut4Wire(spimst_t* pHandle, uint8_t u8TxData)
+static uint8_t SWSPI_Master_ShiftInOut4Wire(spi_mst_t* pHandle, uint8_t u8TxData)
 {
     uint8_t u8RxData = 0x00, u8Mask = 0x80;
 
@@ -364,7 +364,7 @@ static uint8_t SWSPI_Master_ShiftInOut4Wire(spimst_t* pHandle, uint8_t u8TxData)
     return u8RxData;
 }
 
-static err_t SWSPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
+static err_t SWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
 {
     pHandle->u16TimingConfig |= u16Flags & (SPI_FLAG_CPOL_Msk | SPI_FLAG_CPHA_Msk | SPI_FLAG_FIRSTBIT_Msk | SPI_FLAG_DATAWIDTH_Msk | SPI_FLAG_FAST_CLOCK_Msk);
 
@@ -390,7 +390,7 @@ static err_t SWSPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_
     return ERR_NONE;
 }
 
-static err_t SWSPI_Master_TransmitBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
+static err_t SWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
 {
     bool bLsbfirst = (pHandle->u16TimingConfig & SPI_FLAG_FIRSTBIT_Msk) == SPI_FLAG_LSBFIRST;
 
@@ -470,7 +470,7 @@ static err_t SWSPI_Master_TransmitBlock(spimst_t* pHandle, const uint8_t* cpu8Tx
     return ERR_NONE;
 }
 
-static err_t SWSPI_Master_ReceiveBlock(spimst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
+static err_t SWSPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
 {
     bool bLsbfirst = (pHandle->u16TimingConfig & SPI_FLAG_FIRSTBIT_Msk) == SPI_FLAG_LSBFIRST;
 
@@ -544,7 +544,7 @@ static err_t SWSPI_Master_ReceiveBlock(spimst_t* pHandle, uint8_t* pu8RxData, ui
     return ERR_NONE;
 }
 
-static err_t SWSPI_Master_TransmitReceiveBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
+static err_t SWSPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
 {
     bool bLsbfirst = (pHandle->u16TimingConfig & SPI_FLAG_FIRSTBIT_Msk) == SPI_FLAG_LSBFIRST;
 

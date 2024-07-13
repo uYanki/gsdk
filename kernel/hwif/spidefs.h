@@ -122,13 +122,13 @@ typedef struct spimst {
 #endif
 
     const spimst_ops_t* pOps;
-} spimst_t;
+} spi_mst_t;
 
 struct spimst_ops {
-    err_t (*Init)(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags);
-    err_t (*TransmitBlock)(spimst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size);
-    err_t (*ReceiveBlock)(spimst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size);
-    err_t (*TransmitReceiveBlock)(spimst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size);
+    err_t (*Init)(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags);
+    err_t (*TransmitBlock)(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size);
+    err_t (*ReceiveBlock)(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size);
+    err_t (*TransmitReceiveBlock)(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size);
 };
 
 //---------------------------------------------------------------------------

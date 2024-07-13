@@ -255,7 +255,7 @@ void DS1302_ClearRam(spi_ds1302_t* pHandle)
 
 void DS1302_Test(void)
 {
-    spimst_t spi = {
+    spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5}, /* DAT */
         .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6}, /* CLK */

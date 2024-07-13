@@ -196,7 +196,7 @@ void SSD1306_FillBuffer(i2c_ssd1306_t* pHandle, const uint8_t* cpu8Buffer)
 
 #include "./resources/oled_image_spaceman.h"
 
-void SSD1306_Test(i2cmst_t* hI2C)
+void SSD1306_Test(i2c_mst_t* hI2C)
 {
     i2c_ssd1306_t ssd1306 = {
         .hI2C      = hI2C,

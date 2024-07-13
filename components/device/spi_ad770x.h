@@ -115,7 +115,7 @@ typedef enum {
 } ad770x_update_rate_e;
 
 typedef struct {
-    __IN spimst_t*   hSPI;
+    __IN spi_mst_t*  hSPI;
     __IN const pin_t RST;
 } spi_ad770x_t;
 

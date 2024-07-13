@@ -119,7 +119,7 @@ void AD9833_SetOutput(spi_ad9833_t* pHandle, ad9833_freq_output_e freq, ad9833_p
 
 void AD9833_Test(void)
 {
-    spimst_t spi = {
+    spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5}, /* SDATA */
         .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6}, /* SCLK */

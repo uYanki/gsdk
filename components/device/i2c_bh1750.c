@@ -147,7 +147,7 @@ err_t BH1750_GetLux(i2c_bh1750_t* pHandle, float32_t* pf32Lux)
 
 #if CONFIG_DEMOS_SW
 
-void BH1750_Test(i2cmst_t* hI2C)
+void BH1750_Test(i2c_mst_t* hI2C)
 {
     i2c_bh1750_t bh1750 = {
         .hI2C      = hI2C,

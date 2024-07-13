@@ -41,7 +41,7 @@ static void disp_flush(lv_disp_drv_t* disp_drv, const lv_area_t* area, lv_color_
  *  STATIC VARIABLES
  **********************/
 
-static spimst_t spi = {
+static spi_mst_t spi = {
     .MISO = {GPIOA, GPIO_PIN_5}, /*SDA*/
     .MOSI = {GPIOA, GPIO_PIN_5},
     .SCLK = {GPIOA, GPIO_PIN_6}, /*SCL*/

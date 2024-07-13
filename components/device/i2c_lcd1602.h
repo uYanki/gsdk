@@ -28,8 +28,8 @@ extern "C" {
 #define LCD1602_ADDRESS_A111   0x27
 
 typedef struct {
-    __IN const i2cmst_t* hI2C;
-    __IN const uint8_t   u8SlvAddr;
+    __IN const i2c_mst_t* hI2C;
+    __IN const uint8_t    u8SlvAddr;
 
     uint8_t _u8DispMode;
     uint8_t _u8DispCtrl;
@@ -81,7 +81,7 @@ err_t LCD1602_BacklightOff(i2c_lcd1602_t* pHandle);
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void LCD1602_Test(i2cmst_t* hI2C);
+void LCD1602_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

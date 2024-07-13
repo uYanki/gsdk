@@ -28,10 +28,10 @@
 // Prototypes
 //---------------------------------------------------------------------------
 
-static err_t HWSPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags);
-static err_t HWSPI_Master_TransmitBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size);
-static err_t HWSPI_Master_ReceiveBlock(spimst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size);
-static err_t HWSPI_Master_TransmitReceiveBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size);
+static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags);
+static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size);
+static err_t HWSPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size);
+static err_t HWSPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size);
 
 //---------------------------------------------------------------------------
 // Variables
@@ -52,7 +52,7 @@ const spimst_ops_t g_hwSpiOps = {
 // Example
 //---------------------------------------------------------------------------
 
-static err_t HWSPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
+static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
 
@@ -81,19 +81,19 @@ static err_t HWSPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_
     return ThrowError(ERR_INVALID_VALUE, "unknown instance");
 }
 
-static err_t HWSPI_Master_TransmitBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
+static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
     ThrowError_(HAL_SPI_Transmit(hwspi, (uint8_t*)cpu8TxData, u16Size, SPI_TIMEOUT));
 }
 
-static err_t HWSPI_Master_ReceiveBlock(spimst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
+static err_t HWSPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
     ThrowError_(HAL_SPI_Receive(hwspi, pu8RxData, u16Size, SPI_TIMEOUT));
 }
 
-static err_t HWSPI_Master_TransmitReceiveBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
+static err_t HWSPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
     ThrowError_(HAL_SPI_TransmitReceive(hwspi, (uint8_t*)cpu8TxData, pu8RxData, u16Size, SPI_TIMEOUT));

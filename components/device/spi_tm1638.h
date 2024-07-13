@@ -19,7 +19,7 @@ extern "C" {
 #define TM1638_SPI_TIMING (SPI_FLAG_3WIRE | SPI_FLAG_CPOL_HIGH | SPI_FLAG_CPHA_2EDGE | SPI_FLAG_LSBFIRST | SPI_FLAG_DATAWIDTH_8B | SPI_FLAG_CS_ACTIVE_LOW)
 
 typedef struct {
-    __IN spimst_t* hSPI;
+    __IN spi_mst_t* hSPI;
 } spi_tm1638_t;
 
 //---------------------------------------------------------------------------

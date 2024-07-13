@@ -43,7 +43,7 @@ typedef enum {
 } eeprom_capacity_e;
 
 typedef struct {
-    __IN i2cmst_t*         hI2C;
+    __IN i2c_mst_t*        hI2C;
     __IN uint8_t           u8SlvAddr;  //< 7-bit slave address
     __IN eeprom_capacity_e eCapacity;  //< eeprom capacity
 } i2c_eeprom_t;
@@ -63,7 +63,7 @@ err_t EEPROM_DetectCapacity(i2c_eeprom_t* pHandle);
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void EEPROM_Test(i2cmst_t* hI2C);
+void EEPROM_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

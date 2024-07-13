@@ -77,15 +77,15 @@ typedef struct {
 #endif
 
     const i2cmst_ops_t* pOps;
-} i2cmst_t;
+} i2c_mst_t;
 
 struct i2cmst_ops {
-    err_t (*Init)(i2cmst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle);
-    bool (*IsDeviceReady)(i2cmst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags);
-    err_t (*ReadBlock)(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags);
-    err_t (*WriteBlock)(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags);
-    err_t (*ReceiveBlock)(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags);
-    err_t (*TransmitBlock)(i2cmst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags);
+    err_t (*Init)(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle);
+    bool (*IsDeviceReady)(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags);
+    err_t (*ReadBlock)(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags);
+    err_t (*WriteBlock)(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags);
+    err_t (*ReceiveBlock)(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags);
+    err_t (*TransmitBlock)(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags);
 };
 
 //---------------------------------------------------------------------------

@@ -27,7 +27,7 @@
  * @note UART1 has IdleIsr (used in modbus), UART2 does't have IdleIsr
  */
 
-#define UART_HANDLE huart1
+#define UART_HANDLE huart2
 
 int fputc(int ch, FILE* f)
 {

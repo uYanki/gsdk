@@ -418,7 +418,7 @@ void TM1638_Test(void)
 {
     uint8_t u8KeyMsk;
 
-    spimst_t spi = {
+    spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5}, /* DIO */
         .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6}, /* CLK */

@@ -41,8 +41,8 @@ typedef enum {
 } pcf8574_pin_e;
 
 typedef struct {
-    __IN i2cmst_t* hI2C;
-    __IN uint8_t   u8SlvAddr;
+    __IN i2c_mst_t* hI2C;
+    __IN uint8_t    u8SlvAddr;
 
     uint8_t _u8OutputState;
 } i2c_pcf8574_t;
@@ -71,7 +71,7 @@ err_t PCF8574_ScanMatrixkey4x4(i2c_pcf8574_t* pHandle, __OUT uint8_t* pu8KeyInde
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void PCF8574_Test(i2cmst_t* hI2C);
+void PCF8574_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

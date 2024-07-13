@@ -40,8 +40,8 @@ typedef enum {
 } pca9685_channel_e;
 
 typedef struct {
-    __IN i2cmst_t* hI2C;
-    __IN uint8_t   u8SlvAddr;
+    __IN i2c_mst_t* hI2C;
+    __IN uint8_t    u8SlvAddr;
 #if CONFIG_PCA9685_SERVO_CONTROL_SW
     float32_t _f32PeriodUs;  // private
 #endif
@@ -82,7 +82,7 @@ err_t PCA9685_SetAngle_AllServo(i2c_pca9685_t* pHandle, uint8_t u8Angle);
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void PCA9685_Test(i2cmst_t* hI2C);
+void PCA9685_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

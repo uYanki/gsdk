@@ -298,7 +298,7 @@ void MPU6050_GetAngle_Euler(i2c_mpu6050_t* pHandle)
 
 #if CONFIG_DEMOS_SW
 
-void MPU6050_Test(i2cmst_t* hI2C)
+void MPU6050_Test(i2c_mst_t* hI2C)
 {
     i2c_mpu6050_t mpu6050 = {
         .hI2C      = hI2C,

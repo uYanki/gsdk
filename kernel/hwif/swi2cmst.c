@@ -11,33 +11,33 @@
 #define LOG_LOCAL_TAG   "swi2cmst"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_QUIET
 
-#if CONFIG_SWI2C_FAST_MODE_SW // no-delay
-#undef  DelayBlockUs
+#if CONFIG_SWI2C_FAST_MODE_SW  // no-delay
+#undef DelayBlockUs
 #define DelayBlockUs(...)
 #endif
 
-#define I2C_MODE_WRITE  0U
-#define I2C_MODE_READ   1U
+#define I2C_MODE_WRITE 0U
+#define I2C_MODE_READ  1U
 
 //---------------------------------------------------------------------------
 // Prototypes
 //---------------------------------------------------------------------------
 
-static void    SWI2C_Master_GenerateStartSingal(i2cmst_t* pHandle);
-static void    SWI2C_Master_GenerateStopSingal(i2cmst_t* pHandle);
-static void    SWI2C_Master_GenerateAck(i2cmst_t* pHandle);
-static void    SWI2C_Master_GenerateNack(i2cmst_t* pHandle);
-static bool    SWI2C_Master_PollForAck(i2cmst_t* pHandle);
-static void    SWI2C_Master_TransmitByte(i2cmst_t* pHandle, uint8_t u8TxData);
-static uint8_t SWI2C_Master_ReceiveByte(i2cmst_t* pHandle);
+static void    SWI2C_Master_GenerateStartSingal(i2c_mst_t* pHandle);
+static void    SWI2C_Master_GenerateStopSingal(i2c_mst_t* pHandle);
+static void    SWI2C_Master_GenerateAck(i2c_mst_t* pHandle);
+static void    SWI2C_Master_GenerateNack(i2c_mst_t* pHandle);
+static bool    SWI2C_Master_PollForAck(i2c_mst_t* pHandle);
+static void    SWI2C_Master_TransmitByte(i2c_mst_t* pHandle, uint8_t u8TxData);
+static uint8_t SWI2C_Master_ReceiveByte(i2c_mst_t* pHandle);
 
-static err_t SWI2C_Master_Init(i2cmst_t* pHandle, uint32_t u32ClockSpeedHz, i2c_duty_cycle_e eDutyCycle);
-static err_t SWI2C_Master_SetClock(i2cmst_t* pHandle, uint32_t u32ClockSpeedHz, i2c_duty_cycle_e eDutyCycle);
-static bool  SWI2C_Master_IsDeviceReady(i2cmst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags);
-static err_t SWI2C_Master_ReadBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags);
-static err_t SWI2C_Master_WriteBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags);
-static err_t SWI2C_Master_ReceiveBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags);
-static err_t SWI2C_Master_TransmitBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags);
+static err_t SWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockSpeedHz, i2c_duty_cycle_e eDutyCycle);
+static err_t SWI2C_Master_SetClock(i2c_mst_t* pHandle, uint32_t u32ClockSpeedHz, i2c_duty_cycle_e eDutyCycle);
+static bool  SWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags);
+static err_t SWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags);
+static err_t SWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags);
+static err_t SWI2C_Master_ReceiveBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags);
+static err_t SWI2C_Master_TransmitBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags);
 
 //---------------------------------------------------------------------------
 // Variables
@@ -56,7 +56,7 @@ const i2cmst_ops_t g_swI2cOps = {
 // Functions
 //---------------------------------------------------------------------------
 
-static err_t SWI2C_Master_Init(i2cmst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle)
+static err_t SWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle)
 {
     PIN_SetMode(&pHandle->SDA, PIN_MODE_OUTPUT_OPEN_DRAIN, PIN_PULL_UP);
     PIN_SetMode(&pHandle->SCL, PIN_MODE_OUTPUT_OPEN_DRAIN, PIN_PULL_UP);
@@ -69,7 +69,7 @@ static err_t SWI2C_Master_Init(i2cmst_t* pHandle, uint32_t u32ClockFreqHz, i2c_d
     return ERR_NONE;
 }
 
-static err_t SWI2C_Master_SetClock(i2cmst_t* pHandle, uint32_t u32ClockSpeedHz, i2c_duty_cycle_e eDutyCycle)
+static err_t SWI2C_Master_SetClock(i2c_mst_t* pHandle, uint32_t u32ClockSpeedHz, i2c_duty_cycle_e eDutyCycle)
 {
     uint32_t u32ClockCycleUs;
 
@@ -82,7 +82,7 @@ static err_t SWI2C_Master_SetClock(i2cmst_t* pHandle, uint32_t u32ClockSpeedHz, 
     return ERR_NONE;
 }
 
-static void SWI2C_Master_GenerateStartSingal(i2cmst_t* pHandle)
+static void SWI2C_Master_GenerateStartSingal(i2c_mst_t* pHandle)
 {
     PIN_WriteLevel(&pHandle->SDA, PIN_LEVEL_HIGH);  // sda=1
 
@@ -95,7 +95,7 @@ static void SWI2C_Master_GenerateStartSingal(i2cmst_t* pHandle)
     DelayBlockUs(pHandle->u32ClockLowCycleUs / 2);
 }
 
-static void SWI2C_Master_GenerateStopSingal(i2cmst_t* pHandle)
+static void SWI2C_Master_GenerateStopSingal(i2c_mst_t* pHandle)
 {
     PIN_WriteLevel(&pHandle->SDA, PIN_LEVEL_LOW);  // sda=0
     DelayBlockUs(pHandle->u32ClockLowCycleUs / 2);
@@ -107,7 +107,7 @@ static void SWI2C_Master_GenerateStopSingal(i2cmst_t* pHandle)
 /**
  * @note it is called after ReceiveByte(pHandle)
  */
-static void SWI2C_Master_GenerateAck(i2cmst_t* pHandle)
+static void SWI2C_Master_GenerateAck(i2c_mst_t* pHandle)
 {
     PIN_WriteLevel(&pHandle->SDA, PIN_LEVEL_LOW);   // sda=0, ack
     PIN_WriteLevel(&pHandle->SCL, PIN_LEVEL_HIGH);  // scl=1
@@ -119,7 +119,7 @@ static void SWI2C_Master_GenerateAck(i2cmst_t* pHandle)
 /**
  * @note it is called after ReceiveByte(pHandle)
  */
-static void SWI2C_Master_GenerateNack(i2cmst_t* pHandle)
+static void SWI2C_Master_GenerateNack(i2c_mst_t* pHandle)
 {
     PIN_WriteLevel(&pHandle->SDA, PIN_LEVEL_HIGH);  // sda=1, nack
     PIN_WriteLevel(&pHandle->SCL, PIN_LEVEL_HIGH);  // scl=1
@@ -133,7 +133,7 @@ static void SWI2C_Master_GenerateNack(i2cmst_t* pHandle)
  * @return true ACK
  * @return false NACK
  */
-static bool SWI2C_Master_PollForAck(i2cmst_t* pHandle)
+static bool SWI2C_Master_PollForAck(i2c_mst_t* pHandle)
 {
     uint8_t       u8TimeoutUs = pHandle->u32ClockHighCycleUs;
     const uint8_t u8CycleUs   = 5;
@@ -164,7 +164,7 @@ __exit:
     return eAck;
 }
 
-static void SWI2C_Master_TransmitByte(i2cmst_t* pHandle, uint8_t u8TxData)
+static void SWI2C_Master_TransmitByte(i2c_mst_t* pHandle, uint8_t u8TxData)
 {
     uint8_t u8Mask = 0x80;
 
@@ -188,7 +188,7 @@ static void SWI2C_Master_TransmitByte(i2cmst_t* pHandle, uint8_t u8TxData)
     } while (u8Mask >>= 1);
 }
 
-static uint8_t SWI2C_Master_ReceiveByte(i2cmst_t* pHandle)
+static uint8_t SWI2C_Master_ReceiveByte(i2c_mst_t* pHandle)
 {
     uint8_t u8Mask = 0x80, u8RxData = 0x00;
 
@@ -216,7 +216,7 @@ static uint8_t SWI2C_Master_ReceiveByte(i2cmst_t* pHandle)
     return u8RxData;
 }
 
-static bool SWI2C_Master_IsDeviceReady(i2cmst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
+static bool SWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
 {
     bool eAck;
     SWI2C_Master_GenerateStartSingal(pHandle);
@@ -226,7 +226,7 @@ static bool SWI2C_Master_IsDeviceReady(i2cmst_t* pHandle, uint8_t u16SlvAddr, ui
     return eAck ? true : false;
 }
 
-static err_t SWI2C_Master_ReadBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
+static err_t SWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
 {
     err_t eRet = -ERR_TIMEOUT;
 
@@ -281,7 +281,7 @@ __exit:
     return eRet;
 }
 
-static err_t SWI2C_Master_WriteBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags)
+static err_t SWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags)
 {
     err_t eRet = -ERR_TIMEOUT;
 
@@ -339,7 +339,7 @@ __exit:
     return eRet;
 }
 
-static err_t SWI2C_Master_ReceiveBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
+static err_t SWI2C_Master_ReceiveBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
 {
     err_t eRet = -ERR_TIMEOUT;
 
@@ -379,7 +379,7 @@ __exit:
     return eRet;
 }
 
-static err_t SWI2C_Master_TransmitBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags)
+static err_t SWI2C_Master_TransmitBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* pu8TxData, uint16_t u16Size, uint16_t u16Flags)
 {
     err_t eRet = -ERR_TIMEOUT;
 

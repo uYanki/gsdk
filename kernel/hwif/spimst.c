@@ -20,7 +20,7 @@
 // Functions
 //---------------------------------------------------------------------------
 
-void SPI_Master_Select(spimst_t* pHandle)
+void SPI_Master_Select(spi_mst_t* pHandle)
 {
     switch (pHandle->u16TimingConfig & SPI_FLAG_CS_MODE_Msk)
     {
@@ -51,7 +51,7 @@ void SPI_Master_Select(spimst_t* pHandle)
     }
 }
 
-void SPI_Master_Deselect(spimst_t* pHandle)
+void SPI_Master_Deselect(spi_mst_t* pHandle)
 {
     switch (pHandle->u16TimingConfig & SPI_FLAG_CS_MODE_Msk)
     {
@@ -82,7 +82,7 @@ void SPI_Master_Deselect(spimst_t* pHandle)
     }
 }
 
-err_t SPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
+err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
 {
     pHandle->u16TimingConfig |= u16Flags & (SPI_FLAG_CS_MODE_Msk | SPI_FLAG_CS_ACTIVE_LEVEL_Msk);
 
@@ -97,7 +97,7 @@ err_t SPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycl
 
     if (pHandle->SPIx == nullptr)
     {
-#if CONFIG_SWI2C_MODULE_SW
+#if CONFIG_SWSPI_MODULE_SW
         extern const spimst_ops_t g_swSpiOps;
         pHandle->pOps = &g_swSpiOps;
 #else
@@ -106,7 +106,7 @@ err_t SPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycl
     }
     else
     {
-#if CONFIG_HWI2C_MODULE_SW
+#if CONFIG_HWSPI_MODULE_SW
         extern const spimst_ops_t g_hwSpiOps;
         pHandle->pOps = &g_hwSpiOps;
 #else
@@ -129,32 +129,32 @@ err_t SPI_Master_Init(spimst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycl
     return pHandle->pOps->Init(pHandle, u32ClockSpeedHz, eDutyCycle, u16Flags);
 }
 
-err_t SPI_Master_TransmitBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
+err_t SPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
 {
     return pHandle->pOps->TransmitBlock(pHandle, cpu8TxData, u16Size);
 }
 
-err_t SPI_Master_ReceiveBlock(spimst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
+err_t SPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
 {
     return pHandle->pOps->ReceiveBlock(pHandle, pu8RxData, u16Size);
 }
 
-err_t SPI_Master_TransmitReceiveBlock(spimst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
+err_t SPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
 {
     return pHandle->pOps->TransmitReceiveBlock(pHandle, cpu8TxData, pu8RxData, u16Size);
 }
 
-err_t SPI_Master_TransmitByte(spimst_t* pHandle, uint8_t u8TxData)
+err_t SPI_Master_TransmitByte(spi_mst_t* pHandle, uint8_t u8TxData)
 {
     return SPI_Master_TransmitBlock(pHandle, (const uint8_t*)&u8TxData, 1);
 }
 
-err_t SPI_Master_ReceiveByte(spimst_t* pHandle, uint8_t* pu8RxData)
+err_t SPI_Master_ReceiveByte(spi_mst_t* pHandle, uint8_t* pu8RxData)
 {
     return SPI_Master_ReceiveBlock(pHandle, pu8RxData, 1);
 }
 
-err_t SPI_Master_TransmitReceiveByte(spimst_t* pHandle, uint8_t u8TxData, uint8_t* pu8RxData)
+err_t SPI_Master_TransmitReceiveByte(spi_mst_t* pHandle, uint8_t u8TxData, uint8_t* pu8RxData)
 {
     return SPI_Master_TransmitReceiveBlock(pHandle, (const uint8_t*)&u8TxData, pu8RxData, 1);
 }

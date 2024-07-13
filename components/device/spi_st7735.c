@@ -439,7 +439,7 @@ void ST7735_StopDraw(spi_st7735_t* pHandle)
 
 void ST7735_Test(void)
 {
-    spimst_t spi = {
+    spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5}, /*SDA*/
         .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6}, /*SCL*/

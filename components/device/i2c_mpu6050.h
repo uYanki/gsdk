@@ -54,8 +54,8 @@ typedef struct {
 #endif
 
 typedef struct {
-    __IN i2cmst_t* hI2C;
-    __IN uint8_t   u8SlvAddr; /*!< I2C address of device */
+    __IN i2c_mst_t* hI2C;
+    __IN uint8_t    u8SlvAddr; /*!< I2C address of device */
 
     float32_t _f32AccelSen; /*!< Accelerometer corrector from raw data to "g" */
     float32_t _f32GyroSen;  /*!< Gyroscope corrector from raw data to "degrees/s" */
@@ -109,7 +109,7 @@ void MPU6050_GetAngle_Kalman(i2c_mpu6050_t* pHandle);
 #endif
 
 #if CONFIG_DEMOS_SW
-void MPU6050_Test(i2cmst_t* hI2C);
+void MPU6050_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

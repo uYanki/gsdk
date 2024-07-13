@@ -184,7 +184,7 @@ err_t LM75_GetFaultQueue(i2c_lm75_t* pHandle, lm75_fault_queue_e* peFaultQueue)
 
 #if CONFIG_DEMOS_SW
 
-void LM75_Test(i2cmst_t* hI2C)
+void LM75_Test(i2c_mst_t* hI2C)
 {
     i2c_lm75_t lm75 = {
         .hI2C      = hI2C,

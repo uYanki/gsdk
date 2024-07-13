@@ -29,8 +29,8 @@ typedef enum {
 } bh1750_mode_e;
 
 typedef struct {
-    __IN i2cmst_t* hI2C;
-    __IN uint8_t   u8SlvAddr;
+    __IN i2c_mst_t* hI2C;
+    __IN uint8_t    u8SlvAddr;
 
     bh1750_mode_e _eMeasureMode;   // 测量模式
     uint8_t       _u8Sensitivity;  // 灵敏度倍率
@@ -54,7 +54,7 @@ err_t BH1750_GetLux(i2c_bh1750_t* pHandle, float32_t* pf32Lux);
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void BH1750_Test(i2cmst_t* hI2C);
+void BH1750_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

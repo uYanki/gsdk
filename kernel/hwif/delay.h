@@ -29,7 +29,7 @@ inline bool DelayNonBlock(const tick_t* cpTickStart, tick_t TickWait);
 
 // clang-format off
 
-static inline tick_t GetTick1Ms(void) { return GetTickUs() / 1000; }
+static inline tick_t GetTickMs(void) { return GetTickUs() / 1000; }
  
 static inline void DelayBlockUs(tick_t TickWait) { DelayBlock(TickWait * UNIT_US); }
 static inline void DelayBlockMs(tick_t TickWait) { DelayBlock(TickWait * UNIT_MS); }

@@ -198,7 +198,7 @@ void DAC_Set(uint16_t val)
 
 void AD7705_Test(void)
 {
-    spimst_t spi = {
+    spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5},
         .MOSI = {GPIOA, GPIO_PIN_4},
         .SCLK = {GPIOA, GPIO_PIN_6},

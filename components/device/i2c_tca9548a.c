@@ -48,7 +48,7 @@ err_t TCA9548A_ScanAddress(i2c_tca9548a_t* pHandle)
 
 #if CONFIG_DEMOS_SW
 
-void TCA9548A_Test(i2cmst_t* hI2C)
+void TCA9548A_Test(i2c_mst_t* hI2C)
 {
     i2c_tca9548a_t tca9548a = {
         .hI2C      = hI2C,

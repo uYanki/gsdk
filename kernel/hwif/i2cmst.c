@@ -19,7 +19,7 @@
 // Functions
 //---------------------------------------------------------------------------
 
-err_t I2C_Master_Init(i2cmst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle)
+err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle)
 {
     if (pHandle->I2Cx == nullptr)
     {
@@ -43,52 +43,52 @@ err_t I2C_Master_Init(i2cmst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle
     return pHandle->pOps->Init(pHandle, u32ClockFreqHz, eDutyCycle);
 }
 
-bool I2C_Master_IsDeviceReady(i2cmst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
+bool I2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
 {
     return pHandle->pOps->IsDeviceReady(pHandle, u16SlvAddr, u16Flags);
 }
 
-err_t I2C_Master_TransmitBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8TxData, uint16_t u16Size, uint16_t u16Flags)
+err_t I2C_Master_TransmitBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8TxData, uint16_t u16Size, uint16_t u16Flags)
 {
     return pHandle->pOps->TransmitBlock(pHandle, u16SlvAddr, cpu8TxData, u16Size, u16Flags);
 }
 
-err_t I2C_Master_ReceiveBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
+err_t I2C_Master_ReceiveBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
 {
     return pHandle->pOps->ReceiveBlock(pHandle, u16SlvAddr, pu8RxData, u16Size, u16Flags);
 }
 
-err_t I2C_Master_ReadBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
+err_t I2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     return pHandle->pOps->ReadBlock(pHandle, u16SlvAddr, u16MemAddr, pu8Data, u16Size, u16Flags);
 }
 
-err_t I2C_Master_WriteBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
+err_t I2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     return pHandle->pOps->WriteBlock(pHandle, u16SlvAddr, u16MemAddr, cpu8Data, u16Size, u16Flags);
 }
 
-err_t I2C_Master_TransmitByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t u8TxData, uint16_t u16Flags)
+err_t I2C_Master_TransmitByte(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t u8TxData, uint16_t u16Flags)
 {
     return I2C_Master_TransmitBlock(pHandle, u16SlvAddr, &u8TxData, 1, u16Flags);
 }
 
-err_t I2C_Master_ReceiveByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Flags)
+err_t I2C_Master_ReceiveByte(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Flags)
 {
     return I2C_Master_ReceiveBlock(pHandle, u16SlvAddr, pu8RxData, 1, u16Flags);
 }
 
-err_t I2C_Master_WriteByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8Data, uint16_t u16Flags)
+err_t I2C_Master_WriteByte(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8Data, uint16_t u16Flags)
 {
     return I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, 1, u16Flags);
 }
 
-err_t I2C_Master_ReadByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Flags)
+err_t I2C_Master_ReadByte(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Flags)
 {
     return I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, pu8Data, 1, u16Flags);
 }
 
-err_t I2C_Master_TransmitWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Data, uint16_t u16Flags)
+err_t I2C_Master_TransmitWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Data, uint16_t u16Flags)
 {
     uint8_t au8Data[2];
 
@@ -112,7 +112,7 @@ err_t I2C_Master_TransmitWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u
     return I2C_Master_TransmitBlock(pHandle, u16SlvAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags);
 }
 
-err_t I2C_Master_ReceiveWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t* pu16Data, uint16_t u16Flags)
+err_t I2C_Master_ReceiveWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t* pu16Data, uint16_t u16Flags)
 {
     uint8_t au8Data[2];
 
@@ -136,7 +136,7 @@ err_t I2C_Master_ReceiveWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t* p
     return ERR_NONE;
 }
 
-err_t I2C_Master_WriteWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint16_t u16Data, uint16_t u16Flags)
+err_t I2C_Master_WriteWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint16_t u16Data, uint16_t u16Flags)
 {
     uint8_t au8Data[2];
 
@@ -160,7 +160,7 @@ err_t I2C_Master_WriteWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16M
     return I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags);
 }
 
-err_t I2C_Master_ReadWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint16_t* pu16Data, uint16_t u16Flags)
+err_t I2C_Master_ReadWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint16_t* pu16Data, uint16_t u16Flags)
 {
     uint8_t au8Data[2];
 
@@ -184,7 +184,7 @@ err_t I2C_Master_ReadWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Me
     return ERR_NONE;
 }
 
-err_t I2C_Master_WriteByteBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t u8BitsValue, uint16_t u16Flags)
+err_t I2C_Master_WriteByteBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t u8BitsValue, uint16_t u16Flags)
 {
     uint8_t u8Data    = 0x00;
     uint8_t u8BitMask = BITMASK8(u8StartBit, u8BitsCount);
@@ -205,7 +205,7 @@ err_t I2C_Master_WriteByteBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t 
     return ERR_NONE;
 }
 
-err_t I2C_Master_ReadByteBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t* pu8BitsValue, uint16_t u16Flags)
+err_t I2C_Master_ReadByteBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t* pu8BitsValue, uint16_t u16Flags)
 {
     uint8_t u8Data    = 0x00;
     uint8_t u8BitMask = BITMASK8(u8StartBit, u8BitsCount);
@@ -222,7 +222,7 @@ err_t I2C_Master_ReadByteBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u
     return ERR_NONE;
 }
 
-err_t I2C_Master_ReadWordBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue, uint16_t u16Flags)
+err_t I2C_Master_ReadWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue, uint16_t u16Flags)
 {
     uint16_t u16Data    = 0x0000;
     uint16_t u16BitMask = BITMASK16(u8StartBit, u8BitsCount);
@@ -239,7 +239,7 @@ err_t I2C_Master_ReadWordBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u
     return ERR_NONE;
 }
 
-err_t I2C_Master_WriteWordBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t u16BitsValue, uint16_t u16Flags)
+err_t I2C_Master_WriteWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t u16BitsValue, uint16_t u16Flags)
 {
     uint16_t u16Data    = 0x0000;
     uint16_t u16BitMask = BITMASK16(u8StartBit, u8BitsCount);
@@ -263,7 +263,7 @@ err_t I2C_Master_WriteWordBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t 
 /**
  * @return count of detected slaves
  */
-uint8_t I2C_Master_ScanAddress(i2cmst_t* pHandle)
+uint8_t I2C_Master_ScanAddress(i2c_mst_t* pHandle)
 {
     uint8_t  u8SlvAddr = 0, u8Step = 0, u8Count = 0;
     uint16_t u16Flags = 0;
@@ -301,7 +301,7 @@ uint8_t I2C_Master_ScanAddress(i2cmst_t* pHandle)
     return u8Count;
 }
 
-err_t I2C_Master_Hexdump(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Flags)
+err_t I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Flags)
 {
     uint8_t u8Data;
     uint8_t u8MemAddr = 0;

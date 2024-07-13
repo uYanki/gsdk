@@ -150,7 +150,7 @@ err_t PCA9685_SetAngle_AllServo(i2c_pca9685_t* pHandle, uint8_t u8Angle)
 
 #if CONFIG_DEMOS_SW
 
-void PCA9685_Test(i2cmst_t* hI2C)
+void PCA9685_Test(i2c_mst_t* hI2C)
 {
     i2c_pca9685_t pca9685 = {
         .hI2C      = hI2C,

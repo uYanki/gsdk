@@ -78,8 +78,8 @@ typedef enum {
 } as5600_burn_e;
 
 typedef struct {
-    __IN i2cmst_t* hI2C;
-    __IN uint8_t   u8SlvAddr;
+    __IN i2c_mst_t* hI2C;
+    __IN uint8_t    u8SlvAddr;
 } i2c_as5600_t;
 
 //---------------------------------------------------------------------------
@@ -135,7 +135,7 @@ err_t AS5600_SetBurn(i2c_as5600_t* pHandle, as5600_burn_e eBurn);
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void AS5600_Test(i2cmst_t* hI2C);
+void AS5600_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

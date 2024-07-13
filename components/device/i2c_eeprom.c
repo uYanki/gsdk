@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------
 
 #define LOG_LOCAL_TAG   "eeprom"
-#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE // LOG_LEVEL_INFO
+#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE  // LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -245,7 +245,7 @@ err_t EEPROM_DetectCapacity(i2c_eeprom_t* pHandle)
 
 #if CONFIG_DEMOS_SW
 
-void EEPROM_Test(i2cmst_t* hI2C)
+void EEPROM_Test(i2c_mst_t* hI2C)
 {
     i2c_eeprom_t eeprom = {
         .hI2C      = hI2C,

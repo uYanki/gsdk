@@ -15,8 +15,8 @@ extern "C" {
 #define SSD1306_ADDRESS_HIGH 0x3D
 
 typedef struct {
-    __IN i2cmst_t* hI2C;
-    __IN uint8_t   u8SlvAddr;
+    __IN i2c_mst_t* hI2C;
+    __IN uint8_t    u8SlvAddr;
 
     /**
      * @note
@@ -88,7 +88,7 @@ void SSD1306_FillBuffer(i2c_ssd1306_t* pHandle, const uint8_t* cpu8Buffer);
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
-void SSD1306_Test(i2cmst_t* hI2C);
+void SSD1306_Test(i2c_mst_t* hI2C);
 #endif
 
 #ifdef __cplusplus

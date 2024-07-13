@@ -119,7 +119,7 @@ typedef enum {
 } ad9833_waveform_e;
 
 typedef struct {
-    spimst_t* hSPI;
+    spi_mst_t* hSPI;
 } spi_ad9833_t;
 
 //---------------------------------------------------------------------------
