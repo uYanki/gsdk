@@ -1,0 +1,1 @@
+c:\Python27\python.exe .\objdictgen\objdictedit.py

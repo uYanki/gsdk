@@ -1,0 +1,331 @@
+/* USER CODE BEGIN Header */
+/**
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "can.h"
+#include "dma.h"
+#include "i2c.h"
+#include "spi.h"
+#include "tim.h"
+#include "usart.h"
+#include "gpio.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "stm32f4xx_hal_uart.h"
+#include "gdefs.h"
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+#define I2C_IF              0
+#define CONFIG_LINKSCOPE_SW 0
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
+{}
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+#include "gdefs.h"
+#include "hwif.h"
+#include "i2c_eeprom.h"
+// #include "i2c_ssd1306.h"
+// #include "i2c_tca9548a.h"
+// #include "i2c_pcf8574.h"
+// #include "i2c_bh1750.h"
+// #include "i2c_lcd1602.h"
+// #include "spi_ad770x.h"
+// #include "spi_st7735.h"
+// #include "gpio_hcsr04.h"
+// #include "motdrv.h"
+
+#if 1
+
+i2c_eeprom_t eefs_eeprom = {
+    .hI2C      = nullptr,
+    .u8SlvAddr = AT24CXX_ADDRESS_A000,
+    .eCapacity = AT24C02,
+};
+
+void eefs_init(i2cmst_t* hI2C)
+{
+    eefs_eeprom.hI2C = hI2C;
+
+    EEPROM_Init(&eefs_eeprom);
+}
+
+#endif
+
+#if CONFIG_LINKSCOPE_SW
+
+uint8_t u8UartData, g_abc = 0;
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)  // 后续改空闲中�?
+{
+    extern void Debug_SerialRecv(uint8_t * buf, uint16_t len);
+    Debug_SerialRecv(&u8UartData, 1);
+    HAL_UART_Receive_IT(&huart1, &u8UartData, 1);
+}
+
+#endif
+
+static uint16_t a=0;
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+    cm_backtrace_init("demo", "stm32", "V0.01");
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_TIM11_Init();
+  MX_CAN1_Init();
+  MX_I2C1_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  MX_SPI1_Init();
+  /* USER CODE BEGIN 2 */
+
+    DelayInit();
+    // MX_TIM1_Init();
+		
+		while( 1)
+		{
+		DelayBlockMs(1);
+		// printf("2");
+			a+=10;
+		}
+
+#if CONFIG_LINKSCOPE_SW
+
+    HAL_UART_Receive_IT(&huart1, &u8UartData, 1);
+
+    while (1)
+    {
+        g_abc++;
+
+        DelayBlockMs(2);
+    }
+
+#endif
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+
+    // Game2048();
+    // GameSnake();
+
+    // FlexBtn_Test();
+    // Shell_Test();
+    // foc();
+
+    i2cmst_t i2c = {
+#if I2C_IF == 0
+        .SDA  = {AT24C02_SDA_PIN},
+        .SCL  = {AT24C02_SCL_PIN},
+        .I2Cx = nullptr,
+#elif I2C_IF == 1
+        .SDA  = {GPIOA, GPIO_PIN_6},
+        .SCL  = {GPIOA, GPIO_PIN_5},
+        .I2Cx = nullptr,
+#elif I2C_IF == 2
+        .SDA  = {AT24C02_SDA_PIN},
+        .SCL  = {AT24C02_SCL_PIN},
+        .I2Cx = &hi2c1,
+#endif
+    };
+
+    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
+    I2C_Master_ScanAddress(&i2c);
+
+    ST7735_Test();
+    QRCode_Test();
+
+    // EEFS_Test();
+    // FlexBtn_Test();
+
+#if CONFIG_DEMOS_SW
+    // EEPROM_Test(&i2c);
+    // SSD1306_Test(&i2c);
+    // LCD1602_Test(&i2c);
+    // LM75_Test(&i2c);
+    // MPU6050_Test(&i2c);
+    // TCA9548A_Test(&i2c);
+    // BH1750_Test(&i2c);
+    // PCF8574_Test(&i2c);
+    // AS5600_Test(&i2c);
+    // PCA9685_Test(&i2c); // !
+#endif
+
+#if CONFIG_DEMOS_SW
+    // DHT11_Test();
+    // DS18B20_Test(); // !
+    // HCSR04_Test();
+#endif
+
+#if CONFIG_DEMOS_SW
+    // AD9833_Test();
+    // TM1638_Test();
+    // DS1302_Test();
+    // AD7705_Test();  // !
+    // ST7735_Test();
+#endif
+
+    while (1)
+    {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+    }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1)
+    {
+    }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+    /* User can add his own implementation to report the file name and line number,
+       ex: GSDK_PRINTF("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */

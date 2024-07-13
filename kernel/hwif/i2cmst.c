@@ -1,0 +1,341 @@
+#include "i2cmst.h"
+
+//---------------------------------------------------------------------------
+// Definitions
+//---------------------------------------------------------------------------
+
+#define LOG_LOCAL_TAG   "i2cmst"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE
+
+//---------------------------------------------------------------------------
+// Prototypes
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+// Variables
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+// Functions
+//---------------------------------------------------------------------------
+
+err_t I2C_Master_Init(i2cmst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle)
+{
+    if (pHandle->I2Cx == nullptr)
+    {
+#if CONFIG_SWI2C_MODULE_SW
+        extern const i2cmst_ops_t g_swI2cOps;
+        pHandle->pOps = &g_swI2cOps;
+#else
+        return ThrowError(ERR_NOT_EXIST, "swi2c master module is disabled");
+#endif
+    }
+    else
+    {
+#if CONFIG_HWI2C_MODULE_SW
+        extern const i2cmst_ops_t g_hwI2cOps;
+        pHandle->pOps = &g_hwI2cOps;
+#else
+        return ThrowError(ERR_NOT_EXIST, "hwi2c master module is disabled");
+#endif
+    }
+
+    return pHandle->pOps->Init(pHandle, u32ClockFreqHz, eDutyCycle);
+}
+
+bool I2C_Master_IsDeviceReady(i2cmst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
+{
+    return pHandle->pOps->IsDeviceReady(pHandle, u16SlvAddr, u16Flags);
+}
+
+err_t I2C_Master_TransmitBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8TxData, uint16_t u16Size, uint16_t u16Flags)
+{
+    return pHandle->pOps->TransmitBlock(pHandle, u16SlvAddr, cpu8TxData, u16Size, u16Flags);
+}
+
+err_t I2C_Master_ReceiveBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Size, uint16_t u16Flags)
+{
+    return pHandle->pOps->ReceiveBlock(pHandle, u16SlvAddr, pu8RxData, u16Size, u16Flags);
+}
+
+err_t I2C_Master_ReadBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
+{
+    return pHandle->pOps->ReadBlock(pHandle, u16SlvAddr, u16MemAddr, pu8Data, u16Size, u16Flags);
+}
+
+err_t I2C_Master_WriteBlock(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
+{
+    return pHandle->pOps->WriteBlock(pHandle, u16SlvAddr, u16MemAddr, cpu8Data, u16Size, u16Flags);
+}
+
+err_t I2C_Master_TransmitByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t u8TxData, uint16_t u16Flags)
+{
+    return I2C_Master_TransmitBlock(pHandle, u16SlvAddr, &u8TxData, 1, u16Flags);
+}
+
+err_t I2C_Master_ReceiveByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8RxData, uint16_t u16Flags)
+{
+    return I2C_Master_ReceiveBlock(pHandle, u16SlvAddr, pu8RxData, 1, u16Flags);
+}
+
+err_t I2C_Master_WriteByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8Data, uint16_t u16Flags)
+{
+    return I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, 1, u16Flags);
+}
+
+err_t I2C_Master_ReadByte(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Flags)
+{
+    return I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, pu8Data, 1, u16Flags);
+}
+
+err_t I2C_Master_TransmitWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Data, uint16_t u16Flags)
+{
+    uint8_t au8Data[2];
+
+    switch (u16Flags & I2C_FLAG_WORD_ENDIAN_Msk)
+    {
+        default:
+        case I2C_FLAG_WORD_BIG_ENDIAN:
+        {
+            au8Data[0] = (u16Data >> 8) & 0xFF;
+            au8Data[1] = u16Data & 0xFF;
+            break;
+        }
+        case I2C_FLAG_WORD_LITTLE_ENDIAN:
+        {
+            au8Data[0] = u16Data & 0xFF;
+            au8Data[1] = (u16Data >> 8) & 0xFF;
+            break;
+        }
+    }
+
+    return I2C_Master_TransmitBlock(pHandle, u16SlvAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags);
+}
+
+err_t I2C_Master_ReceiveWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t* pu16Data, uint16_t u16Flags)
+{
+    uint8_t au8Data[2];
+
+    ERROR_CHECK_RETURN(I2C_Master_ReceiveBlock(pHandle, u16SlvAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags));
+
+    switch (u16Flags & I2C_FLAG_WORD_ENDIAN_Msk)
+    {
+        default:
+        case I2C_FLAG_WORD_BIG_ENDIAN:
+        {
+            *pu16Data = be16(au8Data);
+            break;
+        }
+        case I2C_FLAG_WORD_LITTLE_ENDIAN:
+        {
+            *pu16Data = le16(au8Data);
+            break;
+        }
+    }
+
+    return ERR_NONE;
+}
+
+err_t I2C_Master_WriteWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint16_t u16Data, uint16_t u16Flags)
+{
+    uint8_t au8Data[2];
+
+    switch (u16Flags & I2C_FLAG_WORD_ENDIAN_Msk)
+    {
+        default:
+        case I2C_FLAG_WORD_BIG_ENDIAN:
+        {
+            au8Data[0] = (u16Data >> 8) & 0xFF;
+            au8Data[1] = u16Data & 0xFF;
+            break;
+        }
+        case I2C_FLAG_WORD_LITTLE_ENDIAN:
+        {
+            au8Data[0] = u16Data & 0xFF;
+            au8Data[1] = (u16Data >> 8) & 0xFF;
+            break;
+        }
+    }
+
+    return I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags);
+}
+
+err_t I2C_Master_ReadWord(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint16_t* pu16Data, uint16_t u16Flags)
+{
+    uint8_t au8Data[2];
+
+    ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags));
+
+    switch (u16Flags & I2C_FLAG_WORD_ENDIAN_Msk)
+    {
+        default:
+        case I2C_FLAG_WORD_BIG_ENDIAN:
+        {
+            *pu16Data = be16(au8Data);
+            break;
+        }
+        case I2C_FLAG_WORD_LITTLE_ENDIAN:
+        {
+            *pu16Data = le16(au8Data);
+            break;
+        }
+    }
+
+    return ERR_NONE;
+}
+
+err_t I2C_Master_WriteByteBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t u8BitsValue, uint16_t u16Flags)
+{
+    uint8_t u8Data    = 0x00;
+    uint8_t u8BitMask = BITMASK8(u8StartBit, u8BitsCount);
+
+    if ((u8StartBit + u8BitsCount) > 8)
+    {
+        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+    }
+
+    ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
+
+    u8BitsValue <<= u8StartBit;
+    u8Data &= ~u8BitMask;
+    u8Data |= u8BitMask & u8BitsValue;
+
+    ERROR_CHECK_RETURN(I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
+
+    return ERR_NONE;
+}
+
+err_t I2C_Master_ReadByteBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t* pu8BitsValue, uint16_t u16Flags)
+{
+    uint8_t u8Data    = 0x00;
+    uint8_t u8BitMask = BITMASK8(u8StartBit, u8BitsCount);
+
+    if ((u8StartBit + u8BitsCount) > 8)
+    {
+        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+    }
+
+    ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
+
+    *pu8BitsValue = (u8BitMask & u8Data) >> u8StartBit;
+
+    return ERR_NONE;
+}
+
+err_t I2C_Master_ReadWordBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue, uint16_t u16Flags)
+{
+    uint16_t u16Data    = 0x0000;
+    uint16_t u16BitMask = BITMASK16(u8StartBit, u8BitsCount);
+
+    if ((u8StartBit + u8BitsCount) > 16)
+    {
+        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+    }
+
+    ERROR_CHECK_RETURN(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
+
+    *pu16BitsValue = (u16BitMask & u16Data) >> u8StartBit;
+
+    return ERR_NONE;
+}
+
+err_t I2C_Master_WriteWordBits(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t u16BitsValue, uint16_t u16Flags)
+{
+    uint16_t u16Data    = 0x0000;
+    uint16_t u16BitMask = BITMASK16(u8StartBit, u8BitsCount);
+
+    if ((u8StartBit + u8BitsCount) > 16)
+    {
+        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+    }
+
+    ERROR_CHECK_RETURN(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
+
+    u16BitsValue <<= u8StartBit;
+    u16Data &= ~u16BitMask;
+    u16Data |= u16BitMask & u16BitsValue;
+
+    ERROR_CHECK_RETURN(I2C_Master_WriteWord(pHandle, u16SlvAddr, u16MemAddr, u16Data, u16Flags));
+
+    return ERR_NONE;
+}
+
+/**
+ * @return count of detected slaves
+ */
+uint8_t I2C_Master_ScanAddress(i2cmst_t* pHandle)
+{
+    uint8_t  u8SlvAddr = 0, u8Step = 0, u8Count = 0;
+    uint16_t u16Flags = 0;
+
+    GSDK_PRINTLN("i2c 7-bit slave address detector:");
+    GSDK_PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+
+    while (u8SlvAddr < 0x7F)
+    {
+        GSDK_PRINTF("%02X: ", u8SlvAddr);
+
+        u8Step = 0x10;
+
+        do
+        {
+            if (I2C_Master_IsDeviceReady(pHandle, u8SlvAddr, u16Flags) == true)
+            {
+                GSDK_PRINTF("%02X ", u8SlvAddr);
+                u8Count++;
+            }
+            else
+            {
+                GSDK_PRINTF("-- ");  // none
+            }
+
+            ++u8SlvAddr;
+
+        } while (--u8Step);
+
+        GSDK_PRINTLN();
+    }
+
+    GSDK_PRINTLN(">> %d slaves are detected in this scan", u8Count);
+
+    return u8Count;
+}
+
+err_t I2C_Master_Hexdump(i2cmst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Flags)
+{
+    uint8_t u8Data;
+    uint8_t u8MemAddr = 0;
+    uint8_t u8Step    = 0;
+
+    GSDK_PRINTLN("i2c 7-bit slave memory hexdump:");
+    GSDK_PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+
+    do
+    {
+        GSDK_PRINTF("%02X: ", u8MemAddr);
+
+        u8Step = 0x10;
+
+        do
+        {
+            // 有些设备不支持连读，这里就单个单个读
+
+            if (I2C_Master_ReadBlock(pHandle, u16SlvAddr, u8MemAddr, &u8Data, 1, u16Flags) == ERR_NONE)
+            {
+                GSDK_PRINTF("%02X ", u8Data);
+            }
+            else
+            {
+                GSDK_PRINTF("-- ");  // none
+            }
+
+            ++u8MemAddr;
+
+        } while (--u8Step);
+
+        GSDK_PRINTLN();
+
+    } while (u8MemAddr);
+
+    return ERR_NONE;
+}
