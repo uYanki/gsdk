@@ -22,16 +22,16 @@ extern "C" {
 /**
  * @brief 字体加载源, CONFIG_FONTSRC_xxx
  */
-#define FONT_SRC_NONE     (0u)  // 不启用
-#define FONT_SRC_FLASH    (1u)  // 片上 Flash
-#define FONT_SRC_EXTFLASH (0u)  // 片外 Flash (未测试)
-#define FONT_SRC_SDCARD   (0u)  // 内存卡 (未测试)
+#define FONT_SRC_NONE     (0u) /*< 不启用 */
+#define FONT_SRC_FLASH    (1u) /*< 片上 Flash */
+#define FONT_SRC_EXTFLASH (0u) /*< 片外 Flash (未测试) */
+#define FONT_SRC_SDCARD   (0u) /*< 内存卡 (未测试) */
 
 typedef struct {
-    uint8_t  source;   // 字体来源
-    void*    address;  // 储存地址
-    uint16_t width;    // 字体宽度
-    uint16_t height;   // 字体高度
+    uint8_t  u8FontSrc; /*< 字体来源 */
+    void*    pvAddress; /*< 储存地址 */
+    uint16_t u16Width;  /*< 字体宽度 */
+    uint16_t u16Height; /*< 字体高度 */
 } oled_font_t;
 
 #if (CONFIG_FONTSRC_CONSLONS_8X16 != FONT_SRC_NONE)
@@ -53,12 +53,12 @@ extern oled_font_t g_Font_GB2312_H1616;
 
 /**
  * @brief 获取字符编码
- * @param[out] ucBuffer 字模缓冲数组
- * @param[in]  usChar   字符码(国标码)
- * @param[in]  Fonts    字体结构体
+ * @param[out] pu8Buffer 字模缓冲数组
+ * @param[in]  chr       字符码(国标码)
+ * @param[in]  pFont     字体结构体
  */
-uint8_t GetConslonsCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts);
-uint8_t GetGBKCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts);
+uint8_t GetConslonsCode(uint8_t* pu8Buffer, char chr, oled_font_t* pFont);
+uint8_t GetGBKCode(uint8_t* pu8Buffer, char chr, oled_font_t* pFont);
 
 #ifdef __cplusplus
 }

@@ -95,11 +95,21 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
     SSD1306_WriteCmd(pHandle, 0x10);  // set high column address
     SSD1306_WriteCmd(pHandle, 0x40);  // set start line address
     SSD1306_WriteCmd(pHandle, 0x81);  // set contrast control register
-    SSD1306_WriteCmd(pHandle, 0xFF);  // brightness(0x00~0xFF)
+    SSD1306_WriteCmd(pHandle, 0xFF);  // brightness (0x00~0xFF)
     SSD1306_WriteCmd(pHandle, 0xA1);  // set segment re-map 0 to 127
     SSD1306_WriteCmd(pHandle, 0xA6);  // set normal display
-    SSD1306_WriteCmd(pHandle, 0xA8);  // set multiplex ratio(1 to 64)
-    SSD1306_WriteCmd(pHandle, 0x3F);
+    SSD1306_WriteCmd(pHandle, 0xA8);  // set multiplex ratio (16 to 63)
+
+    // 设置屏幕高度(单位：比特)
+    if (pHandle->u8Rows == 32 / 8)  // 091inch
+    {
+        SSD1306_WriteCmd(pHandle, 0x1F);  // 31=32-1
+    }
+    else  // if(pHandle->u8Rows == 64 / 8) // 096inch
+    {
+        SSD1306_WriteCmd(pHandle, 0x3F);  // 63=64-1
+    }
+
     SSD1306_WriteCmd(pHandle, 0xA4);  // 0xA4,Output follows RAM content;0xA5,Output ignores RAM content
     SSD1306_WriteCmd(pHandle, 0xD3);  // -set display offset
     SSD1306_WriteCmd(pHandle, 0x00);  // -not offset

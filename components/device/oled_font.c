@@ -4,7 +4,7 @@
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG   "template"
+#define LOG_LOCAL_TAG   "fbfont"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
@@ -15,86 +15,85 @@
 // Variables
 //---------------------------------------------------------------------------
 
-static const uint8_t ASCII8x16_Table[];
-static const uint8_t ASCII16x24_Table[];
-static const uint8_t ASCII24x32_Table[];
-
 #if (CONFIG_FONTSRC_CONSLONS_8X16 != FONT_SRC_NONE)
-oled_font_t g_Font_Conslons_8x16 = {
-    .width  = 8,
-    .height = 16,
-    .source = CONFIG_FONTSRC_CONSLONS_8X16,
+
 #if (CONFIG_FONTSRC_CONSLONS_8X16 == FONT_SRC_FLASH)
-    .address = (void*)ASCII8x16_Table,
+static const uint8_t m_FontTable_Conslons_Ascii8x16[];
+#endif
+
+oled_font_t g_Font_Conslons_8x16 = {
+    .u16Width  = 8,
+    .u16Height = 16,
+    .u8FontSrc = CONFIG_FONTSRC_CONSLONS_8X16,
+#if (CONFIG_FONTSRC_CONSLONS_8X16 == FONT_SRC_FLASH)
+    .pvAddress = (void*)m_FontTable_Conslons_Ascii8x16,
 #elif CONFIG_FONTSRC_CONSLONS_8X16 == FONT_SRC_EXTFLASH)
-    .address = 10 * 1024,
+    .pvAddress = 10 * 1024,
 #elif (CONFIG_FONTSRC_CONSLONS_8X16 == FONT_SRC_SDCARD)
-    .address = "0:/System/Fonts/consolas8x16.FON",
+    .pvAddress = "0:/System/Fonts/consolas8x16.FON",
 #else
 #error "unsupported font scource"
 #endif
 };
+
 #endif
 
 #if (CONFIG_FONTSRC_CONSLONS_16X24 != FONT_SRC_NONE)
-oled_font_t g_Font_Conslons_16x24 = {
-    .width  = 16,
-    .height = 24,
-    .source = CONFIG_FONTSRC_CONSLONS_16X24,
+
 #if (CONFIG_FONTSRC_CONSLONS_16X24 == FONT_SRC_FLASH)
-    .address = (void*)ASCII16x24_Table,
+static const uint8_t m_FontTable_Conslons_Ascii16x24[];
+#endif
+
+oled_font_t g_Font_Conslons_16x24 = {
+    .u16Width  = 16,
+    .u16Height = 24,
+    .u8FontSrc = CONFIG_FONTSRC_CONSLONS_16X24,
+#if (CONFIG_FONTSRC_CONSLONS_16X24 == FONT_SRC_FLASH)
+    .pvAddress = (void*)m_FontTable_Conslons_Ascii16x24,
 #elif (CONFIG_FONTSRC_CONSLONS_16X24 == FONT_SRC_EXTFLASH)
-    .address = 12 * 1024,
+    .pvAddress = 12 * 1024,
 #elif (CONFIG_FONTSRC_CONSLONS_16X24 == FONT_SRC_SDCARD)
-    .address = "0:/System/Fonts/consolas16x24.FON",
+    .pvAddress = "0:/System/Fonts/consolas16x24.FON",
 #else
 #error "unsupported font scource"
 #endif
 };
+
 #endif
 
 #if (CONFIG_FONTSRC_CONSLONS_24X32 != FONT_SRC_NONE)
-oled_font_t g_Font_Conslons_24x32 = {
-    .width  = 24,
-    .height = 32,
-    .source = CONFIG_FONTSRC_CONSLONS_24X32,
+
 #if (CONFIG_FONTSRC_CONSLONS_24X32 == FONT_SRC_FLASH)
-    .address = (void*)ASCII24x32_Table,
+static const uint8_t m_FontTable_Conslons_Ascii32x32[];
+#endif
+
+oled_font_t g_Font_Conslons_24x32 = {
+    .u16Width  = 24,
+    .u16Height = 32,
+    .u8FontSrc = CONFIG_FONTSRC_CONSLONS_24X32,
+#if (CONFIG_FONTSRC_CONSLONS_24X32 == FONT_SRC_FLASH)
+    .pvAddress = (void*)m_FontTable_Conslons_Ascii32x32,
 #elif (CONFIG_FONTSRC_CONSLONS_24X32 == FONT_SRC_EXTFLASH)
-    .address = 17 * 1024,
+    .pvAddress = 17 * 1024,
 #elif (CONFIG_FONTSRC_CONSLONS_24X32 == FONT_SRC_SDCARD)
-    .address = "0:/System/Fonts/consolas24x32.FON",
+    .pvAddress = "0:/System/Fonts/consolas24x32.FON",
 #else
 #error "unsupported font scource"
 #endif
 };
+
 #endif
 
 #if (CONFIG_FONTSRC_GB2312 != FONT_SRC_NONE)
-oled_font_t g_Font_GB2312_H1616 = {
-    .width  = 16,
-    .height = 16,
-    .source = CONFIG_FONTSRC_GB2312,
-#if (CONFIG_FONTSRC_GB2312 == FONT_SRC_EXTFLASH)
-    .address = 387 * 4096,
-#elif (CONFIG_FONTSRC_GB2312 == FONT_SRC_SDCARD)
-    .address = "0:/System/Fonts/consolas32x32.FON",
-#else
-#error "unsupported font scource"
-#endif
-};
-#endif
 
-#if (CONFIG_FONTSRC_HZLIB != FONT_SRC_NONE)
-// 0：HZLIB字模(旧版)
-oled_font_t GB2312_HZLIB = {
-    .width  = 16,
-    .height = 16,
-    .source = CONFIG_FONTSRC_HZLIB,
-#if (CONFIG_FONTSRC_HZLIB == FONT_SRC_EXTFLASH)
-    .address = 1 * 4096,
-#elif (CONFIG_FONTSRC_HZLIB == FONT_SRC_SDCARD)
-    .address = "0:/System/Fonts/hzlib.FON",
+oled_font_t g_Font_GB2312_H1616 = {
+    .u16Width  = 16,
+    .u16Height = 16,
+    .u8FontSrc = CONFIG_FONTSRC_GB2312,
+#if (CONFIG_FONTSRC_GB2312 == FONT_SRC_EXTFLASH)
+    .pvAddress = 387 * 4096,
+#elif (CONFIG_FONTSRC_GB2312 == FONT_SRC_SDCARD)
+    .pvAddress = "0:/System/Fonts/consolas32x32.FON",
 #else
 #error "unsupported font scource"
 #endif
@@ -106,23 +105,21 @@ oled_font_t GB2312_HZLIB = {
 // Functions
 //---------------------------------------------------------------------------
 
-uint8_t GetConslonsCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
+uint8_t GetConslonsCode(uint8_t* pu8Buffer, char chr, oled_font_t* pFont)
 {
-    // 要读取字节数量
-    uint8_t  nCount  = (Fonts->width * Fonts->height) >> 3;
-    // 字模偏移地址
-    uint16_t nOffset = (chr - ' ') * nCount;
-    // 字模起始地址
-    uint8_t* pTable  = (uint8_t*)(Fonts->address) + nOffset;
-    switch (Fonts->source)
+    uint8_t  u8Count   = (pFont->u16Width * pFont->u16Height) >> 3;    // 要读取字节数量
+    uint16_t u16Offset = (chr - ' ') * u8Count;                     // 字模偏移地址
+    uint8_t* pu8Table  = (uint8_t*)(pFont->pvAddress) + u16Offset;  // 字模起始地址
+
+    switch (pFont->u8FontSrc)
     {
 #if FONT_SRC_FLASH
         case FONT_SRC_FLASH:
         {
             // 读取字模
-            while (nCount--)
+            while (u8Count--)
             {
-                *pBuffer++ = *pTable++;
+                *pu8Buffer++ = *pu8Table++;
             }
             return true;
         }
@@ -131,7 +128,7 @@ uint8_t GetConslonsCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
         case FONT_SRC_EXTFLASH:
         {
             // 读取字模
-            SPI_FLASH_BufferRead(pBuffer, pTable, nCount);
+            SPI_FLASH_BufferRead(pu8Buffer, pu8Table, nCount);
             return true;  // 或者返回错误码
         }
 #endif
@@ -150,18 +147,15 @@ uint8_t GetConslonsCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
     }
 }
 
-uint8_t GetGBKCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
+uint8_t GetGBKCode(uint8_t* pu8Buffer, char chr, oled_font_t* pFont)
 {
     //  uint32_t nOffset = (((chr >> 8) - 0xa0 - 16) * 94 + (chr & 0xFF) - 0xa1) * nCount; // HZLIB
 
-    // 要读取字节数量
-    uint8_t  nCount  = (Fonts->width * Fonts->height) >> 3;
-    // 字模偏移地址
-    uint32_t nOffset = (((chr >> 8) - 0xa1) * 94 + (chr & 0xFF) - 0xa1) * nCount;
-    // 字模起始地址
-    uint32_t pTable  = (uint32_t)(Fonts->address) + nOffset;
+    uint8_t  u8Count   = (pFont->u16Width * pFont->u16Height) >> 3;                      // 要读取字节数量
+    uint32_t u32Offset = (((chr >> 8) - 0xA1) * 94 + (chr & 0xFF) - 0xa1) * u8Count;  // 字模偏移地址
+    uint32_t pu8Table  = (uint32_t)(pFont->pvAddress) + u32Offset;                    // 字模起始地址
 
-    switch (Fonts->source)
+    switch (pFont->u8FontSrc)
     {
 #if FONT_SRC_FLASH
         case FONT_SRC_FLASH:
@@ -173,7 +167,7 @@ uint8_t GetGBKCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
         case FONT_SRC_EXTFLASH:
         {
             // 读取字模
-            SPI_FLASH_BufferRead(pBuffer, pTable, nOffset);
+            SPI_FLASH_BufferRead(pu8Buffer, pu8Table, nOffset);
             return true;
         }
 #endif
@@ -196,8 +190,8 @@ uint8_t GetGBKCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
             res_sd = f_open(&fnew, CONFIG_GBKCODE_FILE_NAME, FA_OPEN_EXISTING | FA_READ);
             if (res_sd == FR_OK)
             {
-                f_lseek(&fnew, nOffset);              // 指针偏移
-                f_read(&fnew, pBuffer, nCount, &br);  // 16*16大小的汉字 其字模 占用16*16/8个字节
+                f_lseek(&fnew, nOffset);                // 指针偏移
+                f_read(&fnew, pu8Buffer, nCount, &br);  // 16*16大小的汉字 其字模 占用16*16/8个字节
                 f_close(&fnew);
                 return true;
             }
@@ -216,12 +210,12 @@ uint8_t GetGBKCode(uint8_t* pBuffer, char chr, oled_font_t* Fonts)
     }
 }
 
-//
+// clang-format off
 
 #if (CONFIG_FONTSRC_CONSLONS_8X16 == FONT_SRC_FLASH)
 
 // 常用ASCII表，偏移量32，大小:16（高度）* 8 （宽度），共1520字节
-static const uint8_t ASCII8x16_Table[] = {  //@conslons字体，阴码点阵格式，逐行顺向取摸
+static const uint8_t m_FontTable_Conslons_Ascii8x16[] = {  //@conslons字体，阴码点阵格式，逐行顺向取摸
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x08, 0x00, 0x08, 0x18, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x34, 0x24, 0x24, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -322,7 +316,7 @@ static const uint8_t ASCII8x16_Table[] = {  //@conslons字体，阴码点阵格�
 #if (CONFIG_FONTSRC_CONSLONS_16X24 == FONT_SRC_FLASH)
 
 // 常用ASCII表，偏移量32，大小:24（高度）* 16 （宽度）, 共4560字节
-static const uint8_t ASCII16x24_Table[] = {  //@conslons字体，阴码点阵格式，逐行顺向取摸
+static const uint8_t m_FontTable_Conslons_Ascii16x24[] = {  //@conslons字体，阴码点阵格式，逐行顺向取摸
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -613,7 +607,7 @@ static const uint8_t ASCII16x24_Table[] = {  //@conslons字体，阴码点阵格
 #if (CONFIG_FONTSRC_CONSLONS_24X32 == FONT_SRC_FLASH)
 
 // 常用ASCII表，偏移量32，大小:32（高度）* 24 （宽度），共9120字节
-static const uint8_t ASCII24x32_Table[] = {  //@conslons字体，阴码点阵格式，逐行顺向取摸
+static const uint8_t m_FontTable_Conslons_Ascii32x32[] = {  //@conslons字体，阴码点阵格式，逐行顺向取摸
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1185,3 +1179,5 @@ static const uint8_t ASCII24x32_Table[] = {  //@conslons字体，阴码点阵格
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 #endif
+
+// clang-format on

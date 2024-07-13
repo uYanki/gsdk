@@ -32,10 +32,13 @@
 #include "gsdk.h"
 #include "hwif.h"
 #include "i2c_ssd1306.h"
+#include "oled_framebuf.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+uint8_t buf[128 * 128 / 8] = {0};
 
 /* USER CODE END PTD */
 
@@ -69,14 +72,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 static void SSD1306_Reset(void)
 {
-	DelayBlockMs(20);
-	HAL_GPIO_WritePin(OLED096_RST_PIN,GPIO_PIN_RESET);
-	DelayBlockMs(20);
-	HAL_GPIO_WritePin(OLED096_RST_PIN,GPIO_PIN_SET);
+    DelayBlockMs(20);
+    HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_RESET);
+    DelayBlockMs(20);
+    HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_SET);
 }
 
 /* USER CODE END 0 */
-#include "./resources/oled_image_spaceman.h"
+
 /**
  * @brief  The application entry point.
  * @retval int
@@ -122,29 +125,39 @@ int main(void)
     /* USER CODE BEGIN 2 */
     DelayInit();
 
-
     i2c_mst_t i2c = {
-        .SDA  = {OLED096_SDA_PIN},
-        .SCL  = {OLED096_SCL_PIN},
+        .SDA  = {OLED091_SDA_PIN},
+        .SCL  = {OLED091_SCL_PIN},
         .I2Cx = &hi2c1,
+    };
+
+    framebuf_t fb = {
+        .pu8Buffer   = buf,
+        .u16Width    = 128,
+        .u16Height   = 32,
+        .u16CurrentX = 0,
+        .u16CurrentY = 0,
     };
 
     i2c_ssd1306_t ssd1306 = {
         .hI2C      = &i2c,
-        .u8Cols    = 128,
-        .u8Rows    = 32 / 8,
         .u8SlvAddr = SSD1306_ADDRESS_LOW,
+        .u8Cols    = fb.u16Width,
+        .u8Rows    = fb.u16Height / 8,
     };
-		
-		I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
+
+    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
-		
-		SSD1306_Reset();
+
+    SSD1306_Reset();
 
     SSD1306_Init(&ssd1306);
     SSD1306_ClearScreen(&ssd1306);
-		SSD1306_DisplayBuffer(&ssd1306, 2, 0, 4, 25, ICON_TEMP);    // 温度图标
 		
+    Framebuf_FillRectangle(&fb, 10, 10, 20, 20, OLED_COLOR_XOR);
+    Framebuf_FillRectangle(&fb, 20, 20, 20, 20, OLED_COLOR_XOR);
+    SSD1306_FillBuffer(&ssd1306, fb.pu8Buffer);
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -153,7 +166,8 @@ int main(void)
     {
         GSDK_PRINTLN("%d.%d", HAL_GetTick(), GetTickMs());
         DelayBlockMs(4321);
-
+		// HAL_GPIO_TogglePin(LED1_PIN);
+		//	HAL_GPIO_TogglePin(LED2_PIN);
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
