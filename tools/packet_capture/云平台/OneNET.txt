@@ -1,0 +1,48 @@
+OneNET
+
+Broker Address      : 183.230.40.39
+Prot                : 6002
+
+DeviceID(设备ID)    : 518725049
+ProductID(产品ID)   : 217537
+AuthInfo(鉴权信息)  : 12345
+
+UserName            : 217537
+UserPassword        : 12345
+
+Topic               : 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

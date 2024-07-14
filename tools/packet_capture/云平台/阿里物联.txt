@@ -1,0 +1,92 @@
+
+/***************开发板温湿度数据采集设备***************/
+{
+  "ProductKey"    : "a1MZHjK2SCF",
+  "DeviceName"    : "fire_temp_hum",
+  "DeviceSecret"  : "Y5LcdqQx5lk36mu0YBIUSuWzONE4x1CO"
+}
+
+ 
+Profile Name      : ali_fire_temp_hum (可以随意起)
+Broker Address    : a1MZHjK2SCF.iot-as-mqtt.cn-shanghai.aliyuncs.com
+Broker Port       : 1883
+clientId          : 12345 (可取任意值，长度在64字符以内)
+Client ID         : 12345|securemode=3,signmethod=hmacsha1|
+User Name         : fire_temp_hum&a1MZHjK2SCF
+Password          : D6419896E7BEAF8BD9D03C88BF854EA0D3D506AE
+
+Topic             : /a1MZHjK2SCF/fire_temp_hum/user/temp_hum
+
+
+
+/**************获取温度数据设备（mqtt客户端）***********/
+{
+  "ProductKey": "a1MZHjK2SCF",
+  "DeviceName": "temp",
+  "DeviceSecret": "rR8kv7ixyR1rJfMkHHvksXCzc3W3k8fS"
+}
+
+Profile Name      : ali_fire_temp (可以随意起)
+Broker Address    : a1MZHjK2SCF.iot-as-mqtt.cn-shanghai.aliyuncs.com
+Broker Port       : 1883
+clientId          : 12345 (可取任意值，长度在64字符以内)
+Client ID         : 12345|securemode=3,signmethod=hmacsha1|
+User Name         : temp&a1MZHjK2SCF
+Password          : A5A6234416A06509EBA1AA951DC1017746E3734E
+
+Topic             : /a1MZHjK2SCF/temp/user/temp_hum
+
+/**************获取湿度数据设备（mqtt客户端）***********/
+{
+  "ProductKey": "a1MZHjK2SCF",
+  "DeviceName": "hum_",
+  "DeviceSecret": "RruVTmcyWfqYb53xrT9mviO2meEm14ni"
+}
+
+Profile Name      : ali_fire_hum_ (可以随意起)
+Broker Address    : a1MZHjK2SCF.iot-as-mqtt.cn-shanghai.aliyuncs.com
+Broker Port       : 1883
+clientId          : 12345 (可取任意值，长度在64字符以内)
+Client ID         : 12345|securemode=3,signmethod=hmacsha1|
+User Name         : hum_&a1MZHjK2SCF
+Password          : 1B176AE6A54B9646A95236194AF0D80C1D6F9E17
+
+
+Topic             : /a1MZHjK2SCF/hum_/user/temp_hum
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,95 @@
+HOST_NAME       rvmbdy8.mqtt.iot.gz.baidubce.com   
+HOST_NAME       14.215.190.20
+
+用户名：         rvmbdy8/stm32f4
+秘钥：           9EeVCRrCN5i6el1J
+主题：           temp&hum
+
+
+用户名：         rvmbdy8/mqtt_temp
+秘钥：           U3cjF3T5l0VaO52N
+主题：           temp&hum ，temp
+
+用户名：         rvmbdy8/mqtt_hum
+秘钥：           FIlInD7Ep30hYE8K
+主题：           hum ，temp&hum
+
+
+
+
+
+
+
+
+#define   CLIENT_ID     "client_ID"         //随机的id
+#define   USER_NAME     "rvmbdy8/stm32f4"     //用户名
+#define   PASSWORD      "9EeVCRrCN5i6el1J"  //秘钥
+
+#define   TOPIC         "temp&hum"      //订阅的主题
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

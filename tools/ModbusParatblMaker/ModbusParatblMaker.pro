@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui sql
 
 include(3rdparty/qtxlsx/qtxlsx.pri)
 

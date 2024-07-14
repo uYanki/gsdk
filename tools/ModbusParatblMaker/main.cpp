@@ -9,6 +9,14 @@
 #include <QString>
 #include <QTextStream>
 
+#define CONFIG_DATABASE_SW 1
+
+#include <QMap>
+
+#include <QSqlQuery>
+#include <QtSql>
+#include <qsqldatabase.h>
+
 #define PARA_COLUMN_OFFSET      ('D' - 'A' + 1)
 
 #define PARA_ADDRESS            (PARA_COLUMN_OFFSET + 0)
@@ -26,127 +34,167 @@
 #define PARA_NAME_ZH            (PARA_COLUMN_OFFSET + 12)
 #define PARA_DESC_ZH            (PARA_COLUMN_OFFSET + 13)
 
-#define VALUE_WIDTH             15
-#define ADDR_WIDTH              4
-
-QString MakePara(QString szAddress, QString szDataType, QString szParaName, QString szInitVal, QString szMinVal, QString szMaxVal, QString szMode, QString szRelate, QString szSynCov, QString szAccess)
+void MakePara(
+    QString      szAddress,
+    QString      szDataType,
+    QString      szVarName,
+    QString      szParaNameZH,
+    QString      szInitVal,
+    QString      szMinVal,
+    QString      szMaxVal,
+    QString      szMode,
+    QString      szRelate,
+    QString      szSynCov,
+    QString      szAccess,
+    QTextStream& ParaTable,
+    QTextStream& ParaAttr)
 {
-    QString     szContent;
-    QTextStream stream(&szContent);
-
-    qDebug() << szAddress << szDataType << szParaName << szInitVal << szMinVal << szMaxVal << szMode << szRelate << szSynCov << szAccess << Qt::endl;
+    // qDebug() << szAddress << szDataType << szVarName << szInitVal << szMinVal << szMaxVal << szMode << szRelate << szSynCov << szAccess << Qt::endl;
 
     QString     szSubAttr;
     QTextStream subStream(&szSubAttr);
 
-    if (szMode == "只读") { szMode = "   B_RO"; }
-    else if (szMode == "读写 - 立即更改，立即生效") { szMode = "B_RW_M0"; }
-    else if (szMode == "读写 - 立即更改，重启生效") { szMode = "B_RW_M1"; }
-    else if (szMode == "读写 - 停机更改，立即生效") { szMode = "B_RW_M2"; }
+    // clang-format off
 
-    if (szSynCov == "允许保存，可恢复") { szSynCov = " B_SYNC |  B_COV"; }
-    else if (szSynCov == "允许保存，不可恢复") { szSynCov = " B_SYNC | B_NCOV"; }
-    else if (szSynCov == "不允许保存，不可恢复") { szSynCov = "B_NSYNC | B_NCOV"; }
+    QMap<QString, QString> a = {
+        {"只读",                    "   B_RO"},
+        {"读写 - 立即更改，立即生效", "B_RW_M0"},
+        {"读写 - 立即更改，重启生效", "B_RW_M1"},
+        {"读写 - 停机更改，立即生效", "B_RW_M2"},
+    };
 
-    if (szRelate == "无效") { szRelate = "   B_NL"; }
-    else if (szRelate == "仅上限") { szRelate = "B_RL_UP"; }
-    else if (szRelate == "仅下限") { szRelate = "B_RL_DN"; }
-    else if (szRelate == "上下限") { szRelate = "   B_RL"; }
+    QMap<QString, QString> b = {
+        {"允许保存，可恢复",     " B_SYNC |  B_COV"},
+        {"允许保存，不可恢复",   " B_SYNC | B_NCOV"},
+        {"不允许保存，不可恢复", "B_NSYNC | B_NCOV"},
+    };
 
-    QString style = "    { %1, %2, %3, %4 | %5 | %6 | %7 }, // P%8 %9";
+    QMap<QString, QString> d = {
+        {"允许保存，可恢复",     " B_SYNC |  B_COV"},
+        {"允许保存，不可恢复",   " B_SYNC | B_NCOV"},
+        {"不允许保存，不可恢复", "B_NSYNC | B_NCOV"},
+    };
+
+    QMap<QString, QString> c = {
+        {"无效"  , "   B_NL"},
+        {"仅上限", "B_RL_UP"},
+        {"仅下限", "B_RL_DN"},
+        {"上下限", "   B_RL"},
+    };
+
+    // clang-format on
+
+    szMode   = a.value(szMode);
+    szSynCov = b.value(szSynCov);
+    szRelate = c.value(szRelate);
+
+    QStringList WordInd1, WordInd2;
 
     if (szDataType == "s16" || szDataType == "u16")
     {
-        stream << style
-                      .arg("W(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("W(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("W(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg(" B_SIG")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName)
-               << Qt::endl;
+        WordInd1 << "";
+        WordInd2 << " B_SIG";
     }
     else if (szDataType == "s32" || szDataType == "u32")
     {
-        stream << style
-                      .arg("WL(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("WL(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("WL(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg("B_DOB0")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName + "WL")
-               << Qt::endl;
-
-        stream << style
-                      .arg("WH(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("WH(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("WH(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg("B_DOB1")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName + "WH")
-               << Qt::endl;
+        WordInd1 << "WL" << "WH";
+        WordInd2 << "B_DOB0" << "B_DOB1";
     }
     else if (szDataType == "s64" || szDataType == "u64")
     {
-        stream << style
-                      .arg("W0(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("W0(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("W0(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg("B_QUD0")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName + "W0")
-               << Qt::endl;
-
-        stream << style
-                      .arg("W1(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("W1(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("W1(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg("B_QUD1")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName + "W1")
-               << Qt::endl;
-
-        stream << style
-                      .arg("W2(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("W2(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("W2(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg("B_QUD2")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName + "W2")
-               << Qt::endl;
-
-        stream << style
-                      .arg("W3(" + szInitVal + ")", VALUE_WIDTH)
-                      .arg("W3(" + szMinVal + ")", VALUE_WIDTH)
-                      .arg("W3(" + szMaxVal + ")", VALUE_WIDTH)
-                      .arg(szMode)
-                      .arg(szRelate)
-                      .arg(szSynCov)
-                      .arg("B_QUD3")
-                      .arg(szAddress.toUInt(), ADDR_WIDTH, 10, QLatin1Char('0'))
-                      .arg(szParaName + "W3")
-               << Qt::endl;
+        WordInd1 << "W0" << "W1" << "W2" << "W3";
+        WordInd2 << "B_QUD0" << "B_QUD1" << "B_QUD2" << "B_QUD3";
     }
 
-    return szContent;
+    if (szVarName == "")
+    {
+        szVarName = "_Resv" + szAddress;
+    }
+
+    szAddress = QString("%1").arg(szAddress.toUInt(), 4, 10, QLatin1Char('0'));
+
+    QString styleVar = "    %1 %2 // P%3 %4";
+
+    QString styleAttr = "    { %1, %2, %3, %4 | %5 | %6 | %7 }, // P%8 %9";
+
+    for (uint8_t i = 0; i < WordInd1.size(); ++i)
+    {
+        ParaTable << styleVar
+                         .arg(szDataType)
+                         .arg(szVarName + ";", -20)  // <0: 左对齐, >0 右对齐
+                         .arg(szAddress)
+                         .arg(szParaNameZH)
+                  << Qt::endl;
+
+        ParaAttr << styleAttr
+                        .arg(WordInd1[i] + "(" + szInitVal + ")", 15)
+                        .arg(WordInd1[i] + "(" + szMinVal + ")", 15)
+                        .arg(WordInd1[i] + "(" + szMaxVal + ")", 15)
+                        .arg(szMode)
+                        .arg(szRelate)
+                        .arg(szSynCov)
+                        .arg(WordInd2[i])
+                        .arg(szAddress)
+                        .arg(szVarName + WordInd1[i])
+                 << Qt::endl;
+    }
+}
+
+bool InitDB()
+{
+#if CONFIG_DATABASE_SW
+
+    qDebug() << QSqlDatabase::drivers();
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("default.db");  // create if not exist
+
+    bool isok = db.open();
+
+    if (isok == false)
+    {
+        qDebug() << "error info :" << db.lastError();
+    }
+    else
+    {
+        QSqlQuery query;
+
+        QString creatTableStr = "CREATE TABLE %1   \
+                    (                                \
+                        Address INTEGER PRIMARY KEY, \
+                        DataType TEXT,               \
+                        ParaName_CN TEXT,            \
+                        ControlMode TEXT,            \
+                        LowerLimit TEXT,             \
+                        UpperLimit TEXT,             \
+                        DefaultValue TEXT,           \
+                        ReadWrite TEXT,              \
+                        Comment_CN TEXT,             \
+                        ParaName_EN TEXT,            \
+                        Comment_EN TEXT              \
+                    );";
+
+        creatTableStr = creatTableStr.arg("Para_A4");  // set table name
+
+        query.prepare(creatTableStr);
+
+        if (!query.exec())
+        {
+            qDebug() << "query error :" << query.lastError();
+        }
+        else
+        {
+            qDebug() << "creat table success!";
+        }
+    }
+
+    db.close();
+
+    return isok;
+
+#else
+    return true;
+#endif
 }
 
 int main(int argc, char* argv[])
@@ -155,17 +203,24 @@ int main(int argc, char* argv[])
 
     QXlsx::Document xlsx("paratbl.xlsx");
 
-    QString     filePath = qApp->applicationDirPath() + "/paraattr.c";
-    QFile       file(filePath);
-    QTextStream filestream(&file);
-    bool        isok = file.open(QIODevice::WriteOnly);
+    QFile       file1(qApp->applicationDirPath() + "/paraattr.c");
+    QTextStream ParaAttr(&file1);
+
+    QFile       file2(qApp->applicationDirPath() + "/paratbl.h");
+    QTextStream ParaTbl(&file2);
+
+    bool isok = InitDB() && file1.open(QIODevice::WriteOnly) && file2.open(QIODevice::WriteOnly);
 
     if (isok)
     {
-        filestream.setCodec("UTF-8");
+        ParaAttr.setCodec("UTF-8");
+        ParaTbl.setCodec("UTF-8");
 
-        filestream << "// clang-format off" << Qt::endl;
-        filestream << "{" << Qt::endl;
+        ParaAttr << "// clang-format off" << Qt::endl;
+        ParaAttr << "para_attr_t sParaAttr = {" << Qt::endl;
+
+        ParaTbl << "// clang-format off" << Qt::endl;
+        ParaTbl << "typedef struct __packed {" << Qt::endl;
 
         for (quint16 row = 6; row < 700; row++)
         {
@@ -173,25 +228,30 @@ int main(int argc, char* argv[])
 
             if (szAddress.isEmpty())
             {
-                qDebug() << row;
                 break;
             }
 
-            filestream << MakePara(szAddress,
-                                   xlsx.cellAt(row, PARA_DATA_TYPE)->value().toString(),
-                                   xlsx.cellAt(row, PARA_VAR_NAME)->value().toString(),
-                                   xlsx.cellAt(row, PARA_ATTR_INTI_VAL)->value().toString(),
-                                   xlsx.cellAt(row, PARA_ATTR_MIN_VAL)->value().toString(),
-                                   xlsx.cellAt(row, PARA_ATTR_MAX_VAL)->value().toString(),
-                                   xlsx.cellAt(row, PARA_SUBATTR_MODE)->value().toString(),
-                                   xlsx.cellAt(row, PARA_SUBATTR_RELATE)->value().toString(),
-                                   xlsx.cellAt(row, PARA_SUBATTR_SYNC_COVER)->value().toString(),
-                                   xlsx.cellAt(row, PARA_SUBATTR_ACCESS)->value().toString());
+            qDebug() << szAddress;
+
+            MakePara(szAddress,
+                     xlsx.cellAt(row, PARA_DATA_TYPE)->value().toString(),
+                     xlsx.cellAt(row, PARA_VAR_NAME)->value().toString(),
+                     "",  // xlsx.cellAt(row, PARA_NAME_ZH)->value().toString(),
+                     xlsx.cellAt(row, PARA_ATTR_INTI_VAL)->value().toString(),
+                     xlsx.cellAt(row, PARA_ATTR_MIN_VAL)->value().toString(),
+                     xlsx.cellAt(row, PARA_ATTR_MAX_VAL)->value().toString(),
+                     xlsx.cellAt(row, PARA_SUBATTR_MODE)->value().toString(),
+                     xlsx.cellAt(row, PARA_SUBATTR_RELATE)->value().toString(),
+                     xlsx.cellAt(row, PARA_SUBATTR_SYNC_COVER)->value().toString(),
+                     xlsx.cellAt(row, PARA_SUBATTR_ACCESS)->value().toString(),
+                     ParaTbl, ParaAttr);
         }
 
-        filestream << "};" << Qt::endl;
+        ParaAttr << "} para_attr_t;" << Qt::endl;
+        ParaAttr << "// clang-format on" << Qt::endl;
 
-        filestream << "// clang-format on" << Qt::endl;
+        ParaTbl << "} para_table_t;" << Qt::endl;
+        ParaTbl << "// clang-format on" << Qt::endl;
     }
 
     return 0;
