@@ -2932,6 +2932,26 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>database</GroupName>
+          <Files>
+            <File>
+              <FileName>paraattr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Database\paraattr.c</FilePath>
+            </File>
+            <File>
+              <FileName>paratbl.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Database\paratbl.h</FilePath>
+            </File>
+            <File>
+              <FileName>paraattr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Database\paraattr.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>

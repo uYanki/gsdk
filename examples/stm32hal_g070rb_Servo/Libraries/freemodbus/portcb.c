@@ -8,7 +8,12 @@
 
 #define CONFIG_A4_TRACE_SW  0
 #define CONFIG_MSB_FIRST_SW 1
-#define CONFIG_TUNER_SW     0  // 合信伺服上位机
+#define CONFIG_TUNER_SW     1  // 合信伺服上位机
+
+#if CONFIG_TUNER_SW
+#undef CONFIG_MSB_FIRST_SW
+#define CONFIG_MSB_FIRST_SW 1
+#endif
 
 // register_group_t
 typedef struct {
@@ -31,6 +36,8 @@ cotrust_tuner_t sTuner = {
 
 #endif
 
+para_table_t tbl;
+
 #if CONFIG_A4_TRACE_SW
 __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
 #endif
@@ -40,12 +47,7 @@ static const reg_grp_t m_holding[] = {
     {180,   sizeof(cotrust_tuner_t) / sizeof(u16), (u16*)&sTuner            }, // 合信上位机
 #endif
 
-#if (CONFIG_AXIS_NUM >= 1)
-    {0,     sizeof(axis_para_t) / sizeof(u16),     (u16*)&sAxisTbl[0]       }, // 轴参数
-#endif
-#if (CONFIG_AXIS_NUM >= 2)
-    {500,   sizeof(axis_para_t) / sizeof(u16),     (u16*)&sAxisTbl[1]       }, // 轴参数
-#endif
+    {0,     sizeof(para_table_t) / sizeof(u16),     (u16*)&tbl       }, // 轴参数
 
 #if CONFIG_A4_TRACE_SW
     {800,   8000,                                  (u16*)&as32TraceBuffer[0]}, // 曲线采样

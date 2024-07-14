@@ -46,7 +46,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-
+extern void HAL_UART_IdleCpltCallback(UART_HandleTypeDef* huart);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -214,7 +214,7 @@ void ADC1_IRQHandler(void)
 void TIM1_CC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
-
+   // HAL_ADC_Start_DMA(&hadc1, (uint32_t*) &ADConv[0], ARRAY_SIZE(ADConv));
   /* USER CODE END TIM1_CC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_CC_IRQn 1 */
@@ -242,7 +242,7 @@ void TIM14_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-
+    HAL_UART_IdleCpltCallback(&huart1);
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
@@ -256,7 +256,7 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-
+    HAL_UART_IdleCpltCallback(&huart2);
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -279,5 +279,10 @@ void USART3_4_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    // AxisIsr(AXIS_1);
+}
 
 /* USER CODE END 1 */

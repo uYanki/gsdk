@@ -14,13 +14,14 @@
 #include <QSqlQuery>
 #include <QtSql>
 #include <qsqldatabase.h>
+#include <QMessageBox>
 
 #define PATH  qApp->applicationDirPath() +"/"
 // #define PATH QString("F:/gsdk/tools/ModbusParatblMaker/")
 // #define PATH QString("F:/gsdk/examples/stm32hal_g070rb_Servo/Database/")
 
 // #define PATH_DST    QString("C:/Program Files (x86)/co-trust/MagicWorks Tuner V1.6/")
-#define PATH_DST       QString("C:/Program Files (x86)/co-trust/MagicWorks Tuner debug_V1.81A_0104/Device/")
+#define PATH_DST                QString("C:/Program Files (x86)/co-trust/MagicWorks Tuner debug_V1.81A_0104/Device/")
 
 #define CONFIG_DATABASE_SW      1
 
@@ -157,7 +158,7 @@ void MakePara(
     };
 
     QMap<QString, QString> c = {
-        {"无效"  , "   B_NL"},
+        {"无效"  , "   B_NR"},
         {"仅上限", "B_RL_UP"},
         {"仅下限", "B_RL_DN"},
         {"上下限", "   B_RL"},
@@ -196,17 +197,17 @@ void MakePara(
 
     QString styleVar = "    %1 %2 // P%3 %4";
 
+    ParaTable << styleVar
+                     .arg(szDataType)
+                     .arg(szVarName + ";", -20)  // <0: 左对齐, >0 右对齐
+                     .arg(szAddress)
+                     .arg(szParaNameZH)
+              << Qt::endl;
+
     QString styleAttr = "    { %1, %2, %3, %4 | %5 | %6 | %7 }, // P%8 %9";
 
     for (uint8_t i = 0; i < WordInd1.size(); ++i)
     {
-        ParaTable << styleVar
-                         .arg(szDataType)
-                         .arg(szVarName + ";", -20)  // <0: 左对齐, >0 右对齐
-                         .arg(szAddress)
-                         .arg(szParaNameZH)
-                  << Qt::endl;
-
         ParaAttr << styleAttr
                         .arg(WordInd1[i] + "(" + szInitVal + ")", 15)
                         .arg(WordInd1[i] + "(" + szMinVal + ")", 15)
@@ -242,6 +243,50 @@ void MakePara(
 #endif
 }
 
+bool MergeFile(QString szMiddle /* dst */, QString szFront, QString szBack)
+{
+    QFile f1(szFront);
+    QFile f2(szMiddle);
+    QFile f3(szBack);
+
+    QTextStream s1(&f1);
+    QTextStream s2(&f2);
+    QTextStream s3(&f3);
+
+    s1.setCodec("UTF-8");
+    s2.setCodec("UTF-8");
+    s3.setCodec("UTF-8");
+
+    QString ctx;
+
+    if (f2.open(QIODevice::ReadOnly) == false)
+    {
+        return false;
+    }
+
+    if (f1.open(QIODevice::ReadOnly) == true)
+    {
+        ctx += s1.readAll();
+        f1.close();
+    }
+
+    ctx += s2.readAll();
+    f2.close();
+
+    if (f3.open(QIODevice::ReadOnly) == true)
+    {
+        ctx += s3.readAll();
+        f3.close();
+    }
+
+    if (f2.open(QIODevice::WriteOnly) == true)
+    {
+        s2 << ctx;
+    }
+
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
@@ -261,12 +306,6 @@ int main(int argc, char* argv[])
         ParaAttr.setCodec("UTF-8");
         ParaTbl.setCodec("UTF-8");
 
-        ParaAttr << "// clang-format off" << Qt::endl;
-        ParaAttr << "para_attr_t sParaAttr = {" << Qt::endl;
-
-        ParaTbl << "// clang-format off" << Qt::endl;
-        ParaTbl << "typedef struct __packed {" << Qt::endl;
-
         for (quint16 row = 6; row < 700; row++)
         {
             QString szAddress = xlsx.cellAt(row, PARA_ADDRESS)->value().toString();
@@ -276,12 +315,12 @@ int main(int argc, char* argv[])
                 break;
             }
 
-             // qDebug() << szAddress;
+            // qDebug() << szAddress;
 
             MakePara(szAddress,
                      xlsx.cellAt(row, PARA_DATA_TYPE)->value().toString(),
                      xlsx.cellAt(row, PARA_VAR_NAME)->value().toString(),
-                     xlsx.cellAt(row, PARA_NAME_ZH)->value().isNull() ? "":xlsx.cellAt(row, PARA_NAME_ZH)->value().toString(),
+                     xlsx.cellAt(row, PARA_NAME_ZH)->value().isNull() ? "" : xlsx.cellAt(row, PARA_NAME_ZH)->value().toString(),
                      xlsx.cellAt(row, PARA_ATTR_INTI_VAL)->value().toString(),
                      xlsx.cellAt(row, PARA_ATTR_MIN_VAL)->value().toString(),
                      xlsx.cellAt(row, PARA_ATTR_MAX_VAL)->value().toString(),
@@ -289,18 +328,18 @@ int main(int argc, char* argv[])
                      xlsx.cellAt(row, PARA_SUBATTR_RELATE)->value().toString(),
                      xlsx.cellAt(row, PARA_SUBATTR_SYNC_COVER)->value().toString(),
                      xlsx.cellAt(row, PARA_SUBATTR_ACCESS)->value().toString(),
-                     xlsx.cellAt(row, PARA_DESC_ZH)->value().isNull() ? "":xlsx.cellAt(row, PARA_DESC_ZH)->value().toString(),
+                     xlsx.cellAt(row, PARA_DESC_ZH)->value().isNull() ? "" : xlsx.cellAt(row, PARA_DESC_ZH)->value().toString(),
                      ParaTbl, ParaAttr);
         }
 
-        ParaAttr << "} para_attr_t;" << Qt::endl;
-        ParaAttr << "// clang-format on" << Qt::endl;
+        DB_Deinit();
 
-        ParaTbl << "} para_table_t;" << Qt::endl;
-        ParaTbl << "// clang-format on" << Qt::endl;
+        file1.close();
+        file2.close();
+
+        MergeFile(PATH + "paraattr.c", PATH + "paraattr_front.c", PATH + "paraattr_back.c");
+        MergeFile(PATH + "paratbl.h", PATH + "paratbl_front.h", PATH + "paratbl_back.h");
     }
-
-    DB_Deinit();
 
     // MainWindow w;
     // w.show();

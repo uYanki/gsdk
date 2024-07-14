@@ -34,7 +34,7 @@
 #include "flexbtn.h"
 #include "i2c_ssd1306.h"
 #include "mono_framebuf.h"
-
+#include "paratbl.h"
 #include "freemodbus/mb.h"
 
 /* USER CODE END Includes */
@@ -226,11 +226,17 @@ int main(void)
     }
 
     // modbus(rtu)
-    //    RO u8 ucSlaveID[] = {0xAA, 0xBB, 0xCC};
-    //		eMBInit(MB_RTU, 1, 1, 19200, MB_PAR_EVEN);
-    //    eMBSetSlaveID(0x34, true, ucSlaveID, ARRAY_SIZE(ucSlaveID));
-    //    eMBEnable();
-    //     MbRtuRun();
+    RO u8 ucSlaveID[] = {0xAA, 0xBB, 0xCC};
+    eMBInit(MB_RTU, 1, 1, 19200, MB_PAR_EVEN);
+    eMBSetSlaveID(0x34, true, ucSlaveID, ARRAY_SIZE(ucSlaveID));
+    eMBEnable();
+    MbRtuRun();
+		
+		extern para_table_t tbl;
+		
+		tbl.u16AxisNum = 666;
+		tbl.u16LedNum = 2;
+		tbl.u16KeyNum = 3;
 
     /* USER CODE END 2 */
 
@@ -246,7 +252,7 @@ int main(void)
         PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
 
         // modbus
-        //	eMBPoll();
+        eMBPoll();
 
         /* USER CODE END WHILE */
 
