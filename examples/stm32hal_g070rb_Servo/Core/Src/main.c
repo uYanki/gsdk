@@ -32,13 +32,16 @@
 #include "gsdk.h"
 #include "hwif.h"
 #include "i2c_ssd1306.h"
-#include "oled_framebuf.h"
+#include "mono_framebuf.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-uint8_t buf[128 * 128 / 8] = {0};
+#define SSD1306_WIDTH  128
+#define SSD1306_HEIGHT 32
+
+static uint8_t m_au8Framebuf[SSD1306_WIDTH * SSD1306_HEIGHT / 8] = {0};
 
 /* USER CODE END PTD */
 
@@ -131,12 +134,12 @@ int main(void)
         .I2Cx = &hi2c1,
     };
 
-    framebuf_t fb = {
-        .pu8Buffer   = buf,
-        .u16Width    = 128,
-        .u16Height   = 32,
-        .u16CurrentX = 0,
-        .u16CurrentY = 0,
+    mono_framebuf_t fb = {
+        .pu8Buffer   = m_au8Framebuf,
+        .u16Width    = SSD1306_WIDTH,
+        .u16Height   = SSD1306_HEIGHT,
+        ._u16CursorX = 0,
+        ._u16CursorY = 0,
     };
 
     i2c_ssd1306_t ssd1306 = {
@@ -153,10 +156,13 @@ int main(void)
 
     SSD1306_Init(&ssd1306);
     SSD1306_ClearScreen(&ssd1306);
-		
-    Framebuf_FillRectangle(&fb, 10, 10, 20, 20, OLED_COLOR_XOR);
-    Framebuf_FillRectangle(&fb, 20, 20, 20, 20, OLED_COLOR_XOR);
-    SSD1306_FillBuffer(&ssd1306, fb.pu8Buffer);
+
+    MonoFramebuf_FillRectangle(&fb, 10, 10, 20, 20, MONO_COLOR_BLACK);
+    MonoFramebuf_FillRectangle(&fb, 20, 20, 20, 20, MONO_COLOR_XOR);
+
+    MonoFramebuf_SetCursor(&fb, 0, 0);
+    MonoFramebuf_PutString(&fb, "hello", &g_Font_Conslons_8x16_CpuFlash, MONO_COLOR_WHITE, MONO_COLOR_BLACK);
+    SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
 
     /* USER CODE END 2 */
 
@@ -166,8 +172,8 @@ int main(void)
     {
         GSDK_PRINTLN("%d.%d", HAL_GetTick(), GetTickMs());
         DelayBlockMs(4321);
-		// HAL_GPIO_TogglePin(LED1_PIN);
-		//	HAL_GPIO_TogglePin(LED2_PIN);
+        // HAL_GPIO_TogglePin(LED1_PIN);
+        //	HAL_GPIO_TogglePin(LED2_PIN);
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */

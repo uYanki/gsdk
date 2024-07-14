@@ -74,6 +74,8 @@ static void SSD1306_WriteBlockData(i2c_ssd1306_t* pHandle, const uint8_t* cpu8Da
     I2C_Master_WriteBlock(pHandle->hI2C, pHandle->u8SlvAddr, 0x40, (uint8_t*)cpu8Data, u16Length, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
 }
 
+#define oled_write_cmd(a) SSD1306_WriteCmd(pHandle, a)
+
 err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
 {
     GSDK_ASSERT(pHandle->u8Rows, "rows must greate than 0");
@@ -84,11 +86,11 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
         return ThrowError(ERR_NOT_EXIST, "device doesn't exist");
     }
 
-    // 注: 部分参数需根据屏幕宽高来调整，此处只适配128x64
-
     SSD1306_WriteCmd(pHandle, 0xAE);  // display off
+
     SSD1306_WriteCmd(pHandle, 0x20);  // Set Memory Addressing Mode
     SSD1306_WriteCmd(pHandle, 0x10);  // 00, Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
+
     SSD1306_WriteCmd(pHandle, 0xB0);  // Set Page Start Address for Page Addressing Mode,0-7
     SSD1306_WriteCmd(pHandle, 0xC8);  // Set COM Output Scan Direction
     SSD1306_WriteCmd(pHandle, 0x00);  // set low column address
@@ -98,31 +100,45 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
     SSD1306_WriteCmd(pHandle, 0xFF);  // brightness (0x00~0xFF)
     SSD1306_WriteCmd(pHandle, 0xA1);  // set segment re-map 0 to 127
     SSD1306_WriteCmd(pHandle, 0xA6);  // set normal display
-    SSD1306_WriteCmd(pHandle, 0xA8);  // set multiplex ratio (16 to 63)
 
-    // 设置屏幕高度(单位：比特)
     if (pHandle->u8Rows == 32 / 8)  // 091inch
     {
-        SSD1306_WriteCmd(pHandle, 0x1F);  // 31=32-1
+        SSD1306_WriteCmd(pHandle, 0xA8);  // set multiplex ratio (16 to 63)
+        SSD1306_WriteCmd(pHandle, 0x1F);  // 31=32-1 pixel
+
+        SSD1306_WriteCmd(pHandle, 0xDA);  // set com pins hardware configuration
+        SSD1306_WriteCmd(pHandle, 0x02);
     }
-    else  // if(pHandle->u8Rows == 64 / 8) // 096inch
+    else if (pHandle->u8Rows == 64 / 8)  // 096inch
     {
-        SSD1306_WriteCmd(pHandle, 0x3F);  // 63=64-1
+        SSD1306_WriteCmd(pHandle, 0xA8);  // set multiplex ratio (16 to 63)
+        SSD1306_WriteCmd(pHandle, 0x3F);  // 63=64-1 pixel
+
+        SSD1306_WriteCmd(pHandle, 0xDA);  // set com pins hardware configuration
+        SSD1306_WriteCmd(pHandle, 0x12);
+    }
+    else
+    {
+        return ThrowError(ERR_NOT_SUPPORTED, "unsupported size");
     }
 
     SSD1306_WriteCmd(pHandle, 0xA4);  // 0xA4,Output follows RAM content;0xA5,Output ignores RAM content
+
     SSD1306_WriteCmd(pHandle, 0xD3);  // -set display offset
     SSD1306_WriteCmd(pHandle, 0x00);  // -not offset
+
     SSD1306_WriteCmd(pHandle, 0xD5);  // set display clock divide ratio/oscillator frequency
     SSD1306_WriteCmd(pHandle, 0xF0);  // set divide ratio
+
     SSD1306_WriteCmd(pHandle, 0xD9);  // set pre-charge period
     SSD1306_WriteCmd(pHandle, 0x22);  //
-    SSD1306_WriteCmd(pHandle, 0xDA);  // set com pins hardware configuration
-    SSD1306_WriteCmd(pHandle, 0x12);
+
     SSD1306_WriteCmd(pHandle, 0xDB);  // set vcomh
-    SSD1306_WriteCmd(pHandle, 0x20);  // 0x20,0.77xVcc
+    SSD1306_WriteCmd(pHandle, 0x20);  // 0x20, 0.77xVcc
+
     SSD1306_WriteCmd(pHandle, 0x8D);  // set DC-DC enable
     SSD1306_WriteCmd(pHandle, 0x14);
+
     SSD1306_WriteCmd(pHandle, 0xAF);  // turn on SSD1306 panel
 
     return ERR_NONE;

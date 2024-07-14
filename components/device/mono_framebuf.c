@@ -1,12 +1,12 @@
-#include "oled_framebuf.h"
-#include "oled_font.h"
+#include "mono_framebuf.h"
+#include "mono_font.h"
 #include <string.h>  // memset
 
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG   "oledfb"
+#define LOG_LOCAL_TAG   "mono-fb"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 /* Absolute value */
@@ -24,29 +24,29 @@
 // Functions
 //---------------------------------------------------------------------------
 
-void Framebuf_Fill(framebuf_t* pHandle, oled_color_e eColor)
+void MonoFramebuf_Fill(mono_framebuf_t* pHandle, mono_color_e eColor)
 {
     /* Set memory */
 
-    uint16_t size = pHandle->u16Height * pHandle->u16Height / 8;
+    uint16_t u16Size = pHandle->u16Height * pHandle->u16Height / 8;
 
     switch (eColor)
     {
-        case OLED_COLOR_WHITE:
+        case MONO_COLOR_WHITE:
         {
-            memset(pHandle->pu8Buffer, 0x00, size);
+            memset(pHandle->pu8Buffer, 0xFF, u16Size);
             break;
         }
 
-        case OLED_COLOR_BLACK:
+        case MONO_COLOR_BLACK:
         {
-            memset(pHandle->pu8Buffer, 0xFF, size);
+            memset(pHandle->pu8Buffer, 0x00, u16Size);
             break;
         }
 
-        case OLED_COLOR_XOR:
+        case MONO_COLOR_XOR:
         {
-            for (uint8_t i = 0; i < size; i++)
+            for (uint8_t i = 0; i < u16Size; i++)
             {
                 pHandle->pu8Buffer[i] ^= 0xFF;
             }
@@ -60,7 +60,7 @@ void Framebuf_Fill(framebuf_t* pHandle, oled_color_e eColor)
     }
 }
 
-void Framebuf_DrawPixel(framebuf_t* pHandle, uint16_t x, uint16_t y, oled_color_e eColor)
+void MonoFramebuf_DrawPixel(mono_framebuf_t* pHandle, uint16_t x, uint16_t y, mono_color_e eColor)
 {
     if (x >= pHandle->u16Width || y >= pHandle->u16Height)
     {
@@ -68,76 +68,86 @@ void Framebuf_DrawPixel(framebuf_t* pHandle, uint16_t x, uint16_t y, oled_color_
         return;
     }
 
-    uint16_t byte   = x + (y / 8) * pHandle->u16Width;
-    uint16_t bitmsk = 1 << (y % 8);
+    uint16_t u16Byte   = x + (y / 8) * pHandle->u16Width;
+    uint16_t u16BitMsk = 1 << (y % 8);
 
     /* Set eColor */
     switch (eColor)
     {
-        case OLED_COLOR_WHITE:
-            pHandle->pu8Buffer[byte] |= bitmsk;
+        case MONO_COLOR_WHITE:
+            pHandle->pu8Buffer[u16Byte] |= u16BitMsk;
             break;
-        case OLED_COLOR_BLACK:
-            pHandle->pu8Buffer[byte] &= ~bitmsk;
+        case MONO_COLOR_BLACK:
+            pHandle->pu8Buffer[u16Byte] &= ~u16BitMsk;
             break;
-        case OLED_COLOR_XOR:
-            pHandle->pu8Buffer[byte] ^= bitmsk;
+        case MONO_COLOR_XOR:
+            pHandle->pu8Buffer[u16Byte] ^= u16BitMsk;
             break;
         default:
             break;
     }
 }
 
-void Framebuf_GotoXY(framebuf_t* pHandle, uint16_t x, uint16_t y)
+void MonoFramebuf_SetCursor(mono_framebuf_t* pHandle, uint16_t x, uint16_t y)
 {
     /* Set write pointers */
-    pHandle->u16CurrentX = x;
-    pHandle->u16CurrentY = y;
+    pHandle->_u16CursorX = x;
+    pHandle->_u16CursorY = y;
 }
 
-char Framebuf_Putc(framebuf_t* pHandle, char ch, oled_font_t* Font, oled_color_e eColor)
+char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
 {
     uint32_t i, b, j;
 
     /* Check available space in LCD */
-    if (pHandle->u16Width <= (pHandle->u16CurrentX + Font->u16Width) ||
-        pHandle->u16Height <= (pHandle->u16CurrentY + Font->u16Height))
+    if (pHandle->u16Width <= (pHandle->_u16CursorX + pFont->u16Width) ||
+        pHandle->u16Height <= (pHandle->_u16CursorY + pFont->u16Height))
     {
         /* Error */
         return 0;
     }
 
-    /* Go through font */
-    for (i = 0; i < Font->u16Height; i++)
+    mono_font_code_t sFontCode = {0};
+
+    GetFontInfo(pFont, ch, &sFontCode);
+
+    uint16_t u16Size    = sFontCode.u16Height * sFontCode.u16Width / 8;
+    uint16_t u16StartX  = pHandle->_u16CursorX;
+    uint16_t u16CursorX = pHandle->_u16CursorX;
+    uint16_t u16CursorY = pHandle->_u16CursorY;
+
+    for (i = 0; i < u16Size; i++)
     {
-        // b = Font->data[(ch - 32) * Font->u16Height + i];
-        for (j = 0; j < Font->u16Width; j++)
+        uint8_t u8Byte = sFontCode.pu8Buffer[i];
+
+        for (j = 0; j < 8; j++)
         {
-            if ((b << j) & 0x8000)
-            {
-                Framebuf_DrawPixel(pHandle, pHandle->u16CurrentX + j, (pHandle->u16CurrentY + i), (oled_color_e)eColor);
-            }
-            else
-            {
-                Framebuf_DrawPixel(pHandle, pHandle->u16CurrentX + j, (pHandle->u16CurrentY + i), (oled_color_e)!eColor);
-            }
+            MonoFramebuf_DrawPixel(pHandle, u16CursorX, u16CursorY, (u8Byte & 0x80) ? eForeColor : eBackColor);
+            u8Byte <<= 1;
+            u16CursorX++;
+        }
+
+        if ((u16CursorX - u16StartX) == (sFontCode.u16Width))
+        {
+            u16CursorX = u16StartX;
+            u16CursorY++;
         }
     }
 
     /* Increase pointer */
-    pHandle->u16CurrentX += Font->u16Width;
+    pHandle->_u16CursorX += sFontCode.u16Width;
 
     /* Return character written */
     return ch;
 }
 
-char Framebuf_Puts(framebuf_t* pHandle, char* str, oled_font_t* Font, oled_color_e eColor)
+char MonoFramebuf_PutString(mono_framebuf_t* pHandle, char* str, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
 {
     /* Write characters */
     while (*str)
     {
         /* Write character by character */
-        if (Framebuf_Putc(pHandle, *str, Font, eColor) != *str)
+        if (MonoFramebuf_PutChar(pHandle, *str, pFont, eForeColor, eBackColor) != *str)
         {
             /* Return error */
             return *str;
@@ -151,7 +161,7 @@ char Framebuf_Puts(framebuf_t* pHandle, char* str, oled_font_t* Font, oled_color
     return *str;
 }
 
-void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, oled_color_e eColor)
+void MonoFramebuf_DrawLine(mono_framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, mono_color_e eColor)
 {
     int16_t dx, dy, sx, sy, err, e2, i, tmp;
 
@@ -173,9 +183,9 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
         y1 = pHandle->u16Height - 1;
     }
 
-    dx  = (pHandle, x0 < x1) ? (pHandle, x1 - x0) : (pHandle, x0 - x1);
+    dx  = (x0 < x1) ? (x1 - x0) : (x0 - x1);
     dy  = (y0 < y1) ? (y1 - y0) : (y0 - y1);
-    sx  = (pHandle, x0 < x1) ? 1 : -1;
+    sx  = (x0 < x1) ? 1 : -1;
     sy  = (y0 < y1) ? 1 : -1;
     err = ((dx > dy) ? dx : -dy) / 2;
 
@@ -188,7 +198,7 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
             y0  = tmp;
         }
 
-        if (pHandle, x1 < x0)
+        if (x1 < x0)
         {
             tmp = x1;
             x1  = x0;
@@ -198,7 +208,7 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
         /* Vertical line */
         for (i = y0; i <= y1; i++)
         {
-            Framebuf_DrawPixel(pHandle, x0, i, eColor);
+            MonoFramebuf_DrawPixel(pHandle, x0, i, eColor);
         }
 
         /* Return from function */
@@ -214,7 +224,7 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
             y0  = tmp;
         }
 
-        if (pHandle, x1 < x0)
+        if (x1 < x0)
         {
             tmp = x1;
             x1  = x0;
@@ -224,7 +234,7 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
         /* Horizontal line */
         for (i = x0; i <= x1; i++)
         {
-            Framebuf_DrawPixel(pHandle, i, y0, eColor);
+            MonoFramebuf_DrawPixel(pHandle, i, y0, eColor);
         }
 
         /* Return from function */
@@ -233,8 +243,8 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
 
     while (1)
     {
-        Framebuf_DrawPixel(pHandle, x0, y0, eColor);
-        if (pHandle, x0 == x1 && y0 == y1)
+        MonoFramebuf_DrawPixel(pHandle, x0, y0, eColor);
+        if (x0 == x1 && y0 == y1)
         {
             break;
         }
@@ -252,7 +262,7 @@ void Framebuf_DrawLine(framebuf_t* pHandle, uint16_t x0, uint16_t y0, uint16_t x
     }
 }
 
-void Framebuf_DrawRectangle(framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_t w, uint16_t h, oled_color_e eColor)
+void MonoFramebuf_DrawRectangle(mono_framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_t w, uint16_t h, mono_color_e eColor)
 {
     /* Check input parameters */
     if (x >= pHandle->u16Width || y >= pHandle->u16Height)
@@ -262,7 +272,7 @@ void Framebuf_DrawRectangle(framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_
     }
 
     /* Check u16Width and height */
-    if ((pHandle, x + w) >= pHandle->u16Width)
+    if ((x + w) >= pHandle->u16Width)
     {
         w = pHandle->u16Width - x;
     }
@@ -272,13 +282,13 @@ void Framebuf_DrawRectangle(framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_
     }
 
     /* Draw 4 lines */
-    Framebuf_DrawLine(pHandle, x, y, x + w, y, eColor);         /* Top line */
-    Framebuf_DrawLine(pHandle, x, y + h, x + w, y + h, eColor); /* Bottom line */
-    Framebuf_DrawLine(pHandle, x, y, x, y + h, eColor);         /* Left line */
-    Framebuf_DrawLine(pHandle, x + w, y, x + w, y + h, eColor); /* Right line */
+    MonoFramebuf_DrawLine(pHandle, x, y, x + w, y, eColor);         /* Top line */
+    MonoFramebuf_DrawLine(pHandle, x, y + h, x + w, y + h, eColor); /* Bottom line */
+    MonoFramebuf_DrawLine(pHandle, x, y, x, y + h, eColor);         /* Left line */
+    MonoFramebuf_DrawLine(pHandle, x + w, y, x + w, y + h, eColor); /* Right line */
 }
 
-void Framebuf_FillRectangle(framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_t w, uint16_t h, oled_color_e eColor)
+void MonoFramebuf_FillRectangle(mono_framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_t w, uint16_t h, mono_color_e eColor)
 {
     uint8_t i;
 
@@ -303,19 +313,19 @@ void Framebuf_FillRectangle(framebuf_t* pHandle, uint16_t x, uint16_t y, uint16_
     for (i = 0; i <= h; i++)
     {
         /* Draw lines */
-        Framebuf_DrawLine(pHandle, x, y + i, x + w, y + i, eColor);
+        MonoFramebuf_DrawLine(pHandle, x, y + i, x + w, y + i, eColor);
     }
 }
 
-void Framebuf_DrawTriangle(framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, oled_color_e eColor)
+void MonoFramebuf_DrawTriangle(mono_framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, mono_color_e eColor)
 {
     /* Draw lines */
-    Framebuf_DrawLine(pHandle, x1, y1, x2, y2, eColor);
-    Framebuf_DrawLine(pHandle, x2, y2, x3, y3, eColor);
-    Framebuf_DrawLine(pHandle, x3, y3, x1, y1, eColor);
+    MonoFramebuf_DrawLine(pHandle, x1, y1, x2, y2, eColor);
+    MonoFramebuf_DrawLine(pHandle, x2, y2, x3, y3, eColor);
+    MonoFramebuf_DrawLine(pHandle, x3, y3, x1, y1, eColor);
 }
 
-void Framebuf_FillTriangle(framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, oled_color_e eColor)
+void MonoFramebuf_FillTriangle(mono_framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, mono_color_e eColor)
 {
     int16_t deltax = 0, deltay = 0, x = 0, y = 0, xinc1 = 0, xinc2 = 0,
             yinc1 = 0, yinc2 = 0, den = 0, num = 0, numadd = 0, numpixels = 0,
@@ -326,7 +336,7 @@ void Framebuf_FillTriangle(framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16
     x      = x1;
     y      = y1;
 
-    if (pHandle, x2 >= x1)
+    if (x2 >= x1)
     {
         xinc1 = 1;
         xinc2 = 1;
@@ -369,7 +379,7 @@ void Framebuf_FillTriangle(framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16
 
     for (curpixel = 0; curpixel <= numpixels; curpixel++)
     {
-        Framebuf_DrawLine(pHandle, x, y, x3, y3, eColor);
+        MonoFramebuf_DrawLine(pHandle, x, y, x3, y3, eColor);
 
         num += numadd;
         if (num >= den)
@@ -383,7 +393,7 @@ void Framebuf_FillTriangle(framebuf_t* pHandle, uint16_t x1, uint16_t y1, uint16
     }
 }
 
-void Framebuf_DrawCircle(framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r, oled_color_e eColor)
+void MonoFramebuf_DrawCircle(mono_framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r, mono_color_e eColor)
 {
     int16_t f     = 1 - r;
     int16_t ddF_x = 1;
@@ -391,12 +401,12 @@ void Framebuf_DrawCircle(framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r,
     int16_t x     = 0;
     int16_t y     = r;
 
-    Framebuf_DrawPixel(pHandle, x0, y0 + r, eColor);
-    Framebuf_DrawPixel(pHandle, x0, y0 - r, eColor);
-    Framebuf_DrawPixel(pHandle, x0 + r, y0, eColor);
-    Framebuf_DrawPixel(pHandle, x0 - r, y0, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0, y0 + r, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0, y0 - r, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0 + r, y0, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0 - r, y0, eColor);
 
-    while (pHandle, x < y)
+    while (x < y)
     {
         if (f >= 0)
         {
@@ -408,19 +418,19 @@ void Framebuf_DrawCircle(framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r,
         ddF_x += 2;
         f += ddF_x;
 
-        Framebuf_DrawPixel(pHandle, x0 + x, y0 + y, eColor);
-        Framebuf_DrawPixel(pHandle, x0 - x, y0 + y, eColor);
-        Framebuf_DrawPixel(pHandle, x0 + x, y0 - y, eColor);
-        Framebuf_DrawPixel(pHandle, x0 - x, y0 - y, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 + x, y0 + y, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 - x, y0 + y, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 + x, y0 - y, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 - x, y0 - y, eColor);
 
-        Framebuf_DrawPixel(pHandle, x0 + y, y0 + x, eColor);
-        Framebuf_DrawPixel(pHandle, x0 - y, y0 + x, eColor);
-        Framebuf_DrawPixel(pHandle, x0 + y, y0 - x, eColor);
-        Framebuf_DrawPixel(pHandle, x0 - y, y0 - x, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 + y, y0 + x, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 - y, y0 + x, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 + y, y0 - x, eColor);
+        MonoFramebuf_DrawPixel(pHandle, x0 - y, y0 - x, eColor);
     }
 }
 
-void Framebuf_FillCircle(framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r, oled_color_e eColor)
+void MonoFramebuf_FillCircle(mono_framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r, mono_color_e eColor)
 {
     int16_t f     = 1 - r;
     int16_t ddF_x = 1;
@@ -428,13 +438,13 @@ void Framebuf_FillCircle(framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r,
     int16_t x     = 0;
     int16_t y     = r;
 
-    Framebuf_DrawPixel(pHandle, x0, y0 + r, eColor);
-    Framebuf_DrawPixel(pHandle, x0, y0 - r, eColor);
-    Framebuf_DrawPixel(pHandle, x0 + r, y0, eColor);
-    Framebuf_DrawPixel(pHandle, x0 - r, y0, eColor);
-    Framebuf_DrawLine(pHandle, x0 - r, y0, x0 + r, y0, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0, y0 + r, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0, y0 - r, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0 + r, y0, eColor);
+    MonoFramebuf_DrawPixel(pHandle, x0 - r, y0, eColor);
+    MonoFramebuf_DrawLine(pHandle, x0 - r, y0, x0 + r, y0, eColor);
 
-    while (pHandle, x < y)
+    while (x < y)
     {
         if (f >= 0)
         {
@@ -446,10 +456,15 @@ void Framebuf_FillCircle(framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r,
         ddF_x += 2;
         f += ddF_x;
 
-        Framebuf_DrawLine(pHandle, x0 - x, y0 + y, x0 + x, y0 + y, eColor);
-        Framebuf_DrawLine(pHandle, x0 + x, y0 - y, x0 - x, y0 - y, eColor);
+        MonoFramebuf_DrawLine(pHandle, x0 - x, y0 + y, x0 + x, y0 + y, eColor);
+        MonoFramebuf_DrawLine(pHandle, x0 + x, y0 - y, x0 - x, y0 - y, eColor);
 
-        Framebuf_DrawLine(pHandle, x0 + y, y0 + x, x0 - y, y0 + x, eColor);
-        Framebuf_DrawLine(pHandle, x0 + y, y0 - x, x0 - y, y0 - x, eColor);
+        MonoFramebuf_DrawLine(pHandle, x0 + y, y0 + x, x0 - y, y0 + x, eColor);
+        MonoFramebuf_DrawLine(pHandle, x0 + y, y0 - x, x0 - y, y0 - x, eColor);
     }
+}
+
+uint8_t* MonoFramebuf_GetBuffer(mono_framebuf_t* pHandle)
+{
+    return pHandle->pu8Buffer;
 }
