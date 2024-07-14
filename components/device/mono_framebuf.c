@@ -97,15 +97,7 @@ void MonoFramebuf_SetCursor(mono_framebuf_t* pHandle, uint16_t x, uint16_t y)
 
 char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
 {
-    uint32_t i, b, j;
-
-    /* Check available space in LCD */
-    if (pHandle->u16Width <= (pHandle->_u16CursorX + pFont->u16Width) ||
-        pHandle->u16Height <= (pHandle->_u16CursorY + pFont->u16Height))
-    {
-        /* Error */
-        return 0;
-    }
+    uint32_t i, j;
 
     mono_font_code_t sFontCode = {0};
 

@@ -24,6 +24,8 @@
 
 * [ ] canfestival
 
+* [ ] mono-font (gb2312 over sdcard)
+
 * [ ] modbus-slave
 
 * [ ] matlab-simulink

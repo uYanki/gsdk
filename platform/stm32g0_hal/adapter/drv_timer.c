@@ -66,7 +66,7 @@ tick_t GetTickUs(void)
 // Variables
 //---------------------------------------------------------------------------
 
-static volatile tick_t m_Tick = 0U;
+static volatile tick_t m_Tick = 0ULL;
 
 //---------------------------------------------------------------------------
 // Functions

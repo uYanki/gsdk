@@ -73,18 +73,18 @@ static inline uint8_t le8(const uint8_t* p)
 
 static inline uint16_t le16(const uint8_t* p)
 {
-    return ((uint16_t)p[0] << 0) | ((uint16_t)p[1] << 8);
+    return *(u16*)p;
 }
 
 static inline uint32_t le32(const uint8_t* p)
 {
-    return ((uint32_t)p[0] << 0) | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+    // stm32的32位指针需要4字节对齐才能直接解引用
+    return ((u32)le16(p + 2) << 16) | (u32)le16(p);
 }
 
 static inline uint64_t le64(const uint8_t* p)
 {
-    return ((uint64_t)p[0] << 0)  | ((uint64_t)p[1] << 8)  | ((uint64_t)p[2] << 16) | ((uint64_t)p[3] << 24) |
-           ((uint64_t)p[4] << 32) | ((uint64_t)p[5] << 40) | ((uint64_t)p[6] << 48) | ((uint64_t)p[7] << 54);
+    return ((u64)le32(p + 4) << 32) | (u64)le32(p);
 }
 
 static inline uint8_t be8(const uint8_t* p)
@@ -94,18 +94,17 @@ static inline uint8_t be8(const uint8_t* p)
 
 static inline uint16_t be16(const uint8_t* p)
 {
-    return ((uint16_t)p[1] << 0) | ((uint16_t)p[0] << 8);
+    return ((u16)p[1] << 0) | ((u16)p[0] << 8);
 }
 
 static inline uint32_t be32(const uint8_t* p)
 {
-    return ((uint32_t)p[3] << 0) | ((uint32_t)p[2] << 8) | ((uint32_t)p[1] << 16) | ((uint32_t)p[0] << 24);
+    return ((u64)be32(p) << 16) | (u64)le32(p + 2);
 }
 
 static inline uint64_t be64(const uint8_t* p)
 {
-    return ((uint64_t)p[7] << 0)  | ((uint64_t)p[6] << 8)  | ((uint64_t)p[5] << 16) | ((uint64_t)p[4] << 24) |
-           ((uint64_t)p[3] << 32) | ((uint64_t)p[2] << 40) | ((uint64_t)p[1] << 48) | ((uint64_t)p[0] << 54);
+    return ((u64)be32(p) << 32) | (u64)le32(p + 4);
 }
 
 // clang-format on
@@ -184,7 +183,7 @@ static inline uint16_t bswap16(uint16_t x)
            ((x & 0xFF00) >> 8);
 }
 
-static inline uint32_t bswap32(u3int2 _tx)
+static inline uint32_t bswap32(uint32_t x)
 {
     return ((x & 0x000000FF) << 24) |
            ((x & 0x0000FF00) << 8) |

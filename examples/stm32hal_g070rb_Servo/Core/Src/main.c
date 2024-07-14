@@ -31,6 +31,7 @@
 /* USER CODE BEGIN Includes */
 #include "gsdk.h"
 #include "hwif.h"
+#include "flexbtn.h"
 #include "i2c_ssd1306.h"
 #include "mono_framebuf.h"
 /* USER CODE END Includes */
@@ -41,12 +42,12 @@
 #define SSD1306_WIDTH  128
 #define SSD1306_HEIGHT 32
 
-static uint8_t m_au8Framebuf[SSD1306_WIDTH * SSD1306_HEIGHT / 8] = {0};
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LOG_LOCAL_TAG   "main"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE
 
 /* USER CODE END PD */
 
@@ -58,6 +59,78 @@ static uint8_t m_au8Framebuf[SSD1306_WIDTH * SSD1306_HEIGHT / 8] = {0};
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent);
+static bool IsPressed(flexbtn_t* pHandle);
+
+typedef enum {
+    BUTTON_PREV,
+    BUTTON_OKAY,
+    BUTTON_NEXT,
+} button_id_e;
+
+static pin_t keys[] = {
+    {KEY1_PIN},
+    {KEY2_PIN},
+    {KEY3_PIN},
+};
+
+static flexbtn_t flexbtn[3] = {
+    {
+     .u8ID                         = BUTTON_PREV,
+     .u16ShortPressStartTick       = FLEXBTN_MS_TO_SCAN_CNT(1500),
+     .u16LongPressStartTick        = FLEXBTN_MS_TO_SCAN_CNT(3000),
+     .u16LongHoldStartTick         = FLEXBTN_MS_TO_SCAN_CNT(4500),
+     .u16MaxMultipleClicksInterval = FLEXBTN_MS_TO_SCAN_CNT(300),
+     .pfnIsPressed                 = IsPressed,
+     .pfnEventCb                   = EventCb,
+     },
+
+    {
+     .u8ID                         = BUTTON_OKAY,
+     .u16ShortPressStartTick       = FLEXBTN_MS_TO_SCAN_CNT(1000),
+     .u16LongPressStartTick        = FLEXBTN_MS_TO_SCAN_CNT(2000),
+     .u16LongHoldStartTick         = FLEXBTN_MS_TO_SCAN_CNT(3000),
+     .u16MaxMultipleClicksInterval = FLEXBTN_MS_TO_SCAN_CNT(300),
+     .pfnIsPressed                 = IsPressed,
+     .pfnEventCb                   = EventCb,
+     },
+
+    {
+     .u8ID                         = BUTTON_NEXT,
+     .u16ShortPressStartTick       = FLEXBTN_MS_TO_SCAN_CNT(1500),
+     .u16LongPressStartTick        = FLEXBTN_MS_TO_SCAN_CNT(3000),
+     .u16LongHoldStartTick         = FLEXBTN_MS_TO_SCAN_CNT(4500),
+     .u16MaxMultipleClicksInterval = FLEXBTN_MS_TO_SCAN_CNT(300),
+     .pfnIsPressed                 = IsPressed,
+     .pfnEventCb                   = EventCb,
+     },
+};
+
+//----------
+
+static uint8_t m_au8Framebuf[SSD1306_WIDTH * SSD1306_HEIGHT / 8] = {0};
+
+static mono_framebuf_t fb = {
+    .pu8Buffer   = m_au8Framebuf,
+    .u16Width    = SSD1306_WIDTH,
+    .u16Height   = SSD1306_HEIGHT,
+    ._u16CursorX = 0,
+    ._u16CursorY = 0,
+};
+
+static i2c_mst_t i2c = {
+    .SDA  = {OLED091_SDA_PIN},
+    .SCL  = {OLED091_SCL_PIN},
+    .I2Cx = &hi2c1,
+};
+
+static i2c_ssd1306_t ssd1306 = {
+    .hI2C      = &i2c,
+    .u8SlvAddr = SSD1306_ADDRESS_LOW,
+    .u8Cols    = SSD1306_WIDTH,
+    .u8Rows    = SSD1306_HEIGHT / 8,
+};
 
 /* USER CODE END PV */
 
@@ -99,8 +172,8 @@ int main(void)
     HAL_Init();
 
     /* USER CODE BEGIN Init */
-    cm_backtrace_init("demo", "stm32", "V0.01");
     SEGGER_RTT_Init();
+    cm_backtrace_init("demo", "stm32", "V0.01");
     /* USER CODE END Init */
 
     /* Configure the system clock */
@@ -128,27 +201,6 @@ int main(void)
     /* USER CODE BEGIN 2 */
     DelayInit();
 
-    i2c_mst_t i2c = {
-        .SDA  = {OLED091_SDA_PIN},
-        .SCL  = {OLED091_SCL_PIN},
-        .I2Cx = &hi2c1,
-    };
-
-    mono_framebuf_t fb = {
-        .pu8Buffer   = m_au8Framebuf,
-        .u16Width    = SSD1306_WIDTH,
-        .u16Height   = SSD1306_HEIGHT,
-        ._u16CursorX = 0,
-        ._u16CursorY = 0,
-    };
-
-    i2c_ssd1306_t ssd1306 = {
-        .hI2C      = &i2c,
-        .u8SlvAddr = SSD1306_ADDRESS_LOW,
-        .u8Cols    = fb.u16Width,
-        .u8Rows    = fb.u16Height / 8,
-    };
-
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
 
@@ -157,23 +209,45 @@ int main(void)
     SSD1306_Init(&ssd1306);
     SSD1306_ClearScreen(&ssd1306);
 
-    MonoFramebuf_FillRectangle(&fb, 10, 10, 20, 20, MONO_COLOR_BLACK);
+    MonoFramebuf_FillRectangle(&fb, 10, 10, 20, 20, MONO_COLOR_WHITE);
     MonoFramebuf_FillRectangle(&fb, 20, 20, 20, 20, MONO_COLOR_XOR);
 
     MonoFramebuf_SetCursor(&fb, 0, 0);
-    MonoFramebuf_PutString(&fb, "hello", &g_Font_Conslons_8x16_CpuFlash, MONO_COLOR_WHITE, MONO_COLOR_BLACK);
+    MonoFramebuf_PutString(&fb, "Servo", &g_Font_Conslons_8x16_CpuFlash, MONO_COLOR_WHITE, MONO_COLOR_BLACK);
     SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
+
+    for (int i = 0; i < ARRAY_SIZE(flexbtn); ++i)
+    {
+        PIN_SetMode(&keys[i], PIN_MODE_INPUT_FLOATING, PIN_PULL_UP);
+        FlexBtn_Attach(&flexbtn[i]);
+    }
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+
     while (1)
     {
-        GSDK_PRINTLN("%d.%d", HAL_GetTick(), GetTickMs());
-        DelayBlockMs(4321);
         // HAL_GPIO_TogglePin(LED1_PIN);
-        //	HAL_GPIO_TogglePin(LED2_PIN);
+        // HAL_GPIO_TogglePin(LED2_PIN);
+
+        static tick_t tKeyScan = 0;
+
+        if (DelayNonBlockMs(&tKeyScan, 1000 / CONFIG_FLEXBTN_SCAN_FREQ_HZ))
+        {
+            FlexBtn_Cycle();
+            tKeyScan = GetTickUs();
+        }
+
+        static tick_t tBlink = 0;
+
+        if (DelayNonBlockMs(&tBlink, 1000))
+        {
+            HAL_GPIO_TogglePin(LED2_PIN);
+            tBlink = GetTickUs();
+        }
+
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -226,6 +300,39 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+static bool IsPressed(flexbtn_t* pHandle)
+{
+    switch ((button_id_e)(pHandle->u8ID))
+    {
+        case BUTTON_PREV:
+        case BUTTON_OKAY:
+        case BUTTON_NEXT:
+        {
+            return PIN_ReadLevel(&keys[pHandle->u8ID]) == PIN_LEVEL_LOW;
+        }
+
+        default:
+        {
+            LOGW("unknown button id");
+            break;
+        }
+    }
+
+    return false;
+}
+
+static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
+{
+    if (flexbtn[BUTTON_NEXT].eEvent == FLEXBTN_EVENT_LONG_HOLD && flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
+    {
+        LOGI("combined key event = %s + %s", FlexBtnEventStr(flexbtn[BUTTON_NEXT].eEvent), FlexBtnEventStr(flexbtn[BUTTON_OKAY].eEvent));
+    }
+    else
+    {
+        LOGI("key%d event = %s", pHandle->u8ID, FlexBtnEventStr(eEvent));
+    }
+}
 
 /* USER CODE END 4 */
 

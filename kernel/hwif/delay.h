@@ -13,9 +13,9 @@ extern "C" {
 
 typedef uint64_t tick_t;
 
-#define UNIT_US 1
-#define UNIT_MS 1000
-#define UNIT_S  1000000
+#define UNIT_US (tick_t)1
+#define UNIT_MS (tick_t)1000
+#define UNIT_S  (tick_t)1000000
 
 //---------------------------------------------------------------------------
 // Functions
@@ -23,13 +23,13 @@ typedef uint64_t tick_t;
 
 __IMPL tick_t GetTickUs(void);
 
-void        DelayInit(void);
-inline void DelayBlock(tick_t TickWait);
-inline bool DelayNonBlock(const tick_t* cpTickStart, tick_t TickWait);
+void DelayInit(void);
+void DelayBlock(tick_t TickWait);
+bool DelayNonBlock(const tick_t* cpTickStart, tick_t TickWait);
 
 // clang-format off
 
-static inline tick_t GetTickMs(void) { return GetTickUs() / 1000; }
+static inline tick_t GetTickMs(void) { return GetTickUs() / (tick_t)1000; }
  
 static inline void DelayBlockUs(tick_t TickWait) { DelayBlock(TickWait * UNIT_US); }
 static inline void DelayBlockMs(tick_t TickWait) { DelayBlock(TickWait * UNIT_MS); }

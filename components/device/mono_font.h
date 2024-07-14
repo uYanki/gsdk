@@ -40,7 +40,7 @@ extern const mono_font_t g_Font_Conslons_24x32_CpuFlash;
 // Functions
 //---------------------------------------------------------------------------
 
-bool GetFontInfo(mono_font_t* pFont, char Char, mono_font_code_t* pFontCode);
+bool GetFontInfo(const mono_font_t* pFont, char Char, mono_font_code_t* pFontCode);
 
 #ifdef __cplusplus
 }

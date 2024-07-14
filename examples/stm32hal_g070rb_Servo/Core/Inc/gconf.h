@@ -6,7 +6,7 @@
 #define CONFIG_ARM_DWT_SW       0
 #define CONFIG_ARM_TSG_SW       0
 
-#define CONFIG_DEMOS_SW         1
+#define CONFIG_DEMOS_SW         0
 
 #define CONFIG_SWUART_MODULE_SW 1
 #define CONFIG_SWI2C_MODULE_SW  1

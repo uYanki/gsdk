@@ -71,7 +71,7 @@ const mono_font_t g_Font_GB2312_16x16_SDCard = {
 // Functions
 //---------------------------------------------------------------------------
 
-bool GetFontInfo(mono_font_t* pFont, char Char, mono_font_code_t* pFontCode)
+bool GetFontInfo(const mono_font_t* pFont, char Char, mono_font_code_t* pFontCode)
 {
     return pFont->pfnGetMonoFont(pFont, Char, pFontCode);
 }

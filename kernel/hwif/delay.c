@@ -1,4 +1,5 @@
 #include "delay.h"
+#include "gendian.h"
 
 #if CONFIG_ARM_DWT_SW
 #include "arm_dwt.h"
@@ -67,7 +68,9 @@ void DelayBlock(tick_t TickWait)
 
 bool DelayNonBlock(const tick_t* cpTickStart, tick_t TickWait)
 {
-    if ((GetTickUs() - (*cpTickStart)) < TickWait)
+    tick_t TickEnd = he64(cpTickStart) + (u64)TickWait;
+
+    if (GetTickUs() < TickEnd)
     {
         return false;  // waiting
     }
