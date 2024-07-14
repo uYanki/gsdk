@@ -277,7 +277,7 @@ bool TFORMAT_Test()
 
     while (1)
     {
-        if (DelayNonBlockMs(&t, 300))
+        if (DelayNonBlockMs(t, 300))
         {
             TFORMAT_SetupCmd(&tformat, TFORMAT_CF_DID0);
             TFORMAT_Transfer(&tformat);

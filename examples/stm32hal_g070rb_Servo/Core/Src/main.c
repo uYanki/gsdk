@@ -34,6 +34,9 @@
 #include "flexbtn.h"
 #include "i2c_ssd1306.h"
 #include "mono_framebuf.h"
+
+#include "freemodbus/mb.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -204,24 +207,31 @@ int main(void)
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
 
+		// oled
     SSD1306_Reset();
-
     SSD1306_Init(&ssd1306);
-    SSD1306_ClearScreen(&ssd1306);
-
+		
     MonoFramebuf_FillRectangle(&fb, 10, 10, 20, 20, MONO_COLOR_WHITE);
     MonoFramebuf_FillRectangle(&fb, 20, 20, 20, 20, MONO_COLOR_XOR);
-
     MonoFramebuf_SetCursor(&fb, 0, 0);
     MonoFramebuf_PutString(&fb, "Servo", &g_Font_Conslons_8x16_CpuFlash, MONO_COLOR_WHITE, MONO_COLOR_BLACK);
-    SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
+    
+		SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
 
+		// key
     for (int i = 0; i < ARRAY_SIZE(flexbtn); ++i)
     {
         PIN_SetMode(&keys[i], PIN_MODE_INPUT_FLOATING, PIN_PULL_UP);
         FlexBtn_Attach(&flexbtn[i]);
     }
 
+    // modbus(rtu)
+//    RO u8 ucSlaveID[] = {0xAA, 0xBB, 0xCC};
+//		eMBInit(MB_RTU, 1, 1, 19200, MB_PAR_EVEN);
+//    eMBSetSlaveID(0x34, true, ucSlaveID, ARRAY_SIZE(ucSlaveID));
+//    eMBEnable();
+//     MbRtuRun();
+		
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -229,25 +239,15 @@ int main(void)
 
     while (1)
     {
-        // HAL_GPIO_TogglePin(LED1_PIN);
-        // HAL_GPIO_TogglePin(LED2_PIN);
+			  // led
+				PeriodicTask(UNIT_S, HAL_GPIO_TogglePin(LED2_PIN));
+			
+			  // key
+        PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
 
-        static tick_t tKeyScan = 0;
-
-        if (DelayNonBlockMs(&tKeyScan, 1000 / CONFIG_FLEXBTN_SCAN_FREQ_HZ))
-        {
-            FlexBtn_Cycle();
-            tKeyScan = GetTickUs();
-        }
-
-        static tick_t tBlink = 0;
-
-        if (DelayNonBlockMs(&tBlink, 1000))
-        {
-            HAL_GPIO_TogglePin(LED2_PIN);
-            tBlink = GetTickUs();
-        }
-
+			  // modbus
+			//	eMBPoll(); 
+			
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */

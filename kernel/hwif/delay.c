@@ -66,9 +66,9 @@ void DelayBlock(tick_t TickWait)
     }
 }
 
-bool DelayNonBlock(const tick_t* cpTickStart, tick_t TickWait)
+bool DelayNonBlock(tick_t TickStart, tick_t TickWait)
 {
-    tick_t TickEnd = he64(cpTickStart) + (u64)TickWait;
+    tick_t TickEnd = TickStart + TickWait;
 
     if (GetTickUs() < TickEnd)
     {

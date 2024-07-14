@@ -18,4 +18,37 @@
 
 #define CONFIG_HWCAN_MODULE_SW  1
 
+
+//-----------------------------------------------------------------------------
+// 串口配置
+//
+
+/**
+ * @param CONFIG_UART_MODE
+ */
+#define UART_MODE_NORMAL 0
+#define UART_MODE_RS485  1
+#define UART_MODE_RS232  2
+#define UART_MODE_RS422  3
+
+// 串口类型
+#define CONFIG_UART_MODE UART_MODE_NORMAL
+
+// 使能重定向
+#define CONFIG_REDIRECT_UART_PORT huart2
+#define CONFIG_REDIRECT_PRINTF_SW 2
+
+// MODBUS
+#define CONFIG_MODBUS_UART_PORT  huart2
+#define CONFIG_MODBUS_RXDMA_PORT hdma_usart2_rx
+
+// 缓冲区大小
+#define CONFIG_UART_TXBUF_SIZE 256
+#define CONFIG_UART_RXBUF_SIZE 256
+
+#if CONFIG_UART_MODE == UART_MODE_RS485
+// RS485 换向时间
+#define CONFIG_RS485_SWITCH_TIME_US 200
+#endif
+
 #endif /*<! __GSDK_CONF_H__ */

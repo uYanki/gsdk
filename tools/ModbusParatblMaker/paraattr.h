@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __PARA_ATTR_H__
+#define __PARA_ATTR_H__
 
 #include <stdint.h>
 
@@ -180,3 +181,5 @@ typedef struct {
     } uSubAttr;
 
 } para_attr_t;
+
+#endif

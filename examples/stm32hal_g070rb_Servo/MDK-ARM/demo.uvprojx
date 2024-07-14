@@ -339,7 +339,7 @@
               <MiscControls>-Wno-shift-negative-value -Wno-shift-count-negative -Wno-int-to-void-pointer-cast -Wno-unused-value</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,STM32G070xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../components/motspin/fixed-point;../../../components/shell1;..\..\..\platform\stm32g0_hal\board\stm32g070rb_umotion;../../../platform/stm32g0_hal/adapter;../../../components/eefs;../../../components/logicloader;../../../components/qrcode;../../../components/linkscope;../../../components/CmBacktrace;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Device/ST/STM32G0xx/Include;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../components/motspin/fixed-point;..\..\..\platform\stm32g0_hal\board\stm32g070rb_umotion;../../../platform/stm32g0_hal/adapter;../../../components/CmBacktrace;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Device/ST/STM32G0xx/Include;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Include;..\Libraries;..\Database</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -2842,7 +2842,94 @@
           <GroupName>encoder/tformat</GroupName>
         </Group>
         <Group>
-          <GroupName>components/freemodbus</GroupName>
+          <GroupName>libraries/freemodbus/core</GroupName>
+          <Files>
+            <File>
+              <FileName>mb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mb.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbascii.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbascii.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbcrc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbcrc.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbfunccoils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbfunccoils.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbfuncdisc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbfuncdisc.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbfuncholding.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbfuncholding.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbfuncinput.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbfuncinput.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbfuncother.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbfuncother.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbrtu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbrtu.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbtcp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbtcp.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbutils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\mbutils.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>libraries/freemodbus/port</GroupName>
+          <Files>
+            <File>
+              <FileName>portcb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\portcb.c</FilePath>
+            </File>
+            <File>
+              <FileName>portevent.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\portevent.c</FilePath>
+            </File>
+            <File>
+              <FileName>portserial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\portserial.c</FilePath>
+            </File>
+            <File>
+              <FileName>porttimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\porttimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\freemodbus\bsp_uart.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>

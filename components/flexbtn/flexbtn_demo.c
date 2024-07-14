@@ -119,7 +119,7 @@ void FlexBtn_Test(void)
     {
         static tick_t t = 0;
 
-        if (DelayNonBlockMs(&t, 1000 / CONFIG_FLEXBTN_SCAN_FREQ_HZ))
+        if (DelayNonBlockMs(t, 1000 / CONFIG_FLEXBTN_SCAN_FREQ_HZ))
         {
             FlexBtn_Cycle();
             t = GetTickUs();

@@ -285,7 +285,7 @@ void AD7705_Test(void)
         {
             t = GetTickUs();
         }
-        else if (DelayNonBlockS(&t, 1))
+        else if (DelayNonBlockS(t, 1))
         {
             LOGI("freq = %d Hz\r\n", hz);
             hz = 0;
