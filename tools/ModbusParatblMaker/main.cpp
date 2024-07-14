@@ -9,13 +9,20 @@
 #include <QString>
 #include <QTextStream>
 
-#define CONFIG_DATABASE_SW 1
-
 #include <QMap>
 
 #include <QSqlQuery>
 #include <QtSql>
 #include <qsqldatabase.h>
+
+#define PATH  qApp->applicationDirPath() +"/"
+// #define PATH QString("F:/gsdk/tools/ModbusParatblMaker/")
+// #define PATH QString("F:/gsdk/examples/stm32hal_g070rb_Servo/Database/")
+
+// #define PATH_DST    QString("C:/Program Files (x86)/co-trust/MagicWorks Tuner V1.6/")
+#define PATH_DST       QString("C:/Program Files (x86)/co-trust/MagicWorks Tuner debug_V1.81A_0104/Device/")
+
+#define CONFIG_DATABASE_SW      1
 
 #define PARA_COLUMN_OFFSET      ('D' - 'A' + 1)
 
@@ -34,6 +41,79 @@
 #define PARA_NAME_ZH            (PARA_COLUMN_OFFSET + 12)
 #define PARA_DESC_ZH            (PARA_COLUMN_OFFSET + 13)
 
+#if CONFIG_DATABASE_SW
+
+QSqlDatabase db;
+
+bool DB_Init()
+{
+    qDebug() << QSqlDatabase::drivers();
+
+    QFile::remove(PATH + "default.db");
+    QFile::remove(PATH_DST + "default.db");
+
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(PATH + "default.db");  // create if not exist
+
+    bool isok = db.open();
+
+    if (isok == false)
+    {
+        qDebug() << "error info :" << db.lastError();
+    }
+    else
+    {
+        QSqlQuery query(db);
+
+        QString creatTableStr = "CREATE TABLE %1   \
+                    (                                \
+                        Address INTEGER PRIMARY KEY, \
+                        DataType TEXT,               \
+                        ParaName_CN TEXT,            \
+                        ControlMode TEXT,            \
+                        LowerLimit TEXT,             \
+                        UpperLimit TEXT,             \
+                        DefaultValue TEXT,           \
+                        ReadWrite TEXT,              \
+                        Comment_CN TEXT,             \
+                        ParaName_EN TEXT,            \
+                        Comment_EN TEXT              \
+                    );";
+
+        creatTableStr = creatTableStr.arg("Para_A4");  // set table name
+
+        query.prepare(creatTableStr);
+
+        if (!query.exec())
+        {
+            qDebug() << "query error :" << query.lastError();
+        }
+        else
+        {
+            qDebug() << "creat table success!";
+        }
+    }
+
+    return isok;
+}
+
+void DB_Deinit()
+{
+    db.close();
+    QFile::copy(PATH + "default.db", PATH_DST + "default.db");
+}
+
+#else
+
+bool DB_Init()
+{
+    return true;
+}
+
+void DB_Deinit() {}
+
+#endif
+
 void MakePara(
     QString      szAddress,
     QString      szDataType,
@@ -46,6 +126,7 @@ void MakePara(
     QString      szRelate,
     QString      szSynCov,
     QString      szAccess,
+    QString      szParaNameDescZH,
     QTextStream& ParaTable,
     QTextStream& ParaAttr)
 {
@@ -138,62 +219,26 @@ void MakePara(
                         .arg(szVarName + WordInd1[i])
                  << Qt::endl;
     }
-}
 
-bool InitDB()
-{
 #if CONFIG_DATABASE_SW
 
-    qDebug() << QSqlDatabase::drivers();
+    QSqlQuery query(db);
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("default.db");  // create if not exist
+    QString cmd = "replace into %1 values(\"%2\",%3,\"%4\",\"0\",\"%5\",\"%6\",\"%7\",\"%8\",\"%9\",\"\",\"\");";
 
-    bool isok = db.open();
+    cmd = cmd.arg("Para_A4")  // table name
+              .arg(szAddress)
+              .arg(WordInd1.size())
+              .arg(szVarName + " | " + szParaNameZH)
+              .arg(szMinVal)
+              .arg(szMaxVal)
+              .arg(szInitVal)
+              .arg("")
+              .arg(szParaNameDescZH);
 
-    if (isok == false)
-    {
-        qDebug() << "error info :" << db.lastError();
-    }
-    else
-    {
-        QSqlQuery query;
+    query.prepare(cmd);
+    query.exec();
 
-        QString creatTableStr = "CREATE TABLE %1   \
-                    (                                \
-                        Address INTEGER PRIMARY KEY, \
-                        DataType TEXT,               \
-                        ParaName_CN TEXT,            \
-                        ControlMode TEXT,            \
-                        LowerLimit TEXT,             \
-                        UpperLimit TEXT,             \
-                        DefaultValue TEXT,           \
-                        ReadWrite TEXT,              \
-                        Comment_CN TEXT,             \
-                        ParaName_EN TEXT,            \
-                        Comment_EN TEXT              \
-                    );";
-
-        creatTableStr = creatTableStr.arg("Para_A4");  // set table name
-
-        query.prepare(creatTableStr);
-
-        if (!query.exec())
-        {
-            qDebug() << "query error :" << query.lastError();
-        }
-        else
-        {
-            qDebug() << "creat table success!";
-        }
-    }
-
-    db.close();
-
-    return isok;
-
-#else
-    return true;
 #endif
 }
 
@@ -201,15 +246,15 @@ int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
 
-    QXlsx::Document xlsx("paratbl.xlsx");
+    QXlsx::Document xlsx(PATH + "paratbl.xlsx");
 
-    QFile       file1(qApp->applicationDirPath() + "/paraattr.c");
+    QFile       file1(PATH + "paraattr.c");
     QTextStream ParaAttr(&file1);
 
-    QFile       file2(qApp->applicationDirPath() + "/paratbl.h");
+    QFile       file2(PATH + "paratbl.h");
     QTextStream ParaTbl(&file2);
 
-    bool isok = InitDB() && file1.open(QIODevice::WriteOnly) && file2.open(QIODevice::WriteOnly);
+    bool isok = DB_Init() && file1.open(QIODevice::WriteOnly) && file2.open(QIODevice::WriteOnly);
 
     if (isok)
     {
@@ -231,12 +276,12 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            qDebug() << szAddress;
+             // qDebug() << szAddress;
 
             MakePara(szAddress,
                      xlsx.cellAt(row, PARA_DATA_TYPE)->value().toString(),
                      xlsx.cellAt(row, PARA_VAR_NAME)->value().toString(),
-                     "",  // xlsx.cellAt(row, PARA_NAME_ZH)->value().toString(),
+                     xlsx.cellAt(row, PARA_NAME_ZH)->value().isNull() ? "":xlsx.cellAt(row, PARA_NAME_ZH)->value().toString(),
                      xlsx.cellAt(row, PARA_ATTR_INTI_VAL)->value().toString(),
                      xlsx.cellAt(row, PARA_ATTR_MIN_VAL)->value().toString(),
                      xlsx.cellAt(row, PARA_ATTR_MAX_VAL)->value().toString(),
@@ -244,6 +289,7 @@ int main(int argc, char* argv[])
                      xlsx.cellAt(row, PARA_SUBATTR_RELATE)->value().toString(),
                      xlsx.cellAt(row, PARA_SUBATTR_SYNC_COVER)->value().toString(),
                      xlsx.cellAt(row, PARA_SUBATTR_ACCESS)->value().toString(),
+                     xlsx.cellAt(row, PARA_DESC_ZH)->value().isNull() ? "":xlsx.cellAt(row, PARA_DESC_ZH)->value().toString(),
                      ParaTbl, ParaAttr);
         }
 
@@ -254,9 +300,11 @@ int main(int argc, char* argv[])
         ParaTbl << "// clang-format on" << Qt::endl;
     }
 
-    return 0;
+    DB_Deinit();
 
-    //    MainWindow w;
-    //    w.show();
-    //    return a.exec();
+    // MainWindow w;
+    // w.show();
+    // return a.exec();
+
+    return 0;
 }
