@@ -5,9 +5,10 @@
 
 #include "gsdk.h"
 #include "paratbl.h"
+#include "paraattr.h"
 
 #define CONFIG_A4_TRACE_SW  0
-#define CONFIG_MSB_FIRST_SW 1 // tuner = 0
+#define CONFIG_MSB_FIRST_SW 1  // tuner = 0
 
 // register_group_t
 typedef struct {
@@ -16,21 +17,7 @@ typedef struct {
     u16* u16Buffer;
 } reg_grp_t;
 
-#if CONFIG_TUNER_SW
-
-typedef struct {
-    u16 SoftVer;
-    u16 DrvType;
-} cotrust_tuner_t;
-
-cotrust_tuner_t sTuner = {
-    .SoftVer = 22096,  // A4
-    .DrvType = 0x0303,
-};
-
-#endif
-
-__attribute((aligned (4))) para_table_t tbl;
+__attribute((aligned(2))) para_table_t sParaTbl;
 
 #if CONFIG_A4_TRACE_SW
 __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
@@ -38,13 +25,13 @@ __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
 
 static const reg_grp_t m_holding[] = {
 
-    {0,     sizeof(para_table_t) / sizeof(u16),     (u16*)&tbl       }, // 轴参数
+    {0,   sizeof(para_table_t) / sizeof(u16), (u16*)&sParaTbl          }, // 轴参数
 
 #if CONFIG_A4_TRACE_SW
-    {800,   8000,                                  (u16*)&as32TraceBuffer[0]}, // 曲线采样
+    {800, 8000,                               (u16*)&as32TraceBuffer[0]}, // 曲线采样
 #endif
 
-  //  {10000, sizeof(drv_para_t) / sizeof(u16),      (u16*)&sDrvTbl           }, // 驱动器信息
+//  {10000, sizeof(drv_para_t) / sizeof(u16),      (u16*)&sDrvTbl           }, // 驱动器信息
 
 #if 0
     {9000,  sizeof(dbg_tbl_t) / sizeof(u16),       (u16*)&sDbgTbl           }, // 调试用
@@ -65,8 +52,9 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 
     u8 u8GrpIdx;
 
-	if(u16Address==180||u16Address==181)
     u16Address--;
+
+    extern const para_attr_t sParaAttr[];
 
     for (u8GrpIdx = 0; u8GrpIdx < ARRAY_SIZE(m_holding); ++u8GrpIdx)
     {
@@ -77,56 +65,138 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 
             switch (eMode)
             {
-                case MB_REG_READ: {
-#if CONFIG_A4_TRACE_SW
-                    if (u8GrpIdx == 2)
+                case MB_REG_READ:
+                {
+                    while (u16Count > 0)
                     {
-                        while (u16Count > 1)
+                        uint8_t u8Step, _u8Step;
+
+                        switch (sParaAttr[u16RegIdx].uSubAttr.u32Bit.Length)
                         {
-                            *pu8Buffer++ = ((u8*)pu16RegBuf)[3];
-                            *pu8Buffer++ = ((u8*)pu16RegBuf)[2];
-                            *pu8Buffer++ = ((u8*)pu16RegBuf)[1];
-                            *pu8Buffer++ = ((u8*)pu16RegBuf)[0];
-                            pu16RegBuf += 2;
-                            u16Count -= 2;
+                            default:  // 错误访问
+                            {
+#if 0
+                                // 上位机参数地址按字长递增时用
+                                eStatus = MB_EIO;
+                                goto __exit;
+#else
+                                u8Step = 1;
+                                break;
+#endif
+                            }
+
+                            case V_SIG:
+                            {
+                                u8Step = 1;
+                                break;
+                            }
+
+                            case V_DOB0:
+                            {
+                                u8Step = 2;
+                                break;
+                            }
+
+                            case V_QUD0:
+                            {
+                                u8Step = 4;
+                                break;
+                            }
                         }
 
-                        break;
+                        if (u16Count < u8Step)  // 访问超限
+                        {
+                            eStatus = MB_EIO;
+                            goto __exit;
+                        }
+
+                        _u8Step = u8Step;
+
+                        while (_u8Step--)
+                        {
+                            *pu8Buffer++ = (u8)(pu16RegBuf[_u8Step] >> 8);
+                            *pu8Buffer++ = (u8)(pu16RegBuf[_u8Step] & 0xFF);
+                        }
+
+                        pu16RegBuf += u8Step;
+                        u16Count -= u8Step;
+                        u16RegIdx += u8Step;
                     }
-#endif
-                    while (u16Count > 0)
-                    {
-#if CONFIG_MSB_FIRST_SW
-                        *pu8Buffer++ = (u8)(*pu16RegBuf >> 8);
-                        *pu8Buffer++ = (u8)(*pu16RegBuf & 0xFF);
-#else
-                        *pu8Buffer++ = (u8)(*pu16RegBuf & 0xFF);
-                        *pu8Buffer++ = (u8)(*pu16RegBuf >> 8);
-#endif
-                        pu16RegBuf++;
-                        u16Count--;
-                    }
+
                     break;
                 }
-                case MB_REG_WRITE: {
-#if CONFIG_TUNER_SW
-                    if (u8GrpIdx == 0 && u16RegIdx == 0)
-                    {
-                        break;
-                    }
-#endif
-
+                case MB_REG_WRITE:
+                {
                     while (u16Count > 0)
                     {
-#if CONFIG_MSB_FIRST_SW
-                        *pu16RegBuf = *pu8Buffer++ << 8;
-                        *pu16RegBuf |= *pu8Buffer++;
+                        uint8_t u8Step, _u8Step;
+
+                        switch (sParaAttr[u16RegIdx].uSubAttr.u32Bit.Length)
+                        {
+                            default:  // 错误访问
+                            {
+#if 0
+                                // 上位机参数地址按字长递增时用
+                                eStatus = MB_EIO;
+                                goto __exit;
 #else
-                        *pu16RegBuf |= *pu8Buffer++;
-                        *pu16RegBuf = *pu8Buffer++ << 8;
+                                u8Step = 1;
+                                break;
 #endif
-                        pu16RegBuf++;
-                        u16Count--;
+                            }
+
+                            case V_SIG:
+                            {
+                                u8Step = 1;
+                                break;
+                            }
+
+                            case V_DOB0:
+                            {
+                                u8Step = 2;
+                                break;
+                            }
+
+                            case V_QUD0:
+                            {
+                                u8Step = 4;
+                                break;
+                            }
+                        }
+
+                        if (u16Count < u8Step)  // 访问超限
+                        {
+                            eStatus = MB_EIO;
+                            goto __exit;
+                        }
+
+                        switch (sParaAttr[u16RegIdx].uSubAttr.u32Bit.Mode)
+                        {
+                            default:
+                            case V_RO:  // 只读
+                            {
+                                eStatus = MB_EIO;
+                                goto __exit;
+                            }
+                            case V_RW_M0:
+                            case V_RW_M1:
+                            case V_RW_M2:
+                            {
+                                _u8Step = u8Step;
+
+                                while (_u8Step--)
+                                {
+                                    pu16RegBuf[_u8Step] = *pu8Buffer++ << 8;
+                                    pu16RegBuf[_u8Step] |= *pu8Buffer++;
+                                }
+
+                                break;
+                            }
+                        }
+
+                        pu16RegBuf += u8Step;
+                        u16Count -= u8Step;
+                        u16RegIdx += u8Step;
                     }
                 }
             }
@@ -139,6 +209,7 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
         }
     }
 
+__exit:
     return eStatus;
 }
 

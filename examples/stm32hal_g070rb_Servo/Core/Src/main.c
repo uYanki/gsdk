@@ -135,10 +135,23 @@ static i2c_ssd1306_t ssd1306 = {
     .u8Rows    = SSD1306_HEIGHT / 8,
 };
 
+static void SSD1306_Reset(void)
+{
+    DelayBlockMs(20);
+    HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_RESET);
+    DelayBlockMs(20);
+    HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_SET);
+}
+
+//----------
+
+void ParaTblInit(void);
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -147,14 +160,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-}
-
-static void SSD1306_Reset(void)
-{
-    DelayBlockMs(20);
-    HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_RESET);
-    DelayBlockMs(20);
-    HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_SET);
 }
 
 /* USER CODE END 0 */
@@ -204,6 +209,8 @@ int main(void)
     /* USER CODE BEGIN 2 */
     DelayInit();
 
+    ParaTblInit();
+
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
 
@@ -227,23 +234,19 @@ int main(void)
 
     // modbus(rtu)
     RO u8 ucSlaveID[] = {0xAA, 0xBB, 0xCC};
-    eMBInit(MB_RTU, 1, 1, 19200, MB_PAR_EVEN);
+    printf("%d,%d\n", P.u16MbSlvId, P.u16MbSlvId);
+    eMBInit(MB_RTU, P.u16MbSlvId, 1, P.u32MbBaudrate, MB_PAR_EVEN /* P.u16MbParity */);
     eMBSetSlaveID(0x34, true, ucSlaveID, ARRAY_SIZE(ucSlaveID));
     eMBEnable();
     MbRtuRun();
-		
-		extern para_table_t tbl;
-		
-		tbl.u32McuSwBuildDate = 123456;
-		tbl.u16AxisNum = 666;
-		tbl.u16LedNum = 2;
-		tbl.u16KeyNum = 3;
-		tbl.u32ChipDevID = 1234;
-		extern const para_attr_t sParaAttr[];
-		
-		for(uint16_t i=0;i<sizeof(para_table_t)/sizeof(u16);++i){
-		 ((uint16_t*)&tbl)[i]= sParaAttr[i].u16InitVal;
-		}
+
+    // #if __ENC_HALL_SW
+    //     HAL_TIM_Base_Start(&TIM_HALL);
+    // #elif __ENC_INC_SW
+    //     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
+    // #endif
+
+    // HAL_ADCEx_Calibration_Start(&hadc1);
 
     /* USER CODE END 2 */
 
@@ -260,6 +263,8 @@ int main(void)
 
         // modbus
         eMBPoll();
+
+        P.u32SysRunTime = GetTickMs();
 
         /* USER CODE END WHILE */
 
@@ -345,6 +350,25 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
     {
         LOGI("key%d event = %s", pHandle->u8ID, FlexBtnEventStr(eEvent));
     }
+}
+
+void ParaTblInit(void)
+{
+    extern const para_attr_t sParaAttr[];
+
+    uint16_t* pParaTbl = (uint16_t*)&P;
+
+    for (uint16_t i = 0; i < sizeof(para_table_t) / sizeof(u16); ++i)
+    {
+        pParaTbl[i] = sParaAttr[i].u16InitVal;
+    }
+
+    P.u32ChipDevID  = HAL_GetDEVID();
+    P.u32ChipRevID  = HAL_GetREVID();
+    P.u32ChipUIDw0  = HAL_GetUIDw0();
+    P.u32ChipUIDw1  = HAL_GetUIDw1();
+    P.u32ChipUIDw2  = HAL_GetUIDw2();
+    P.u32HalVersion = HAL_GetHalVersion();
 }
 
 /* USER CODE END 4 */

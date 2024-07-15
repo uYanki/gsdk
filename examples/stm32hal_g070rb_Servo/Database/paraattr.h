@@ -10,10 +10,15 @@
 #define ATTR_MODE_Pos 0
 #define ATTR_MODE_Len 2
 
-#define B_RO          (0 << ATTR_MODE_Pos) /* read only  - cannot be changed */
-#define B_RW_M0       (1 << ATTR_MODE_Pos) /* read write - change immediately, take effect immediately */
-#define B_RW_M1       (2 << ATTR_MODE_Pos) /* read write - change immediately, restart takes effect */
-#define B_RW_M2       (3 << ATTR_MODE_Pos) /* read write - stop changes, effective immediately */
+#define V_RO          0U
+#define V_RW_M0       1U
+#define V_RW_M1       2U
+#define V_RW_M2       3U
+
+#define B_RO          (V_RO << ATTR_MODE_Pos)    /* read only  - cannot be changed */
+#define B_RW_M0       (V_RW_M0 << ATTR_MODE_Pos) /* read write - change immediately, take effect immediately */
+#define B_RW_M1       (V_RW_M1 << ATTR_MODE_Pos) /* read write - change immediately, restart takes effect */
+#define B_RW_M2       (V_RW_M2 << ATTR_MODE_Pos) /* read write - stop changes, effective immediately */
 
 /**
  * @brief relate
@@ -21,10 +26,10 @@
 #define ATTR_RELATE_Pos (ATTR_MODE_Pos + ATTR_MODE_Len)
 #define ATTR_RELATE_Len 2
 
-#define V_NR            0UL
-#define V_RL_DN         1UL
-#define V_RL_UP         2UL
-#define V_RL            3UL
+#define V_NR            0U
+#define V_RL_DN         1U
+#define V_RL_UP         2U
+#define V_RL            3U
 
 #define B_NR            (V_NR << ATTR_RELATE_Pos)    /* no related id */
 #define B_RL_DN         (V_RL_DN << ATTR_RELATE_Pos) /* min related to other parameter address */
@@ -38,8 +43,11 @@
 #define ATTR_SYNC_Pos (ATTR_RELATE_Pos + ATTR_RELATE_Len)
 #define ATTR_SYNC_Len 1
 
-#define B_SYNC        (0 << ATTR_SYNC_Pos)
-#define B_NSYNC       (1 << ATTR_SYNC_Pos)
+#define V_SYNC        0U
+#define V_NSYNC       1U
+
+#define B_SYNC        (V_SYNC << ATTR_SYNC_Pos)
+#define B_NSYNC       (V_NSYNC << ATTR_SYNC_Pos)
 
 /**
  * @brief
@@ -48,8 +56,11 @@
 #define ATTR_COVER_Pos (ATTR_SYNC_Pos + ATTR_SYNC_Len)
 #define ATTR_COVER_Len 1
 
-#define B_COV          (0 << ATTR_COVER_Pos) /* cover (over write) when parameters table reset */
-#define B_NCOV         (1 << ATTR_COVER_Pos) /* do not cover(don't over write) */
+#define V_COV          0U
+#define V_NCOV         1U
+
+#define B_COV          (V_COV << ATTR_COVER_Pos)  /* cover (over write) when parameters table reset */
+#define B_NCOV         (V_NCOV << ATTR_COVER_Pos) /* do not cover(don't over write) */
 
 /**
  * @brief
@@ -58,13 +69,21 @@
 #define ATTR_LENGTH_Pos (ATTR_COVER_Pos + ATTR_COVER_Len)
 #define ATTR_LENGTH_Len 3
 
-#define B_SIG           (0 << ATTR_LENGTH_Pos) /* single word (16bits) */
-#define B_DOB0          (1 << ATTR_LENGTH_Pos) /* double word (32bits) */
-#define B_DOB1          (2 << ATTR_LENGTH_Pos) /* double word (32bits) */
-#define B_QUD0          (3 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
-#define B_QUD1          (4 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
-#define B_QUD2          (5 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
-#define B_QUD3          (6 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
+#define V_SIG           0U
+#define V_DOB0          1U
+#define V_DOB1          2U
+#define V_QUD0          3U
+#define V_QUD1          4U
+#define V_QUD2          5U
+#define V_QUD3          6U
+
+#define B_SIG           (V_SIG << ATTR_LENGTH_Pos)  /* single word (16bits) */
+#define B_DOB0          (V_DOB0 << ATTR_LENGTH_Pos) /* double word (32bits) */
+#define B_DOB1          (V_DOB1 << ATTR_LENGTH_Pos) /* double word (32bits) */
+#define B_QUD0          (V_QUD0 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
+#define B_QUD1          (V_QUD1 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
+#define B_QUD2          (V_QUD2 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
+#define B_QUD3          (V_QUD3 << ATTR_LENGTH_Pos) /* quadruple word (64bits) */
 
 /**
  * @brief
@@ -73,9 +92,13 @@
 #define ATTR_ACCESS_Pos (ATTR_LENGTH_Pos + ATTR_LENGTH_Len)
 #define ATTR_ACCESS_Len 2
 
-#define B_ADMIN         (0 << ATTR_ACCESS_Pos) /* administrator */
-#define B_USER          (1 << ATTR_ACCESS_Pos) /* user */
-#define B_ANYONE        (2 << ATTR_ACCESS_Pos) /* anyone (guest) */
+#define V_ADMIN         0U
+#define V_USER          1U
+#define V_ANYONE        2U
+
+#define B_ADMIN         (V_ADMIN << ATTR_ACCESS_Pos)  /* administrator */
+#define B_USER          (V_USER << ATTR_ACCESS_Pos)   /* user */
+#define B_ANYONE        (V_ANYONE << ATTR_ACCESS_Pos) /* anyone (guest) */
 
 /**
  * @brief physical unit

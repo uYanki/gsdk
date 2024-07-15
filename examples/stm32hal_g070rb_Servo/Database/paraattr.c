@@ -2,8 +2,8 @@
 
 // clang-format off
 const para_attr_t sParaAttr[] = {
-    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR |  B_SYNC |  B_COV | B_DOB0 }, // P0000 u32DrvSchemeWL
-    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR |  B_SYNC |  B_COV | B_DOB1 }, // P0000 u32DrvSchemeWH
+    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0000 u32DrvSchemeWL
+    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0000 u32DrvSchemeWH
     {           WL(0),           WL(0),           WL(0),    B_RO | B_RL_UP | B_NSYNC | B_NCOV | B_DOB0 }, // P0002 u32McuSwBuildDateWL
     {           WH(0),           WH(0),           WH(0),    B_RO | B_RL_UP | B_NSYNC | B_NCOV | B_DOB1 }, // P0002 u32McuSwBuildDateWH
     {           WL(0),           WL(0),           WL(0),    B_RO | B_RL_DN | B_NSYNC | B_NCOV | B_DOB0 }, // P0004 u32McuSwBuildTimeWL
@@ -11,16 +11,16 @@ const para_attr_t sParaAttr[] = {
     {           WL(0),           WL(0),           WL(0),    B_RO |    B_RL | B_NSYNC | B_NCOV | B_DOB0 }, // P0006 u32McuSwVerWL
     {           WH(0),           WH(0),           WH(0),    B_RO |    B_RL | B_NSYNC | B_NCOV | B_DOB1 }, // P0006 u32McuSwVerWH
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0008 _Resv8
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0009 u16AxisNum
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0010 u16LedNum
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0011 u16KeyNum
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0012 u16ExtDiNum
+    {            W(1),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0009 u16AxisNum
+    {            W(2),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0010 u16LedNum
+    {            W(3),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0011 u16KeyNum
+    {            W(2),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0012 u16ExtDiNum
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0013 u16ExtDoNum
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0014 u16ExtHDiNum
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0015 u16ExtHDoNum
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0016 u16ExtAiNum
+    {            W(2),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0016 u16ExtAiNum
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0017 u16ExtAoNum
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0018 u16TsNum
+    {            W(1),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0018 u16TsNum
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0019 _Resv19
     {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0020 u32ChipDevIDWL
     {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0020 u32ChipDevIDWH
@@ -105,8 +105,8 @@ const para_attr_t sParaAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0100 _Resv100
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0101 _Resv101
     {            W(1),            W(1),          W(247), B_RW_M1 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0102 u16MbSlvId
-    {      WL(115200),           WL(0),     WL(1000000), B_RW_M1 |    B_NR |  B_SYNC |  B_COV | B_DOB0 }, // P0103 u32MbBaudrateWL
-    {      WH(115200),           WH(0),     WH(1000000), B_RW_M1 |    B_NR |  B_SYNC |  B_COV | B_DOB1 }, // P0103 u32MbBaudrateWH
+    {       WL(19200),           WL(0),     WL(1000000), B_RW_M1 |    B_NR |  B_SYNC |  B_COV | B_DOB0 }, // P0103 u32MbBaudrateWL
+    {       WH(19200),           WH(0),     WH(1000000), B_RW_M1 |    B_NR |  B_SYNC |  B_COV | B_DOB1 }, // P0103 u32MbBaudrateWH
     {            W(2),            W(0),            W(2), B_RW_M1 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0105 u16MbParity
     {            W(0),            W(0),            W(1), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0106 u16MbMstEndian
     {         W(5000),            W(0),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0107 u16MbDisconnTime
