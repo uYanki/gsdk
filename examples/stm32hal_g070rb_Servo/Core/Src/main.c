@@ -234,9 +234,16 @@ int main(void)
 		
 		extern para_table_t tbl;
 		
+		tbl.u32McuSwBuildDate = 123456;
 		tbl.u16AxisNum = 666;
 		tbl.u16LedNum = 2;
 		tbl.u16KeyNum = 3;
+		tbl.u32ChipDevID = 1234;
+		extern const para_attr_t sParaAttr[];
+		
+		for(uint16_t i=0;i<sizeof(para_table_t)/sizeof(u16);++i){
+		 ((uint16_t*)&tbl)[i]= sParaAttr[i].u16InitVal;
+		}
 
     /* USER CODE END 2 */
 

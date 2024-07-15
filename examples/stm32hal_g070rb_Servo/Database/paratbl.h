@@ -5,6 +5,7 @@
 
 // clang-format off
 typedef struct __packed {
+    u32 u32DrvScheme;        // P0000 驱动器方案
     u32 u32McuSwBuildDate;   // P0002 软件构建日期
     u32 u32McuSwBuildTime;   // P0004 软件构建时间
     u32 u32McuSwVer;         // P0006 固件版本号
@@ -32,7 +33,7 @@ typedef struct __packed {
     u16 _Resv35;             // P0035 _
     u16 _Resv36;             // P0036 _
     u16 _Resv37;             // P0037 _
-    u16 _Resv38;             // P0038 _
+    s16 _Resv38;             // P0038 _
     u16 _Resv39;             // P0039 _
     u16 _Resv40;             // P0040 _
     u16 _Resv41;             // P0041 _
@@ -40,235 +41,235 @@ typedef struct __packed {
     u16 _Resv43;             // P0043 _
     u16 _Resv44;             // P0044 _
     u16 _Resv45;             // P0045 _
-    u16 _Resv46;             // P0046 _
-    u16 _Resv47;             // P0047 _
-    u16 _Resv48;             // P0048 _
-    u16 u16MotorType;        // P0049 电机类型
-    u16 u16EncoderType;      // P0050 编码器类型
-    u16 u16MotPolePairs;     // P0051 电机极对数
-    u16 u16MotAccMax;        // P0052 电机最大加速度
-    u32 u32MotInertia;       // P0053 电机转动惯量
-    u16 u16MotStatorRes;     // P0055 电机定子电阻
-    u16 u16MotStatorLd;      // P0056 电机定子D轴电感
-    u16 u16MotStatorLq;      // P0057 电机定子Q轴电感
-    u16 u16MotCurRate;       // P0058 电机额定电流
-    u16 u16MotCurMax;        // P0059 电机最大电流
-    u16 u16MotTrqRate;       // P0060 电机额定转矩
-    u16 u16MotTrqMax;        // P0061 电机最大转矩
-    u16 u16MotSpdRate;       // P0062 电机额定转速
-    u16 u16MotSpdMax;        // P0063 电机最大转速
-    u16 u16MotEmfCoeff;      // P0064 电机反电动势常数
-    u16 u16MotTrqCoeff;      // P0065 电机转矩系数
-    u16 u16MotTm;            // P0066 电机机械时间常数
-    u16 _Resv67;             // P0067 _
-    u16 _Resv68;             // P0068 _
-    u16 u16UmdcHwCoeff;      // P0069 主回路电压采样系数
-    u16 u16UcdcHwCoeff;      // P0070 控制电电压采样系数
-    u16 u16Uai0HwCoeff;      // P0071 _
-    u16 u16Uai1HwCoeff;      // P0072 _
-    u16 u16Uai2HwCoeff;      // P0073 _
-    u16 u16UTempHwCoeff;     // P0074 _
-    u16 _Resv75;             // P0075 _
-    u16 u16PosLoopKp;        // P0076 位置环增益系数
-    u16 u16PosLoopKi;        // P0077 位置环积分系数
-    u16 u16PosLoopKd;        // P0078 位置环微分系数
-    u16 u16SpdLoopKp;        // P0079 速度环增益系数
-    u16 u16SpdLoopKi;        // P0080 速度环积分系数
-    u16 u16SpdLoopKd;        // P0081 速度环微分系数
-    u16 u16CurLoopIqKp;      // P0082 电流环转矩增益系数
-    u16 u16CurLoopIqKi;      // P0083 电流环转矩积分系数
-    u16 u16CurLoopIqKd;      // P0084 电流环转矩增益系数
-    u16 u16CurLoopIdKp;      // P0085 电流环磁链增益系数
-    u16 u16CurLoopIdKi;      // P0086 电流环磁链积分系数
-    u16 u16CurLoopIdKd;      // P0087 电流环磁链增益系数
+    u16 u16MotorType;        // P0046 电机类型
+    u16 u16EncoderType;      // P0047 编码器类型
+    u16 u16MotPolePairs;     // P0048 电机极对数
+    u16 u16MotAccMax;        // P0049 电机最大加速度
+    u32 u32MotInertia;       // P0050 电机转动惯量
+    u16 u16MotStatorRes;     // P0052 电机定子电阻
+    u16 u16MotStatorLd;      // P0053 电机定子D轴电感
+    u16 u16MotStatorLq;      // P0054 电机定子Q轴电感
+    u16 u16MotCurRate;       // P0055 电机额定电流
+    u16 u16MotCurMax;        // P0056 电机最大电流
+    u16 u16MotTrqRate;       // P0057 电机额定转矩
+    u16 u16MotTrqMax;        // P0058 电机最大转矩
+    u16 u16MotSpdRate;       // P0059 电机额定转速
+    u16 u16MotSpdMax;        // P0060 电机最大转速
+    u16 u16MotEmfCoeff;      // P0061 电机反电动势常数
+    u16 u16MotTrqCoeff;      // P0062 电机转矩系数
+    u16 u16MotTm;            // P0063 电机机械时间常数
+    u16 _Resv64;             // P0064 _
+    u16 _Resv65;             // P0065 _
+    u16 u16UmdcHwCoeff;      // P0066 主回路电压采样系数
+    u16 u16UcdcHwCoeff;      // P0067 控制电电压采样系数
+    u16 u16Uai0HwCoeff;      // P0068 _
+    u16 u16Uai1HwCoeff;      // P0069 _
+    u16 u16Uai2HwCoeff;      // P0070 _
+    u16 u16UTempHwCoeff;     // P0071 _
+    u16 _Resv72;             // P0072 _
+    u16 u16PosLoopKp;        // P0073 位置环增益系数
+    u16 u16PosLoopKi;        // P0074 位置环积分系数
+    u16 u16PosLoopKd;        // P0075 位置环微分系数
+    u16 u16SpdLoopKp;        // P0076 速度环增益系数
+    u16 u16SpdLoopKi;        // P0077 速度环积分系数
+    u16 u16SpdLoopKd;        // P0078 速度环微分系数
+    u16 u16CurLoopIqKp;      // P0079 电流环转矩增益系数
+    u16 u16CurLoopIqKi;      // P0080 电流环转矩积分系数
+    u16 u16CurLoopIqKd;      // P0081 电流环转矩增益系数
+    u16 u16CurLoopIdKp;      // P0082 电流环磁链增益系数
+    u16 u16CurLoopIdKi;      // P0083 电流环磁链积分系数
+    u16 u16CurLoopIdKd;      // P0084 电流环磁链增益系数
+    u16 _Resv85;             // P0085 _
+    u16 u16CarryFreq;        // P0086 载波频率
+    u16 u16CurSampType;      // P0087 电流采样类型
     u16 _Resv88;             // P0088 _
-    u16 u16CarryFreq;        // P0089 载波频率
-    u16 u16CurSampType;      // P0090 电流采样类型
+    u16 _Resv89;             // P0089 _
+    u16 _Resv90;             // P0090 _
     u16 _Resv91;             // P0091 _
     u16 _Resv92;             // P0092 _
     u16 _Resv93;             // P0093 _
-    u16 _Resv94;             // P0094 _
-    u16 _Resv95;             // P0095 _
-    u16 _Resv96;             // P0096 _
-    u16 u16SysPwd;           // P0097 系统密码
-    u16 u16SysAccess;        // P0098 当前系统权限
-    u16 u16SysRst;           // P0099 系统软复位
+    u16 u16SysPwd;           // P0094 系统密码
+    u16 u16SysAccess;        // P0095 当前系统权限
+    u16 u16SysRst;           // P0096 系统软复位
+    u16 _Resv97;             // P0097 _
+    u16 _Resv98;             // P0098 _
+    u16 _Resv99;             // P0099 _
     u16 _Resv100;            // P0100 _
     u16 _Resv101;            // P0101 _
-    u16 _Resv102;            // P0102 _
-    u16 _Resv103;            // P0103 _
-    u16 _Resv104;            // P0104 _
-    u16 u16MbSlvId;          // P0105 Modbus-从站节点ID
-    u32 u32MbBaudrate;       // P0106 Modbus-从站波特率
-    u16 u16MbParity;         // P0108 Modbus-从站检验位
-    u16 u16MbMstEndian;      // P0109 Modbus-主站大小端
-    u16 u16MbDisconnTime;    // P0110 Modbus-通讯断开检测时间
-    u16 u16MbResponseDelay;  // P0111 Modbus-命令响应延时 
-    u16 _Resv112;            // P0112 _
-    u16 u16CopNodeId;        // P0113 CANopen-节点ID
-    u16 u16CopBitrate;       // P0114 CANopen-比特率
-    u16 u16PdoInhTime;       // P0115 CANopen-PDO禁止时间
-    u16 u16CopState;         // P0116 CANopen-通信状态
-    u16 _Resv117;            // P0117 _
-    u16 u16EcatScanPrd;      // P0118 EtherCAT-通信状态
-    u16 u16EcatState;        // P0119 EtherCAT-Port0错误统计
-    u16 u16EcatPort0ErrCnt;  // P0120 EtherCAT-Port1错误统计
-    u16 u16EcatPort1ErrCnt;  // P0121 EtherCAT-接收错误统计
-    u16 u16EcatRxErrCnt;     // P0122 EtherCAT-处理单元错误统计
-    u16 u16EcatPdiErrCnt;    // P0123 _
-    u16 _Resv124;            // P0124 _
-    u16 _Resv125;            // P0125 _
-    u16 _Resv126;            // P0126 _
-    u16 u16ScopeSampPrd;     // P0127 数据记录采样周期设定
-    u16 u16ScopeSampPts;     // P0128 数据记录采样点数设定
-    u16 u16ScopeChCnt;       // P0129 数据记录通道数量设定
-    u16 u16ScopeChSrc00;     // P0130 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc01;     // P0131 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc02;     // P0132 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc03;     // P0133 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc04;     // P0134 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc05;     // P0135 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc06;     // P0136 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChSrc07;     // P0137 数据记录通道来源设定 (数据源)
-    u16 u16ScopeChAddr00;    // P0138 数据记录通道地址设定
-    u16 u16ScopeChAddr01;    // P0139 数据记录通道地址设定
-    u16 u16ScopeChAddr02;    // P0140 数据记录通道地址设定
-    u16 u16ScopeChAddr03;    // P0141 数据记录通道地址设定
-    u16 u16ScopeChAddr04;    // P0142 数据记录通道地址设定
-    u16 u16ScopeChAddr05;    // P0143 数据记录通道地址设定
-    u16 u16ScopeChAddr06;    // P0144 数据记录通道地址设定
-    u16 u16ScopeChAddr07;    // P0145 数据记录通道地址设定
-    u16 u16ScopeSampIdx;     // P0146 当前数据记录索引
-    u16 u16ScopeSampSts;     // P0147 数据记录状态
-    u32 _Resv148;            // P0148 _
-    u32 _Resv150;            // P0150 _
-    u16 _Resv152;            // P0152 _
-    u16 u16AppSel;           // P0153 应用选择
-    u16 u16CtrlMethod;       // P0154 控制方法
-    u16 u16CtrlMode;         // P0155 控制模式
-    u16 u16CtrlCmdSrc;       // P0156 控制命令来源
-    u16 u16PwrOnAutoRun;     // P0157 上电自使能
-    u16 u16ServoOn;          // P0158 伺服使能
+    u16 u16MbSlvId;          // P0102 Modbus-从站节点ID
+    u32 u32MbBaudrate;       // P0103 Modbus-从站波特率
+    u16 u16MbParity;         // P0105 Modbus-从站检验位
+    u16 u16MbMstEndian;      // P0106 Modbus-主站大小端
+    u16 u16MbDisconnTime;    // P0107 Modbus-通讯断开检测时间
+    u16 u16MbResponseDelay;  // P0108 Modbus-命令响应延时 
+    u16 _Resv109;            // P0109 _
+    u16 u16CopNodeId;        // P0110 CANopen-节点ID
+    u16 u16CopBitrate;       // P0111 CANopen-比特率
+    u16 u16PdoInhTime;       // P0112 CANopen-PDO禁止时间
+    u16 u16CopState;         // P0113 CANopen-通信状态
+    u16 _Resv114;            // P0114 _
+    u16 u16EcatScanPrd;      // P0115 EtherCAT-通信状态
+    u16 u16EcatState;        // P0116 EtherCAT-Port0错误统计
+    u16 u16EcatPort0ErrCnt;  // P0117 EtherCAT-Port1错误统计
+    u16 u16EcatPort1ErrCnt;  // P0118 EtherCAT-接收错误统计
+    u16 u16EcatRxErrCnt;     // P0119 EtherCAT-处理单元错误统计
+    u16 u16EcatPdiErrCnt;    // P0120 _
+    u16 _Resv121;            // P0121 _
+    u16 _Resv122;            // P0122 _
+    u16 _Resv123;            // P0123 _
+    u16 u16ScopeSampPrd;     // P0124 数据记录采样周期设定
+    u16 u16ScopeSampPts;     // P0125 数据记录采样点数设定
+    u16 u16ScopeChCnt;       // P0126 数据记录通道数量设定
+    u16 u16ScopeChSrc00;     // P0127 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc01;     // P0128 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc02;     // P0129 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc03;     // P0130 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc04;     // P0131 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc05;     // P0132 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc06;     // P0133 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChSrc07;     // P0134 数据记录通道来源设定 (数据源)
+    u16 u16ScopeChAddr00;    // P0135 数据记录通道地址设定
+    u16 u16ScopeChAddr01;    // P0136 数据记录通道地址设定
+    u16 u16ScopeChAddr02;    // P0137 数据记录通道地址设定
+    u16 u16ScopeChAddr03;    // P0138 数据记录通道地址设定
+    u16 u16ScopeChAddr04;    // P0139 数据记录通道地址设定
+    u16 u16ScopeChAddr05;    // P0140 数据记录通道地址设定
+    u16 u16ScopeChAddr06;    // P0141 数据记录通道地址设定
+    u16 u16ScopeChAddr07;    // P0142 数据记录通道地址设定
+    u16 u16ScopeSampIdx;     // P0143 当前数据记录索引
+    u16 u16ScopeSampSts;     // P0144 数据记录状态
+    u32 _Resv145;            // P0145 _
+    u32 _Resv147;            // P0147 _
+    u16 _Resv149;            // P0149 _
+    u16 u16AppSel;           // P0150 应用选择
+    u16 u16CtrlMethod;       // P0151 控制方法
+    u16 u16CtrlMode;         // P0152 控制模式
+    u16 u16CtrlCmdSrc;       // P0153 控制命令来源
+    u16 u16PwrOnAutoRun;     // P0154 上电自使能
+    u16 u16ServoOn;          // P0155 伺服使能
+    u16 _Resv156;            // P0156 _
+    u16 u16DiSrc;            // P0157 外部或虚拟DI选择
+    u16 u16DoSrc;            // P0158 外部或虚拟DO选择
     u16 _Resv159;            // P0159 _
-    u16 u16DiSrc;            // P0160 外部或虚拟DI选择
-    u16 u16DoSrc;            // P0161 外部或虚拟DO选择
-    u16 _Resv162;            // P0162 _
-    u16 _Resv163;            // P0163 _
-    u16 u16PosLimSrc;        // P0164 位置指令来源
-    s64 s64PosLimFwd;        // P0165 数字位置指令
-    s64 s64PosLimRev;        // P0169 位置规划模式
-    u16 u16PosLimSts;        // P0173 位置规划状态
-    u16 _Resv174;            // P0174 _
-    u32 u32ElecGearNum;      // P0175 电子齿轮比分子
-    u32 u32ElecGearDeno;     // P0177 电子齿轮比分母
-    u16 _Resv179;            // P0179 _
-    u16 u16EncFreqDivDir;    // P0180 编码器分频输出脉冲方向
-    u16 u16EncFreqDivNum;    // P0181 编码器分频输出分子
-    u16 u16EncFreqDivDeno;   // P0182 编码器分频输出分母
+    u16 _Resv160;            // P0160 _
+    u16 u16PosLimSrc;        // P0161 位置指令来源
+    s64 s64PosLimFwd;        // P0162 数字位置指令
+    s64 s64PosLimRev;        // P0166 位置规划模式
+    u16 u16PosLimSts;        // P0170 位置规划状态
+    u16 _Resv171;            // P0171 _
+    u32 u32ElecGearNum;      // P0172 电子齿轮比分子
+    u32 u32ElecGearDeno;     // P0174 电子齿轮比分母
+    u16 _Resv176;            // P0176 _
+    u16 u16EncFreqDivDir;    // P0177 编码器分频输出脉冲方向
+    u16 u16EncFreqDivNum;    // P0178 编码器分频输出分子
+    u16 u16EncFreqDivDeno;   // P0179 编码器分频输出分母
+    u16 u16TunerSoftVer;     // P0180 识别码1
+    u16 u16TunerDrvType;     // P0181 识别码2
+    u16 _Resv182;            // P0182 _
     u16 _Resv183;            // P0183 _
-    u16 _Resv184;            // P0184 _
-    u16 _Resv185;            // P0185 _
-    u16 _Resv186;            // P0186 _
-    s64 s64PosDigRef00;      // P0187 多段数字位置指令00
-    s64 s64PosDigRef01;      // P0191 多段数字位置指令01
-    s64 s64PosDigRef02;      // P0195 多段数字位置指令02
-    s64 s64PosDigRef03;      // P0199 多段数字位置指令03
-    s64 s64PosDigRef04;      // P0203 多段数字位置指令04
-    s64 s64PosDigRef05;      // P0207 多段数字位置指令05
-    s64 s64PosDigRef06;      // P0211 多段数字位置指令06
-    s64 s64PosDigRef07;      // P0215 多段数字位置指令07
-    s64 s64PosDigRef08;      // P0219 多段数字位置指令08
-    s64 s64PosDigRef09;      // P0223 多段数字位置指令09
-    s64 s64PosDigRef10;      // P0227 多段数字位置指令10
-    s64 s64PosDigRef11;      // P0231 多段数字位置指令11
-    s64 s64PosDigRef12;      // P0235 多段数字位置指令12
-    s64 s64PosDigRef13;      // P0239 多段数字位置指令13
-    s64 s64PosDigRef14;      // P0243 多段数字位置指令14
-    s64 s64PosDigRef15;      // P0247 多段数字位置指令15
-    u16 _Resv251;            // P0251 _
-    u16 u16ProbeStatus;      // P0252 探针状态
-    s64 s64ProbePosEdgePo00; // P0253 探针1上升沿锁存位置
-    s64 s64ProbeNegEdgePo00; // P0257 探针1下降沿锁存位置
-    s64 s64ProbePosEdgePo01; // P0261 探针2上升沿锁存位置
-    s64 s64ProbeNegEdgePo01; // P0265 探针2下降沿锁存位置
-    s64 s64ProbePosEdgePo02; // P0269 探针3上升沿锁存位置
-    s64 s64ProbeNegEdgePo02; // P0273 探针3下降沿锁存位置
-    s64 s64ProbePosEdgePo03; // P0277 探针4上升沿锁存位置
-    s64 s64ProbeNegEdgePo03; // P0281 探针4下降沿锁存位置
-    u16 _Resv285;            // P0285 _
-    u16 u16SpdRefSrc;        // P0286 速度指令来源
-    s32 s32SpdDigRef;        // P0287 数字速度指令
+    s64 s64PosDigRef00;      // P0184 多段数字位置指令00
+    s64 s64PosDigRef01;      // P0188 多段数字位置指令01
+    s64 s64PosDigRef02;      // P0192 多段数字位置指令02
+    s64 s64PosDigRef03;      // P0196 多段数字位置指令03
+    s64 s64PosDigRef04;      // P0200 多段数字位置指令04
+    s64 s64PosDigRef05;      // P0204 多段数字位置指令05
+    s64 s64PosDigRef06;      // P0208 多段数字位置指令06
+    s64 s64PosDigRef07;      // P0212 多段数字位置指令07
+    s64 s64PosDigRef08;      // P0216 多段数字位置指令08
+    s64 s64PosDigRef09;      // P0220 多段数字位置指令09
+    s64 s64PosDigRef10;      // P0224 多段数字位置指令10
+    s64 s64PosDigRef11;      // P0228 多段数字位置指令11
+    s64 s64PosDigRef12;      // P0232 多段数字位置指令12
+    s64 s64PosDigRef13;      // P0236 多段数字位置指令13
+    s64 s64PosDigRef14;      // P0240 多段数字位置指令14
+    s64 s64PosDigRef15;      // P0244 多段数字位置指令15
+    u16 _Resv248;            // P0248 _
+    u16 u16ProbeStatus;      // P0249 探针状态
+    s64 s64ProbePosEdgePo00; // P0250 探针1上升沿锁存位置
+    s64 s64ProbeNegEdgePo00; // P0254 探针1下降沿锁存位置
+    s64 s64ProbePosEdgePo01; // P0258 探针2上升沿锁存位置
+    s64 s64ProbeNegEdgePo01; // P0262 探针2下降沿锁存位置
+    s64 s64ProbePosEdgePo02; // P0266 探针3上升沿锁存位置
+    s64 s64ProbeNegEdgePo02; // P0270 探针3下降沿锁存位置
+    s64 s64ProbePosEdgePo03; // P0274 探针4上升沿锁存位置
+    s64 s64ProbeNegEdgePo03; // P0278 探针4下降沿锁存位置
+    u16 _Resv282;            // P0282 _
+    u16 u16SpdRefSrc;        // P0283 速度指令来源
+    s32 s32SpdDigRef;        // P0284 数字速度指令
+    u16 _Resv286;            // P0286 _
+    u16 u16AccTime;          // P0287 加速时间
+    u16 u16DecTime;          // P0288 减速时间
     u16 _Resv289;            // P0289 _
-    u16 u16AccTime;          // P0290 加速时间
-    u16 u16DecTime;          // P0291 减速时间
+    u16 u16JogDigRef;        // P0290 点动速度指令
+    u16 u16JogAccDecTime;    // P0291 点动加减速时间
     u16 _Resv292;            // P0292 _
-    u16 u16JogDigRef;        // P0293 点动速度指令
-    u16 u16JogAccDecTime;    // P0294 点动加减速时间
-    u16 _Resv295;            // P0295 _
-    u16 u16SpdLimSrc;        // P0296 速度限制来源
-    u16 u16SpdLimFwd;        // P0297 正向速度限制
-    u16 u16SpdLimRev;        // P0298 反向速度限制
-    u16 u16SpdLimSts;        // P0299 速度限制状态
-    u16 _Resv300;            // P0300 _
-    u16 u16AiSpdCoeff00;     // P0301 _
-    u16 u16AiSpdCoeff01;     // P0302 _
-    u16 u16AiSpdCoeff02;     // P0303 _
+    u16 u16SpdLimSrc;        // P0293 速度限制来源
+    u16 u16SpdLimFwd;        // P0294 正向速度限制
+    u16 u16SpdLimRev;        // P0295 反向速度限制
+    u16 u16SpdLimSts;        // P0296 速度限制状态
+    u16 _Resv297;            // P0297 _
+    u16 u16AiSpdCoeff00;     // P0298 _
+    u16 u16AiSpdCoeff01;     // P0299 _
+    u16 u16AiSpdCoeff02;     // P0300 _
+    u16 _Resv301;            // P0301 _
+    u16 _Resv302;            // P0302 _
+    u16 _Resv303;            // P0303 _
     u16 _Resv304;            // P0304 _
     u16 _Resv305;            // P0305 _
     u16 _Resv306;            // P0306 _
     u16 _Resv307;            // P0307 _
     u16 _Resv308;            // P0308 _
-    u16 _Resv309;            // P0309 _
-    u16 _Resv310;            // P0310 _
-    u16 _Resv311;            // P0311 _
-    s32 s32SpdDigRef00;      // P0312 多段数字速度指令00
-    s32 s32SpdDigRef01;      // P0314 多段数字速度指令01
-    s32 s32SpdDigRef02;      // P0316 多段数字速度指令02
-    s32 s32SpdDigRef03;      // P0318 多段数字速度指令03
-    s32 s32SpdDigRef04;      // P0320 多段数字速度指令04
-    s32 s32SpdDigRef05;      // P0322 多段数字速度指令05
-    s32 s32SpdDigRef06;      // P0324 多段数字速度指令06
-    s32 s32SpdDigRef07;      // P0326 多段数字速度指令07
-    s32 s32SpdDigRef08;      // P0328 多段数字速度指令08
-    s32 s32SpdDigRef09;      // P0330 多段数字速度指令09
-    s32 s32SpdDigRef10;      // P0332 多段数字速度指令10
-    s32 s32SpdDigRef11;      // P0334 多段数字速度指令11
-    s32 s32SpdDigRef12;      // P0336 多段数字速度指令12
-    s32 s32SpdDigRef13;      // P0338 多段数字速度指令13
-    s32 s32SpdDigRef14;      // P0340 多段数字速度指令14
-    s32 s32SpdDigRef15;      // P0342 多段数字速度指令15
-    u16 u16AccTime00;        // P0344 多段加速时间00
-    u16 u16AccTime01;        // P0345 多段加速时间01
-    u16 u16AccTime02;        // P0346 多段加速时间02
-    u16 u16AccTime03;        // P0347 多段加速时间03
-    u16 u16AccTime04;        // P0348 多段加速时间04
-    u16 u16AccTime05;        // P0349 多段加速时间05
-    u16 u16AccTime06;        // P0350 多段加速时间06
-    u16 u16AccTime07;        // P0351 多段加速时间07
-    u16 u16AccTime08;        // P0352 多段加速时间08
-    u16 u16AccTime09;        // P0353 多段加速时间09
-    u16 u16AccTime10;        // P0354 多段加速时间10
-    u16 u16AccTime11;        // P0355 多段加速时间11
-    u16 u16AccTime12;        // P0356 多段加速时间12
-    u16 u16AccTime13;        // P0357 多段加速时间13
-    u16 u16AccTime14;        // P0358 多段加速时间14
-    u16 u16AccTime15;        // P0359 多段加速时间15
-    u16 u16DecTime00;        // P0360 多段减速时间00
-    u16 u16DecTime01;        // P0361 多段减速时间01
-    u16 u16DecTime02;        // P0362 多段减速时间02
-    u16 u16DecTime03;        // P0363 多段减速时间03
-    u16 u16DecTime04;        // P0364 多段减速时间04
-    u16 u16DecTime05;        // P0365 多段减速时间05
-    u16 u16DecTime06;        // P0366 多段减速时间06
-    u16 u16DecTime07;        // P0367 多段减速时间07
-    u16 u16DecTime08;        // P0368 多段减速时间08
-    u16 u16DecTime09;        // P0369 多段减速时间09
-    u16 u16DecTime10;        // P0370 多段减速时间10
-    u16 u16DecTime11;        // P0371 多段减速时间11
-    u16 u16DecTime12;        // P0372 多段减速时间12
-    u16 u16DecTime13;        // P0373 多段减速时间13
-    u16 u16DecTime14;        // P0374 多段减速时间14
-    u16 u16DecTime15;        // P0375 多段减速时间15
+    s32 s32SpdDigRef00;      // P0309 多段数字速度指令00
+    s32 s32SpdDigRef01;      // P0311 多段数字速度指令01
+    s32 s32SpdDigRef02;      // P0313 多段数字速度指令02
+    s32 s32SpdDigRef03;      // P0315 多段数字速度指令03
+    s32 s32SpdDigRef04;      // P0317 多段数字速度指令04
+    s32 s32SpdDigRef05;      // P0319 多段数字速度指令05
+    s32 s32SpdDigRef06;      // P0321 多段数字速度指令06
+    s32 s32SpdDigRef07;      // P0323 多段数字速度指令07
+    s32 s32SpdDigRef08;      // P0325 多段数字速度指令08
+    s32 s32SpdDigRef09;      // P0327 多段数字速度指令09
+    s32 s32SpdDigRef10;      // P0329 多段数字速度指令10
+    s32 s32SpdDigRef11;      // P0331 多段数字速度指令11
+    s32 s32SpdDigRef12;      // P0333 多段数字速度指令12
+    s32 s32SpdDigRef13;      // P0335 多段数字速度指令13
+    s32 s32SpdDigRef14;      // P0337 多段数字速度指令14
+    s32 s32SpdDigRef15;      // P0339 多段数字速度指令15
+    u16 u16AccTime00;        // P0341 多段加速时间00
+    u16 u16AccTime01;        // P0342 多段加速时间01
+    u16 u16AccTime02;        // P0343 多段加速时间02
+    u16 u16AccTime03;        // P0344 多段加速时间03
+    u16 u16AccTime04;        // P0345 多段加速时间04
+    u16 u16AccTime05;        // P0346 多段加速时间05
+    u16 u16AccTime06;        // P0347 多段加速时间06
+    u16 u16AccTime07;        // P0348 多段加速时间07
+    u16 u16AccTime08;        // P0349 多段加速时间08
+    u16 u16AccTime09;        // P0350 多段加速时间09
+    u16 u16AccTime10;        // P0351 多段加速时间10
+    u16 u16AccTime11;        // P0352 多段加速时间11
+    u16 u16AccTime12;        // P0353 多段加速时间12
+    u16 u16AccTime13;        // P0354 多段加速时间13
+    u16 u16AccTime14;        // P0355 多段加速时间14
+    u16 u16AccTime15;        // P0356 多段加速时间15
+    u16 u16DecTime00;        // P0357 多段减速时间00
+    u16 u16DecTime01;        // P0358 多段减速时间01
+    u16 u16DecTime02;        // P0359 多段减速时间02
+    u16 u16DecTime03;        // P0360 多段减速时间03
+    u16 u16DecTime04;        // P0361 多段减速时间04
+    u16 u16DecTime05;        // P0362 多段减速时间05
+    u16 u16DecTime06;        // P0363 多段减速时间06
+    u16 u16DecTime07;        // P0364 多段减速时间07
+    u16 u16DecTime08;        // P0365 多段减速时间08
+    u16 u16DecTime09;        // P0366 多段减速时间09
+    u16 u16DecTime10;        // P0367 多段减速时间10
+    u16 u16DecTime11;        // P0368 多段减速时间11
+    u16 u16DecTime12;        // P0369 多段减速时间12
+    u16 u16DecTime13;        // P0370 多段减速时间13
+    u16 u16DecTime14;        // P0371 多段减速时间14
+    u16 u16DecTime15;        // P0372 多段减速时间15
+    u16 _Resv373;            // P0373 _
+    u16 _Resv374;            // P0374 _
+    u16 _Resv375;            // P0375 _
     u16 _Resv376;            // P0376 _
     u16 _Resv377;            // P0377 _
     u16 _Resv378;            // P0378 _
@@ -291,25 +292,25 @@ typedef struct __packed {
     u16 _Resv395;            // P0395 _
     u16 _Resv396;            // P0396 _
     u16 _Resv397;            // P0397 _
-    u16 _Resv398;            // P0398 _
-    u16 _Resv399;            // P0399 _
-    u16 _Resv400;            // P0400 _
-    s16 s16TrqDigRef00;      // P0401 多段数字转矩指令00
-    s16 s16TrqDigRef01;      // P0402 多段数字转矩指令01
-    s16 s16TrqDigRef02;      // P0403 多段数字转矩指令02
-    s16 s16TrqDigRef03;      // P0404 多段数字转矩指令03
-    s16 s16TrqDigRef04;      // P0405 多段数字转矩指令04
-    s16 s16TrqDigRef05;      // P0406 多段数字转矩指令05
-    s16 s16TrqDigRef06;      // P0407 多段数字转矩指令06
-    s16 s16TrqDigRef07;      // P0408 多段数字转矩指令07
-    s16 s16TrqDigRef08;      // P0409 多段数字转矩指令08
-    s16 s16TrqDigRef09;      // P0410 多段数字转矩指令09
-    s16 s16TrqDigRef10;      // P0411 多段数字转矩指令10
-    s16 s16TrqDigRef11;      // P0412 多段数字转矩指令11
-    s16 s16TrqDigRef12;      // P0413 多段数字转矩指令12
-    s16 s16TrqDigRef13;      // P0414 多段数字转矩指令13
-    s16 s16TrqDigRef14;      // P0415 多段数字转矩指令14
-    s16 s16TrqDigRef15;      // P0416 多段数字转矩指令15
+    s16 s16TrqDigRef00;      // P0398 多段数字转矩指令00
+    s16 s16TrqDigRef01;      // P0399 多段数字转矩指令01
+    s16 s16TrqDigRef02;      // P0400 多段数字转矩指令02
+    s16 s16TrqDigRef03;      // P0401 多段数字转矩指令03
+    s16 s16TrqDigRef04;      // P0402 多段数字转矩指令04
+    s16 s16TrqDigRef05;      // P0403 多段数字转矩指令05
+    s16 s16TrqDigRef06;      // P0404 多段数字转矩指令06
+    s16 s16TrqDigRef07;      // P0405 多段数字转矩指令07
+    s16 s16TrqDigRef08;      // P0406 多段数字转矩指令08
+    s16 s16TrqDigRef09;      // P0407 多段数字转矩指令09
+    s16 s16TrqDigRef10;      // P0408 多段数字转矩指令10
+    s16 s16TrqDigRef11;      // P0409 多段数字转矩指令11
+    s16 s16TrqDigRef12;      // P0410 多段数字转矩指令12
+    s16 s16TrqDigRef13;      // P0411 多段数字转矩指令13
+    s16 s16TrqDigRef14;      // P0412 多段数字转矩指令14
+    s16 s16TrqDigRef15;      // P0413 多段数字转矩指令15
+    u16 _Resv414;            // P0414 _
+    u16 _Resv415;            // P0415 _
+    u16 _Resv416;            // P0416 _
     u16 _Resv417;            // P0417 _
     u16 _Resv418;            // P0418 _
     u16 _Resv419;            // P0419 _
@@ -462,90 +463,90 @@ typedef struct __packed {
     u16 _Resv566;            // P0566 _
     u16 _Resv567;            // P0567 _
     u16 _Resv568;            // P0568 _
-    u16 _Resv569;            // P0569 _
-    u16 _Resv570;            // P0570 _
-    u16 _Resv571;            // P0571 _
-    u16 u16AlmCode00;        // P0572 历史报警代码00
-    u16 u16AlmCode01;        // P0573 历史报警代码01
-    u16 u16AlmCode02;        // P0574 历史报警代码02
-    u16 u16AlmCode03;        // P0575 历史报警代码03
-    u16 u16AlmCode04;        // P0576 历史报警代码04
-    u16 u16AlmCode05;        // P0577 历史报警代码05
-    u16 u16AlmCode06;        // P0578 历史报警代码06
-    u16 u16AlmCode07;        // P0579 历史报警代码07
-    u16 u16AlmCode08;        // P0580 历史报警代码08
-    u16 u16AlmCode09;        // P0581 历史报警代码09
-    u16 u16AlmCode10;        // P0582 历史报警代码10
-    u16 u16AlmCode11;        // P0583 历史报警代码11
-    u16 u16AlmCode12;        // P0584 历史报警代码12
-    u16 u16AlmCode13;        // P0585 历史报警代码13
-    u16 u16AlmCode14;        // P0586 历史报警代码14
-    u16 u16AlmCode15;        // P0587 历史报警代码15
-    u32 u32AlmTime00;        // P0588 历史报警时间戳00
-    u32 u32AlmTime01;        // P0590 历史报警时间戳01
-    u32 u32AlmTime02;        // P0592 历史报警时间戳02
-    u32 u32AlmTime03;        // P0594 历史报警时间戳03
-    u32 u32AlmTime04;        // P0596 历史报警时间戳04
-    u32 u32AlmTime05;        // P0598 历史报警时间戳05
-    u32 u32AlmTime06;        // P0600 历史报警时间戳06
-    u32 u32AlmTime07;        // P0602 历史报警时间戳07
-    u32 u32AlmTime08;        // P0604 历史报警时间戳08
-    u32 u32AlmTime09;        // P0606 历史报警时间戳09
-    u32 u32AlmTime10;        // P0608 历史报警时间戳10
-    u32 u32AlmTime11;        // P0610 历史报警时间戳11
-    u32 u32AlmTime12;        // P0612 历史报警时间戳12
-    u32 u32AlmTime13;        // P0614 历史报警时间戳13
-    u32 u32AlmTime14;        // P0616 历史报警时间戳14
-    u32 u32AlmTime15;        // P0618 历史报警时间戳15
+    u16 u16AlmCode00;        // P0569 历史报警代码00
+    u16 u16AlmCode01;        // P0570 历史报警代码01
+    u16 u16AlmCode02;        // P0571 历史报警代码02
+    u16 u16AlmCode03;        // P0572 历史报警代码03
+    u16 u16AlmCode04;        // P0573 历史报警代码04
+    u16 u16AlmCode05;        // P0574 历史报警代码05
+    u16 u16AlmCode06;        // P0575 历史报警代码06
+    u16 u16AlmCode07;        // P0576 历史报警代码07
+    u16 u16AlmCode08;        // P0577 历史报警代码08
+    u16 u16AlmCode09;        // P0578 历史报警代码09
+    u16 u16AlmCode10;        // P0579 历史报警代码10
+    u16 u16AlmCode11;        // P0580 历史报警代码11
+    u16 u16AlmCode12;        // P0581 历史报警代码12
+    u16 u16AlmCode13;        // P0582 历史报警代码13
+    u16 u16AlmCode14;        // P0583 历史报警代码14
+    u16 u16AlmCode15;        // P0584 历史报警代码15
+    u32 u32AlmTime00;        // P0585 历史报警时间戳00
+    u32 u32AlmTime01;        // P0587 历史报警时间戳01
+    u32 u32AlmTime02;        // P0589 历史报警时间戳02
+    u32 u32AlmTime03;        // P0591 历史报警时间戳03
+    u32 u32AlmTime04;        // P0593 历史报警时间戳04
+    u32 u32AlmTime05;        // P0595 历史报警时间戳05
+    u32 u32AlmTime06;        // P0597 历史报警时间戳06
+    u32 u32AlmTime07;        // P0599 历史报警时间戳07
+    u32 u32AlmTime08;        // P0601 历史报警时间戳08
+    u32 u32AlmTime09;        // P0603 历史报警时间戳09
+    u32 u32AlmTime10;        // P0605 历史报警时间戳10
+    u32 u32AlmTime11;        // P0607 历史报警时间戳11
+    u32 u32AlmTime12;        // P0609 历史报警时间戳12
+    u32 u32AlmTime13;        // P0611 历史报警时间戳13
+    u32 u32AlmTime14;        // P0613 历史报警时间戳14
+    u32 u32AlmTime15;        // P0615 历史报警时间戳15
+    u16 _Resv617;            // P0617 _
+    u32 u32SysRunTime;       // P0618 运行时间
     u16 _Resv620;            // P0620 _
-    u32 u32SysRunTime;       // P0621 运行时间
+    u16 u16DiState;          // P0621 DI输入端子电平状态
+    u16 u16DoState;          // P0622 DO输出端子电平状态
     u16 _Resv623;            // P0623 _
-    u16 u16DiState;          // P0624 DI输入端子电平状态
-    u16 u16DoState;          // P0625 DO输出端子电平状态
-    u16 _Resv626;            // P0626 _
-    s16 s16UaiPu0;           // P0627 AI0输入电压数字量
-    s16 s16UaiPu1;           // P0628 AI1输入电压数字量
-    s16 s16UaiPu2;           // P0629 AI2输入电压数字量
-    u16 _Resv630;            // P0630 _
-    s16 s16UaiSi0;           // P0631 AI0输入电压
-    s16 s16UaiSi1;           // P0632 AI1输入电压
-    s16 s16UaiSi2;           // P0633 AI2输入电压
-    u16 u16UaoSi0;           // P0634 AO0输出电压
-    u16 u16UaoSi1;           // P0635 AO1输出电压
-    u16 u16UaoSi2;           // P0636 AO2输出电压
+    s16 s16UaiPu0;           // P0624 AI0输入电压数字量
+    s16 s16UaiPu1;           // P0625 AI1输入电压数字量
+    s16 s16UaiPu2;           // P0626 AI2输入电压数字量
+    u16 _Resv627;            // P0627 _
+    s16 s16UaiSi0;           // P0628 AI0输入电压
+    s16 s16UaiSi1;           // P0629 AI1输入电压
+    s16 s16UaiSi2;           // P0630 AI2输入电压
+    u16 u16UaoSi0;           // P0631 AO0输出电压
+    u16 u16UaoSi1;           // P0632 AO1输出电压
+    u16 u16UaoSi2;           // P0633 AO2输出电压
+    u16 _Resv634;            // P0634 _
+    u16 _Resv635;            // P0635 _
+    u16 _Resv636;            // P0636 _
     u16 _Resv637;            // P0637 _
     u16 _Resv638;            // P0638 _
     u16 _Resv639;            // P0639 _
-    u16 _Resv640;            // P0640 _
-    u16 _Resv641;            // P0641 _
-    u16 _Resv642;            // P0642 _
-    u16 u16UmdcSi;           // P0643 主回路母线电压物理值
-    u16 u16UcdcSi;           // P0644 控制母线电压物理值
-    s16 s16IaFbSi;           // P0645 A相反馈电流物理值
-    s16 s16IbFbSi;           // P0646 B相反馈电流物理值
-    s16 s16IcFbSi;           // P0647 C相反馈电流物理值
-    s16 s16TempIpmSi;        // P0648 逆变桥温度物理值
-    s16 s16TempRectSi;       // P0649 整流桥温度物理值
+    u16 u16UmdcSi;           // P0640 主回路母线电压物理值
+    u16 u16UcdcSi;           // P0641 控制母线电压物理值
+    s16 s16IaFbSi;           // P0642 A相反馈电流物理值
+    s16 s16IbFbSi;           // P0643 B相反馈电流物理值
+    s16 s16IcFbSi;           // P0644 C相反馈电流物理值
+    s16 s16TempIpmSi;        // P0645 逆变桥温度物理值
+    s16 s16TempRectSi;       // P0646 整流桥温度物理值
+    u16 _Resv647;            // P0647 _
+    u16 _Resv648;            // P0648 _
+    u16 _Resv649;            // P0649 _
     u16 _Resv650;            // P0650 _
     u16 _Resv651;            // P0651 _
-    u16 _Resv652;            // P0652 _
-    u16 _Resv653;            // P0653 _
-    u16 _Resv654;            // P0654 _
-    s64 s64UserPosRef;       // P0655 用户位置指令
-    s64 s64UserPosFb;        // P0659 用户位置反馈
-    s32 s32UserSpdRef;       // P0663 用户速度指令
-    s32 s32UserSpdFb;        // P0665 用户速度反馈
-    s16 s16UserTrqRef;       // P0667 用户转矩指令
-    s16 s16UserTrqFb;        // P0668 用户转矩反馈
+    s64 s64UserPosRef;       // P0652 用户位置指令
+    s64 s64UserPosFb;        // P0656 用户位置反馈
+    s32 s32UserSpdRef;       // P0660 用户速度指令
+    s32 s32UserSpdFb;        // P0662 用户速度反馈
+    s16 s16UserTrqRef;       // P0664 用户转矩指令
+    s16 s16UserTrqFb;        // P0665 用户转矩反馈
+    u16 _Resv666;            // P0666 _
+    u16 _Resv667;            // P0667 _
+    u16 _Resv668;            // P0668 _
     u16 _Resv669;            // P0669 _
     u16 _Resv670;            // P0670 _
-    u16 _Resv671;            // P0671 _
-    u16 _Resv672;            // P0672 _
-    u16 _Resv673;            // P0673 _
-    u16 u16PosLoopIsrTime;   // P0674 _
-    u16 u16SpdLoopIsrTime;   // P0675 _
-    u16 u16CurLoopIsrTime;   // P0676 _
-    u16 u16LoopTick;         // P0677 _
+    u16 u16PosLoopIsrTime;   // P0671 _
+    u16 u16SpdLoopIsrTime;   // P0672 _
+    u16 u16CurLoopIsrTime;   // P0673 _
+    u16 u16LoopTick;         // P0674 _
+    u16 _Resv675;            // P0675 _
+    u16 _Resv676;            // P0676 _
+    u16 _Resv677;            // P0677 _
     u16 _Resv678;            // P0678 _
     u16 _Resv679;            // P0679 _
     u16 _Resv680;            // P0680 _

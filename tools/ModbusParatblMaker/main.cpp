@@ -16,7 +16,7 @@
 #include <qsqldatabase.h>
 #include <QMessageBox>
 
-#define PATH  qApp->applicationDirPath() +"/"
+#define PATH qApp->applicationDirPath() + "/"
 // #define PATH QString("F:/gsdk/tools/ModbusParatblMaker/")
 // #define PATH QString("F:/gsdk/examples/stm32hal_g070rb_Servo/Database/")
 
@@ -170,22 +170,25 @@ void MakePara(
     szSynCov = b.value(szSynCov);
     szRelate = c.value(szRelate);
 
-    QStringList WordInd1, WordInd2;
+    QStringList WordInd1, WordInd2, Suffix;
 
     if (szDataType == "s16" || szDataType == "u16")
     {
-        WordInd1 << "";
+        WordInd1 << "W";
         WordInd2 << " B_SIG";
+        Suffix << "";
     }
     else if (szDataType == "s32" || szDataType == "u32")
     {
         WordInd1 << "WL" << "WH";
         WordInd2 << "B_DOB0" << "B_DOB1";
+        Suffix = WordInd1;
     }
     else if (szDataType == "s64" || szDataType == "u64")
     {
         WordInd1 << "W0" << "W1" << "W2" << "W3";
         WordInd2 << "B_QUD0" << "B_QUD1" << "B_QUD2" << "B_QUD3";
+        Suffix = WordInd1;
     }
 
     if (szVarName == "")
@@ -217,7 +220,7 @@ void MakePara(
                         .arg(szSynCov)
                         .arg(WordInd2[i])
                         .arg(szAddress)
-                        .arg(szVarName + WordInd1[i])
+                        .arg(szVarName + Suffix[i])
                  << Qt::endl;
     }
 
@@ -229,7 +232,7 @@ void MakePara(
 
     cmd = cmd.arg("Para_A4")  // table name
               .arg(szAddress)
-              .arg(WordInd1.size())
+              .arg(WordInd1.size()*4) // half byte count: word=4,dword=8
               .arg(szVarName + " | " + szParaNameZH)
               .arg(szMinVal)
               .arg(szMaxVal)
@@ -306,7 +309,7 @@ int main(int argc, char* argv[])
         ParaAttr.setCodec("UTF-8");
         ParaTbl.setCodec("UTF-8");
 
-        for (quint16 row = 6; row < 700; row++)
+        for (quint16 row = 5; row < 700; row++)
         {
             QString szAddress = xlsx.cellAt(row, PARA_ADDRESS)->value().toString();
 

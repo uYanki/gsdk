@@ -7,13 +7,7 @@
 #include "paratbl.h"
 
 #define CONFIG_A4_TRACE_SW  0
-#define CONFIG_MSB_FIRST_SW 1
-#define CONFIG_TUNER_SW     1  // 合信伺服上位机
-
-#if CONFIG_TUNER_SW
-#undef CONFIG_MSB_FIRST_SW
-#define CONFIG_MSB_FIRST_SW 1
-#endif
+#define CONFIG_MSB_FIRST_SW 1 // tuner = 0
 
 // register_group_t
 typedef struct {
@@ -36,16 +30,13 @@ cotrust_tuner_t sTuner = {
 
 #endif
 
-para_table_t tbl;
+__attribute((aligned (4))) para_table_t tbl;
 
 #if CONFIG_A4_TRACE_SW
 __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
 #endif
 
 static const reg_grp_t m_holding[] = {
-#if CONFIG_TUNER_SW
-    {180,   sizeof(cotrust_tuner_t) / sizeof(u16), (u16*)&sTuner            }, // 合信上位机
-#endif
 
     {0,     sizeof(para_table_t) / sizeof(u16),     (u16*)&tbl       }, // 轴参数
 
@@ -74,6 +65,7 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 
     u8 u8GrpIdx;
 
+	if(u16Address==180||u16Address==181)
     u16Address--;
 
     for (u8GrpIdx = 0; u8GrpIdx < ARRAY_SIZE(m_holding); ++u8GrpIdx)
