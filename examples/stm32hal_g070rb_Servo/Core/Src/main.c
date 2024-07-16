@@ -42,6 +42,8 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+#define __ENC_HALL_SW  1
+
 #define SSD1306_WIDTH  128
 #define SSD1306_HEIGHT 32
 
@@ -147,6 +149,20 @@ static void SSD1306_Reset(void)
 
 void ParaTblInit(void);
 
+//----------
+#include "encoder/hall_enc.h"
+#if __ENC_HALL_SW
+static hall_enc_t sHallEnc = {
+    .eHallState   = HALL_STATE_0,
+    .eDirection   = HALL_DIR_FWD,
+    // .u8Placement    = 120,
+    .u8PhaseShift = 0,
+    .u16ElecAngle = 0,
+    .u16EdgeCount = 0,
+    .u16HallError = 0,
+};
+#endif
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -234,17 +250,16 @@ int main(void)
 
     // modbus(rtu)
     RO u8 ucSlaveID[] = {0xAA, 0xBB, 0xCC};
-    printf("%d,%d\n", P.u16MbSlvId, P.u16MbSlvId);
-    eMBInit(MB_RTU, P.u16MbSlvId, 1, P.u32MbBaudrate, MB_PAR_EVEN /* P.u16MbParity */);
+    eMBInit(MB_RTU, D.u16MbSlvId, 1, D.u32MbBaudrate, MB_PAR_EVEN /* P.u16MbParity */);
     eMBSetSlaveID(0x34, true, ucSlaveID, ARRAY_SIZE(ucSlaveID));
     eMBEnable();
     MbRtuRun();
 
-    // #if __ENC_HALL_SW
-    //     HAL_TIM_Base_Start(&TIM_HALL);
-    // #elif __ENC_INC_SW
-    //     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
-    // #endif
+#if __ENC_HALL_SW
+    HAL_TIM_Base_Start(&TIM_HALL);
+#elif __ENC_INC_SW
+    HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
+#endif
 
     // HAL_ADCEx_Calibration_Start(&hadc1);
 
@@ -264,7 +279,9 @@ int main(void)
         // modbus
         eMBPoll();
 
-        P.u32SysRunTime = GetTickMs();
+        D.u32SysRunTime = GetTickMs();
+
+        //		P._Resv41 = ;
 
         /* USER CODE END WHILE */
 
@@ -354,21 +371,32 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
 
 void ParaTblInit(void)
 {
-    extern const para_attr_t sParaAttr[];
+    uint16_t* pParaTbl;
 
-    uint16_t* pParaTbl = (uint16_t*)&P;
+    //
 
-    for (uint16_t i = 0; i < sizeof(para_table_t) / sizeof(u16); ++i)
+    pParaTbl = (uint16_t*)&D;
+
+    for (uint16_t i = 0; i < sizeof(device_para_t) / sizeof(u16); ++i)
     {
-        pParaTbl[i] = sParaAttr[i].u16InitVal;
+        pParaTbl[i] = sDeviceAttr[i].u16InitVal;
     }
 
-    P.u32ChipDevID  = HAL_GetDEVID();
-    P.u32ChipRevID  = HAL_GetREVID();
-    P.u32ChipUIDw0  = HAL_GetUIDw0();
-    P.u32ChipUIDw1  = HAL_GetUIDw1();
-    P.u32ChipUIDw2  = HAL_GetUIDw2();
-    P.u32HalVersion = HAL_GetHalVersion();
+    D.u32ChipDevID  = HAL_GetDEVID();
+    D.u32ChipRevID  = HAL_GetREVID();
+    D.u32ChipUIDw0  = HAL_GetUIDw0();
+    D.u32ChipUIDw1  = HAL_GetUIDw1();
+    D.u32ChipUIDw2  = HAL_GetUIDw2();
+    D.u32HalVersion = HAL_GetHalVersion();
+
+    //
+
+    pParaTbl = (uint16_t*)&P(AXIS_0);
+
+    for (uint16_t i = 0; i < sizeof(axis_para_t) / sizeof(u16); ++i)
+    {
+        pParaTbl[i] = sAxisAttr[i].u16InitVal;
+    }
 }
 
 /* USER CODE END 4 */

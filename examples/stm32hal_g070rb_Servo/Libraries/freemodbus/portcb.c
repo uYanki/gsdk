@@ -17,7 +17,8 @@ typedef struct {
     u16* u16Buffer;
 } reg_grp_t;
 
-__attribute((aligned(2))) para_table_t sParaTbl;
+device_para_t sDevicePara;
+axis_para_t   aAxisPara[1];
 
 #if CONFIG_A4_TRACE_SW
 __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
@@ -25,8 +26,10 @@ __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
 
 static const reg_grp_t m_holding[] = {
 
-    {0,   sizeof(para_table_t) / sizeof(u16), (u16*)&sParaTbl          }, // 轴参数
-
+	  {0,   sizeof(device_para_t) / sizeof(u16), (u16*)&sDevicePara            }, // 设备参数
+    {300,   sizeof(axis_para_t) / sizeof(u16), (u16*)&aAxisPara[0]          }, // 轴参数
+		// {500,   sizeof(aAxisPara) / sizeof(u16), (u16*)&aAxisPara[1]          }, // 轴参数
+		
 #if CONFIG_A4_TRACE_SW
     {800, 8000,                               (u16*)&as32TraceBuffer[0]}, // 曲线采样
 #endif
@@ -62,6 +65,19 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
         {
             u16  u16RegIdx  = u16Address - m_holding[u8GrpIdx].u16Offset;
             u16* pu16RegBuf = &(m_holding[u8GrpIdx].u16Buffer[u16RegIdx]);
+					
+	
+			
+					 para_attr_t * sParaAttr;
+					
+					if(u8GrpIdx == 0)
+					{
+						sParaAttr= aDeviceAttr;
+					}
+					else if(u8GrpIdx == 1)
+					{
+						sParaAttr= aAxisAttr;
+					}
 
             switch (eMode)
             {

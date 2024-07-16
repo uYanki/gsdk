@@ -123,6 +123,11 @@ typedef volatile float64_t vf64;
 #define S32_MAX    0x7FFFFFFF          /*!< +2147483647 */
 #define S64_MAX    0x7FFFFFFFFFFFFFFF  /*!< +9223372036854775807 */
 
+#define U8_MIN     0x00                /*!< 0 */
+#define U16_MIN    0x0000              /*!< 0 */
+#define U32_MIN    0x00000000          /*!< 0 */
+#define U64_MIN    0x0000000000000000  /*!< 0 */
+
 #define U8_MAX     0xFFU                  /*!< +255 */
 #define U16_MAX    0xFFFFU                /*!< +65535 */
 #define U32_MAX    0xFFFFFFFFUL           /*!< +4294967295 */

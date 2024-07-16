@@ -1,8 +1,17 @@
-} para_table_t;
+
 // clang-format on
 
-extern para_table_t sParaTbl;
+// 后续该生成工具时再去掉
+#define aDeviceAttr sDeviceAttr
+#define aAxisAttr   sAxisAttr
 
-#define P sParaTbl
+extern const para_attr_t aDeviceAttr[];
+extern const para_attr_t aAxisAttr[];
+
+extern device_para_t sDevicePara;
+extern axis_para_t   aAxisPara[];
+
+#define D       sDevicePara
+#define P(axis) aAxisPara[axis]
 
 #endif

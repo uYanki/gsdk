@@ -214,7 +214,7 @@ void ADC1_IRQHandler(void)
 void TIM1_CC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
-   // HAL_ADC_Start_DMA(&hadc1, (uint32_t*) &ADConv[0], ARRAY_SIZE(ADConv));
+  // HAL_ADC_Start_DMA(&hadc1, (uint32_t*) &ADConv[0], ARRAY_SIZE(ADConv));
   /* USER CODE END TIM1_CC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_CC_IRQn 1 */

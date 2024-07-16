@@ -51,4 +51,7 @@
 #define CONFIG_RS485_SWITCH_TIME_US 200
 #endif
 
+// 编码器类型
+#define CONFIG_HALL_ENC_SW 1
+
 #endif /*<! __GSDK_CONF_H__ */

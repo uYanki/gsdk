@@ -3,5 +3,11 @@
 
 #include "paraattr.h"
 
+typedef enum {
+    AXIS_0,
+    AXIS_1,
+    AXIS_2,
+    // ...
+} axis_e;
+
 // clang-format off
-typedef struct __packed {
