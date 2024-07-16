@@ -37,7 +37,8 @@
 #include "paratbl.h"
 #include "freemodbus/mb.h"
 #include "encoder/encoder.h"
-
+#include "gconf.h"
+#include "adconv/adconv.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -179,6 +180,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 }
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    D._Resv100 = ADConv[0];
+    D._Resv101 = ADConv[1];
+    D._Resv102 = ADConv[2];
+    D._Resv103 = ADConv[3];
+    D._Resv104 = ADConv[4];
+    D._Resv105 = ADConv[5];
+
+    D.s16UaiPu0 = GetUai1();
+    D.s16UaiPu1 = GetUai2();
+
+    D.s16UaiSi0 = GetUai1();
+    D.s16UaiSi1 = GetUai2();
+    D.u16UcdcSi = D.u16UmdcSi = GetUai2();
+
+    // AxisIsr(AXIS_1);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -228,7 +248,7 @@ int main(void)
 
     ParaTblInit();
 
-    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
+    I2C_Master_Init(&i2c, 4e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
 
     // oled
@@ -266,7 +286,9 @@ int main(void)
     //     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
     // #endif
 
-    // HAL_ADCEx_Calibration_Start(&hadc1);
+    // adc
+    HAL_ADCEx_Calibration_Start(&hadc1);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
 
     /* USER CODE END 2 */
 
@@ -282,6 +304,9 @@ int main(void)
 
         // key
         PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
+
+        // 放中断
+        PeriodicTask(125 * UNIT_US, HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv)));
 
         // modbus
         eMBPoll();

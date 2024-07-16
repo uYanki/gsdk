@@ -280,9 +280,5 @@ void USART3_4_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-    // AxisIsr(AXIS_1);
-}
 
 /* USER CODE END 1 */

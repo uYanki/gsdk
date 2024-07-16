@@ -18,7 +18,6 @@
 
 #define CONFIG_HWCAN_MODULE_SW  1
 
-
 //-----------------------------------------------------------------------------
 // 串口配置
 //
@@ -53,5 +52,9 @@
 
 // 编码器类型
 #define CONFIG_HALL_ENC_SW 1
+
+#define CONFIG_AXIS_NUM    1
+#define CONFIG_EXT_AI_NUM  2
+#define __CUR_SAMP_SHUNT_2 1
 
 #endif /*<! __GSDK_CONF_H__ */

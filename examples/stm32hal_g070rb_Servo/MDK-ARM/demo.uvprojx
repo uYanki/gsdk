@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>3</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -2958,6 +2958,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>adconv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\adconv\adconv.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -7,8 +7,7 @@
 #include "paratbl.h"
 #include "paraattr.h"
 
-#define CONFIG_A4_TRACE_SW  0
-#define CONFIG_MSB_FIRST_SW 1  // tuner = 0
+#define CONFIG_A4_TRACE_SW 0
 
 // register_group_t
 typedef struct {
@@ -18,7 +17,7 @@ typedef struct {
 } reg_grp_t;
 
 device_para_t sDevicePara;
-axis_para_t   aAxisPara[1];
+axis_para_t   aAxisPara[CONFIG_AXIS_NUM];
 
 #if CONFIG_A4_TRACE_SW
 __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
@@ -26,15 +25,15 @@ __IO s32 as32TraceBuffer[CONFIG_SAMP_CH_NUM * 1000] = {0};
 
 static const reg_grp_t m_holding[] = {
 
-	  {0,   sizeof(device_para_t) / sizeof(u16), (u16*)&sDevicePara            }, // 设备参数
-    {300,   sizeof(axis_para_t) / sizeof(u16), (u16*)&aAxisPara[0]          }, // 轴参数
-		// {500,   sizeof(aAxisPara) / sizeof(u16), (u16*)&aAxisPara[1]          }, // 轴参数
-		
-#if CONFIG_A4_TRACE_SW
-    {800, 8000,                               (u16*)&as32TraceBuffer[0]}, // 曲线采样
+    {0,   sizeof(device_para_t) / sizeof(u16), (u16*)&sDevicePara       }, // 设备参数
+    {300, sizeof(axis_para_t) / sizeof(u16),   (u16*)&aAxisPara[0]      }, // 轴参数
+#if CONFIG_AXIS_NUM > 1
+    {500, sizeof(aAxisPara) / sizeof(u16),     (u16*)&aAxisPara[1]      }, // 轴参数
 #endif
 
-//  {10000, sizeof(drv_para_t) / sizeof(u16),      (u16*)&sDrvTbl           }, // 驱动器信息
+#if CONFIG_A4_TRACE_SW
+    {800, 8000,                                (u16*)&as32TraceBuffer[0]}, // 曲线采样
+#endif
 
 #if 0
     {9000,  sizeof(dbg_tbl_t) / sizeof(u16),       (u16*)&sDbgTbl           }, // 调试用
@@ -65,19 +64,17 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
         {
             u16  u16RegIdx  = u16Address - m_holding[u8GrpIdx].u16Offset;
             u16* pu16RegBuf = &(m_holding[u8GrpIdx].u16Buffer[u16RegIdx]);
-					
-	
-			
-					 para_attr_t * sParaAttr;
-					
-					if(u8GrpIdx == 0)
-					{
-						sParaAttr= aDeviceAttr;
-					}
-					else if(u8GrpIdx == 1)
-					{
-						sParaAttr= aAxisAttr;
-					}
+
+            para_attr_t* sParaAttr;
+
+            if (u8GrpIdx == 0)
+            {
+                sParaAttr = aDeviceAttr;
+            }
+            else if (u8GrpIdx == 1)
+            {
+                sParaAttr = aAxisAttr;
+            }
 
             switch (eMode)
             {
