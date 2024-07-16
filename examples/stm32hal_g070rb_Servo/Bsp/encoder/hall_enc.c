@@ -4,7 +4,7 @@
 // 霍尔位置的对应角度 https://zhuanlan.zhihu.com/p/462932301
 // 霍尔传感器信号超前于转子π/6，因此，电角度 = 霍尔角度 - π/6。正向旋转时
 
-#define SPD_RPM(a) (a)*10
+#define SPD_RPM(a) (a) * 10
 
 #if CONFIG_HALL_ENC_SW
 
@@ -165,18 +165,18 @@ static void HallEnc_CalcSpd(hall_enc_t* pEnc)
      */
 }
 
-void HallEncCreat(hall_enc_t* pEnc)
+void HallEnc_Creat(hall_enc_t* pEnc)
 {
     pEnc->pfnReadHallState = ReadHallState;
 }
 
-void HallEncInit(hall_enc_t* pEnc)
+void HallEnc_Init(hall_enc_t* pEnc)
 {
     HallEnc_ReadState(pEnc);
 }
 
 // Call in PosLoopIsr
-void HallEncIsr(hall_enc_t* pEnc)
+void HallEnc_Isr(hall_enc_t* pEnc)
 {
     hall_state_e eHallStatePrev = pEnc->eHallState;
     hall_dir_e   eDirectionPrev = pEnc->eDirection;
@@ -196,7 +196,7 @@ void HallEncIsr(hall_enc_t* pEnc)
     HallEnc_CalcSpd(pEnc);
 }
 
-void HallEncCycle(hall_enc_t* pEnc)
+void HallEnc_Cycle(hall_enc_t* pEnc)
 {
 }
 

@@ -36,6 +36,7 @@
 #include "mono_framebuf.h"
 #include "paratbl.h"
 #include "freemodbus/mb.h"
+#include "encoder/encoder.h"
 
 /* USER CODE END Includes */
 
@@ -255,11 +256,15 @@ int main(void)
     eMBEnable();
     MbRtuRun();
 
-#if __ENC_HALL_SW
-    HAL_TIM_Base_Start(&TIM_HALL);
-#elif __ENC_INC_SW
-    HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
-#endif
+    // hall enc
+    HallEnc_Creat(&sHallEnc);
+    HallEnc_Init(&sHallEnc);
+
+    // #if __ENC_HALL_SW
+    //     HAL_TIM_Base_Start(&TIM_HALL);
+    // #elif __ENC_INC_SW
+    //     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
+    // #endif
 
     // HAL_ADCEx_Calibration_Start(&hadc1);
 
@@ -267,6 +272,8 @@ int main(void)
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+
+    sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
 
     while (1)
     {
@@ -281,7 +288,14 @@ int main(void)
 
         D.u32SysRunTime = GetTickMs();
 
-        //		P._Resv41 = ;
+        HallEnc_Isr(&sHallEnc);
+
+        P(AXIS_0).u16HallState  = sHallEnc.eHallState;
+        P(AXIS_0).u16EncRes     = sHallEnc.u16EncRes;
+        P(AXIS_0).u16EncPos     = sHallEnc.u16EncPos;
+        P(AXIS_0).s32EncTurns   = sHallEnc.s32EncTurns;
+        P(AXIS_0).s64EncMultPos = sHallEnc.s64EncMultPos;
+        P(AXIS_0).u16ElecAngle  = sHallEnc.u16ElecAngle;
 
         /* USER CODE END WHILE */
 

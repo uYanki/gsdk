@@ -53,10 +53,10 @@ typedef struct {
 
 } hall_enc_t;
 
-void HallEncCreat(hall_enc_t* pEnc);
-void HallEncInit(hall_enc_t* pEnc);
-void HallEncIsr(hall_enc_t* pEnc);
-void HallEncCycle(hall_enc_t* pEnc);
+void HallEnc_Creat(hall_enc_t* pEnc);
+void HallEnc_Init(hall_enc_t* pEnc);
+void HallEnc_Isr(hall_enc_t* pEnc);
+void HallEnc_Cycle(hall_enc_t* pEnc);
 
 #endif
 #endif
