@@ -38,7 +38,8 @@
 #include "freemodbus/mb.h"
 #include "encoder/encoder.h"
 #include "gconf.h"
-#include "adconv/adconv.h"
+#include "adconv.h"
+#include "pwmctrl.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -289,13 +290,18 @@ int main(void)
     // adc
     HAL_ADCEx_Calibration_Start(&hadc1);
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
-
+		
+		  axis_e eAxisNo = AXIS_0;
+    __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
+    HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
     sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
+		
+		P(AXIS_0).u32CommCmd =1;
 
     while (1)
     {
@@ -315,12 +321,36 @@ int main(void)
 
         HallEnc_Isr(&sHallEnc);
 
-        P(AXIS_0).u16HallState  = sHallEnc.eHallState;
-        P(AXIS_0).u16EncRes     = sHallEnc.u16EncRes;
-        P(AXIS_0).u16EncPos     = sHallEnc.u16EncPos;
-        P(AXIS_0).s32EncTurns   = sHallEnc.s32EncTurns;
-        P(AXIS_0).s64EncMultPos = sHallEnc.s64EncMultPos;
-        P(AXIS_0).u16ElecAngle  = sHallEnc.u16ElecAngle;
+        axis_e eAxisNo = AXIS_0;
+
+        P(eAxisNo).u16HallState  = sHallEnc.eHallState;
+        P(eAxisNo).u16EncRes     = sHallEnc.u16EncRes;
+        P(eAxisNo).u16EncPos     = sHallEnc.u16EncPos;
+        P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
+        P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
+        P(eAxisNo).u16ElecAngle  = sHallEnc.u16ElecAngle;
+
+        {
+#define BIT_SERVO_ON 0
+
+            static u32 u32CommCmdPre = 0;
+            u32        u32CommCmdCur = P(eAxisNo).u32CommCmd;
+
+            if (u32CommCmdPre ^ u32CommCmdCur)
+            {
+                if (CHKBIT32(u32CommCmdCur, BIT_SERVO_ON))  // 后续改 union
+                {
+                    PWM_Start(eAxisNo);
+                    PWM_SetDuty(1000, 1000, 1000, eAxisNo);
+                }
+                else
+                {
+                    PWM_Stop(eAxisNo);
+                }
+
+                u32CommCmdPre = u32CommCmdCur;
+            }
+        }
 
         /* USER CODE END WHILE */
 
@@ -430,12 +460,37 @@ void ParaTblInit(void)
 
     //
 
-    pParaTbl = (uint16_t*)&P(AXIS_0);
+    axis_e eAxisNo = AXIS_0;
+
+    pParaTbl = (uint16_t*)&P(eAxisNo);
 
     for (uint16_t i = 0; i < sizeof(axis_para_t) / sizeof(u16); ++i)
     {
         pParaTbl[i] = sAxisAttr[i].u16InitVal;
     }
+
+    // TIM freq / Carry freq / 2
+    P(eAxisNo).u16PwmDutyMax = 64000000 / P(eAxisNo).u16CarryFreq / 2;
+}
+
+void AxisApp()
+{
+}
+
+void OpenLoop_Creat(axis_e eAxisNo)
+{
+}
+
+void OpenLoop_Init(axis_e eAxisNo)
+{
+}
+
+void OpenLoop_Cycle(axis_e eAxisNo)
+{
+}
+
+void OpenLoop_Isr(axis_e eAxisNo)
+{
 }
 
 /* USER CODE END 4 */

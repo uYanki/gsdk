@@ -218,11 +218,11 @@ typedef enum {
 
 #define SETBIT32(DAT, BIT)       ((DAT) |= (1U << (BIT)))    /*!< set a bit */
 #define CLRBIT32(DAT, BIT)       ((DAT) &= (~(1U << (BIT)))) /*!< clear a bit */
-#define GETBIT32(DAT, BIT)       (((DAT) >> (BIT)) & 1U)     /*!< get a bit */
+#define CHKBIT32(DAT, BIT)       (((DAT) >> (BIT)) & 1U)     /*!< get a bit */
 
 #define SETBIT64(DAT, BIT)       ((DAT) |= (1ULL << (BIT)))    /*!< set a bit */
 #define CLRBIT64(DAT, BIT)       ((DAT) &= (~(1ULL << (BIT)))) /*!< clear a bit */
-#define GETBIT64(DAT, BIT)       (((DAT) >> (BIT)) & 1ULL)     /*!< get a bit */
+#define CHKBIT64(DAT, BIT)       (((DAT) >> (BIT)) & 1ULL)     /*!< get a bit */
 
 #define SETBITS32(DAT, STB, LEN) ((DAT) |= (MASK32(LEN) << (STB)))  /*!< set bits (bit-32) */
 #define CLRBITS32(DAT, STB, LEN) ((DAT) &= ~(MASK32(LEN) << (STB))) /*!< clear bits (bit-32) */

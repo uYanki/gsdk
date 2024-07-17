@@ -2962,7 +2962,12 @@
             <File>
               <FileName>adconv.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\adconv\adconv.c</FilePath>
+              <FilePath>..\Bsp\adconv.c</FilePath>
+            </File>
+            <File>
+              <FileName>pwmctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\pwmctrl.c</FilePath>
             </File>
           </Files>
         </Group>
