@@ -217,8 +217,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-    SEGGER_RTT_Init();
-    cm_backtrace_init("demo", "stm32", "V0.01");
+   // SEGGER_RTT_Init();
+   // cm_backtrace_init("demo", "stm32", "V0.01");
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -227,24 +227,33 @@ int main(void)
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
-
+	 MX_TIM1_Init();
+	  start_pwm(&htim1);
+		
+		while(1);
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_I2C1_Init();
-  MX_I2C2_Init();
+ // MX_GPIO_Init();
+//  MX_DMA_Init();
+//  MX_ADC1_Init();
+//  MX_I2C1_Init();
+//  MX_I2C2_Init();
   MX_TIM1_Init();
-  MX_USART1_UART_Init();
-  MX_USART3_UART_Init();
-  MX_CRC_Init();
-  MX_TIM6_Init();
-  MX_USART2_UART_Init();
-  MX_SPI1_Init();
-  MX_TIM3_Init();
-  MX_TIM14_Init();
+//  MX_USART1_UART_Init();
+//  MX_USART3_UART_Init();
+//  MX_CRC_Init();
+//  MX_TIM6_Init();
+//  MX_USART2_UART_Init();
+//  MX_SPI1_Init();
+//  MX_TIM3_Init();
+//  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
-    DelayInit();
+ //   DelayInit();
+ 
+ start_pwm(&htim1);
+		
+		//PWM_Start(0);
+		
+		while(1);
 
     ParaTblInit();
 
@@ -293,7 +302,7 @@ int main(void)
     axis_e eAxisNo = AXIS_0;
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
     HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
-    PWM_Start(eAxisNo);
+    
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -302,7 +311,7 @@ int main(void)
     sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
 
     P(AXIS_0).u32CommCmd = 1;
-
+PWM_Start(eAxisNo);
     while (1)
     {
         // led
@@ -373,14 +382,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 8;
+  RCC_OscInitStruct.PLL.PLLN = 16;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -401,7 +408,6 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
 /* USER CODE BEGIN 4 */
 
 static bool IsPressed(flexbtn_t* pHandle)
