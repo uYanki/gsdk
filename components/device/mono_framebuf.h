@@ -49,8 +49,8 @@ void MonoFramebuf_DrawCircle(mono_framebuf_t* pHandle, int16_t x0, int16_t y0, i
 void MonoFramebuf_FillCircle(mono_framebuf_t* pHandle, int16_t x0, int16_t y0, int16_t r, mono_color_e eColor);
 
 void MonoFramebuf_SetCursor(mono_framebuf_t* pHandle, uint16_t x, uint16_t y);
-char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor);
-char MonoFramebuf_PutString(mono_framebuf_t* pHandle, char* str, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor);
+char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, const mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor);
+char MonoFramebuf_PutString(mono_framebuf_t* pHandle, char* str, const mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor);
 
 uint8_t* MonoFramebuf_GetBuffer(mono_framebuf_t* pHandle);
 

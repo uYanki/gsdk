@@ -17,24 +17,25 @@
 
 void PWM_Start(axis_e eAxisNo)
 {
-    u16 u16Duty = 2000;//P(eAxisNo).u16PwmDutyMax >> 1;
+    u16 u16Duty = P(eAxisNo).u16PwmDutyMax >> 1;
 
     switch (eAxisNo)
     {
 #if (CONFIG_AXIS_NUM >= 1)
-			default:
         case AXIS_0:
         {
-						P(eAxisNo)._Resv341 =22;
             PWM_SetDuty(u16Duty, u16Duty, u16Duty, eAxisNo);
-				HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);
-				HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_1);
-				HAL_TIM_PWM_Start(htim, TIM_CHANNEL_2);
-				HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_2);
-				HAL_TIM_PWM_Start(htim, TIM_CHANNEL_3);
-				HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_3);
-				
-           //  HAL_TIM_OC_Start(&AXIS0_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
+            HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);
+            HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_1);
+            HAL_TIM_PWM_Start(htim, TIM_CHANNEL_2);
+            HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_2);
+            HAL_TIM_PWM_Start(htim, TIM_CHANNEL_3);
+            HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_3);
+#if 0
+            // 不要写成这种形式！！
+            HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
+            HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
+#endif
             break;
         }
 #endif
@@ -44,27 +45,26 @@ void PWM_Start(axis_e eAxisNo)
             break;
         }
 #endif
-     //  default: break;
+        default: break;
     }
 }
 
 void PWM_Stop(axis_e eAxisNo)
 {
-	 u16 u16Duty = 2000;
+    u16 u16Duty = P(eAxisNo).u16PwmDutyMax >> 1;
+
     switch (eAxisNo)
     {
 #if (CONFIG_AXIS_NUM >= 1)
         case AXIS_0:
         {
-					   PWM_SetDuty(u16Duty, u16Duty, u16Duty, eAxisNo);
+            PWM_SetDuty(u16Duty, u16Duty, u16Duty, eAxisNo);
             HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_1);
-    HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_2);
-    HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_3);
-    HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_3);
-					P(0).u32CommCmd&=~BV(5);
-           //  HAL_TIM_OC_Stop(&AXIS0_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
+            HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_1);
+            HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_2);
+            HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_2);
+            HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_3);
+            HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_3);
             break;
         }
 #endif

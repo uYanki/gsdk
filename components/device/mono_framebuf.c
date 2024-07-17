@@ -95,7 +95,7 @@ void MonoFramebuf_SetCursor(mono_framebuf_t* pHandle, uint16_t x, uint16_t y)
     pHandle->_u16CursorY = y;
 }
 
-char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
+char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, const mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
 {
     uint32_t i, j;
 
@@ -133,7 +133,7 @@ char MonoFramebuf_PutChar(mono_framebuf_t* pHandle, char ch, mono_font_t* pFont,
     return ch;
 }
 
-char MonoFramebuf_PutString(mono_framebuf_t* pHandle, char* str, mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
+char MonoFramebuf_PutString(mono_framebuf_t* pHandle, char* str, const mono_font_t* pFont, mono_color_e eForeColor, mono_color_e eBackColor)
 {
     /* Write characters */
     while (*str)

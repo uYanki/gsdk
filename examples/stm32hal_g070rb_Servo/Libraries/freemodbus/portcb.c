@@ -65,7 +65,7 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
             u16  u16RegIdx  = u16Address - m_holding[u8GrpIdx].u16Offset;
             u16* pu16RegBuf = &(m_holding[u8GrpIdx].u16Buffer[u16RegIdx]);
 
-            para_attr_t* sParaAttr;
+            const para_attr_t* sParaAttr;
 
             if (u8GrpIdx == 0)
             {
