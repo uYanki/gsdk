@@ -186,8 +186,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D._Resv101 = ADConv[1];
     D._Resv102 = ADConv[2];
     D._Resv103 = ADConv[3];
-    D._Resv104 = ADConv[4];
-    D._Resv105 = ADConv[5];
+    // D._Resv104 = ADConv[4];
+    // D._Resv105 = ADConv[5];
+
+    D._Resv104 = GetCurU(AXIS_0);
+    D._Resv105 = GetCurV(AXIS_0);
+    D._Resv106 = GetCurW(AXIS_0);
 
     D.s16UaiPu0 = GetUai1();
     D.s16UaiPu1 = GetUai2();
@@ -199,39 +203,27 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     // AxisIsr(AXIS_1);
 }
 
-void start_pwm(TIM_HandleTypeDef* htim)
-{
-    // Init PWM
-    int half_load        = 2000;
-    htim->Instance->CCR1 = half_load;
-    htim->Instance->CCR2 = half_load;
-    htim->Instance->CCR3 = half_load;
+typedef enum {
+    AXIS_INIT,
+    AXIS_RUN,
+    AXIS_IDLE,
+} axis_state_e;
 
-    // This hardware obfustication layer really is getting on my nerves
-    HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);
-    HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(htim, TIM_CHANNEL_2);
-    HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(htim, TIM_CHANNEL_3);
-    HAL_TIMEx_PWMN_Start(htim, TIM_CHANNEL_3);
-}
+typedef enum {
+    AXIS_APP_GENERIC,   // 通用控制
+    AXIS_APP_OPENLOOP,  // 开环测试
+    AXIS_APP_ENCIDENT,  // 编码器辨识
+} axis_app_e;
 
-void stop_pwm(TIM_HandleTypeDef* htim)
-{
-    // Init PWM
-    int half_load        = 2000;
-    htim->Instance->CCR1 = half_load;
-    htim->Instance->CCR2 = half_load;
-    htim->Instance->CCR3 = half_load;
+typedef union {
+    struct {
+        uint32_t ServoOn : 1;
+        uint32_t _Resv   : 31;
+    } u32Bit;
+    uint32_t u32All;
+} ctrlword_u;
 
-    // This hardware obfustication layer really is getting on my nerves
-    HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_1);
-    HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_2);
-    HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Stop(htim, TIM_CHANNEL_3);
-    HAL_TIMEx_PWMN_Stop(htim, TIM_CHANNEL_3);
-}
+#include "motdrv.h"
 
 /* USER CODE END 0 */
 
@@ -328,6 +320,8 @@ int main(void)
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
     HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
 
+    P(eAxisNo).u16AxisFSM = AXIS_INIT;
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -335,7 +329,7 @@ int main(void)
 
     sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
 
-    P(AXIS_0).u32CommCmd = 1;
+    // P(AXIS_0).u32CommCmd = 1;
 
     while (1)
     {
@@ -363,6 +357,8 @@ int main(void)
         P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
         P(eAxisNo).u16ElecAngle  = sHallEnc.u16ElecAngle;
 
+        P(eAxisNo).s32UserSpdFb = sHallEnc.s16SpdFb;
+
         {
 #define BIT_SERVO_ON 0
 
@@ -371,16 +367,75 @@ int main(void)
 
             if (u32CommCmdPre ^ u32CommCmdCur)
             {
-                if (CHKBIT32(u32CommCmdCur, BIT_SERVO_ON))  // TODO: use union
+                ctrlword_u uCtrlWord;
+
+                uCtrlWord.u32All = u32CommCmdCur;
+
+                if (uCtrlWord.u32Bit.ServoOn)  // TODO: use union
                 {
                     PWM_Start(eAxisNo);
+                    P(eAxisNo).u16AxisFSM = AXIS_RUN;
                 }
                 else
                 {
                     PWM_Stop(eAxisNo);
+                    P(eAxisNo).u16AxisFSM = AXIS_IDLE;
                 }
 
                 u32CommCmdPre = u32CommCmdCur;
+            }
+        }
+
+        if (P(eAxisNo).u16AxisFSM == AXIS_RUN)
+        {
+            switch (P(eAxisNo).u16AppSel)
+            {
+                case AXIS_APP_GENERIC:
+                {
+                    break;
+                }
+                case AXIS_APP_OPENLOOP:
+                {
+                    PeriodicTask(125 * UNIT_US, {
+                        motdrv_t foc;
+
+                        foc.Uq      = 8000;
+                        foc.Ud      = 0;
+                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
+
+                        P(eAxisNo).u16ElecAngle += 125;
+
+                        MC_SinCos(&foc, P(eAxisNo).u16ElecAngle);
+                        MC_InvPark(&foc);
+
+                        switch (P(eAxisNo).s16Uq)
+                        {
+                            default:
+                            case 0:
+                                MC_InvClark(&foc);
+                                MC_MinMaxU(&foc);
+                                MC_ZeroSeqInj(&foc);
+                                break;
+                            case 1:
+                                SVPWMx(&foc);
+                                break;
+                            case 2:
+                                svm(&foc);
+                                break;
+                            case 3:
+                                SVGEN_run(&foc, 0);
+                                break;
+                        }
+
+                        PWM_SetDuty(foc.Ta, foc.Tb, foc.Tc, eAxisNo);
+                    });
+
+                    break;
+                }
+                case AXIS_APP_ENCIDENT:
+                {
+                    break;
+                }
             }
         }
 

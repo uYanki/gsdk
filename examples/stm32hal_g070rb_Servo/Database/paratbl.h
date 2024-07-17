@@ -5,8 +5,8 @@
 
 typedef enum {
     AXIS_0,
-//    AXIS_1,
-//    AXIS_2,
+    AXIS_1,
+    AXIS_2,
     // ...
 } axis_e;
 
@@ -494,7 +494,7 @@ typedef struct __packed {
     u16 _Resv630;            // P0630 
     u16 _Resv631;            // P0631 
     u16 _Resv632;            // P0632 
-    u16 AxisFSM;             // P0633 轴状态机
+    u16 u16AxisFSM;          // P0633 轴状态机
     u16 _Resv634;            // P0634 
     u16 _Resv635;            // P0635 
     u16 _Resv636;            // P0636 

@@ -3082,6 +3082,16 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>components/motspin</GroupName>
+          <Files>
+            <File>
+              <FileName>motdrv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\motdrv.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
