@@ -55,7 +55,7 @@ s16 GetCurX(axis_e eAxisNo, u8 nSampIdx)  // Q15
     switch (eAxisNo)
     {
 #if CONFIG_AXIS_NUM >= 1
-        case AXIS_1:
+        case AXIS_0:
         {
             if (nSampIdx == 0)
             {
@@ -72,7 +72,7 @@ s16 GetCurX(axis_e eAxisNo, u8 nSampIdx)  // Q15
         }
 #endif
 #if CONFIG_AXIS_NUM >= 2
-        case AXIS_2: return 0;
+        case AXIS_1: return 0;
 #endif
         default: return 0;
     }
@@ -87,10 +87,10 @@ s16 GetCurU(axis_e eAxisNo)  // Q15
     switch (eAxisNo)
     {
 #if CONFIG_AXIS_NUM >= 1
-        case AXIS_1: return (s16)(AD_CUR_A << 4) - 0x8000;
+        case AXIS_0: return (s16)(AD_CUR_A << 4) - 0x8000;
 #endif
 #if CONFIG_AXIS_NUM >= 2
-        case AXIS_2: return 0;
+        case AXIS_1: return 0;
 #endif
         default: return 0;
     }
@@ -101,10 +101,10 @@ s16 GetCurV(axis_e eAxisNo)  // Q15
     switch (eAxisNo)
     {
 #if CONFIG_AXIS_NUM >= 1
-        case AXIS_1: return 0;
+        case AXIS_0: return 0;
 #endif
 #if CONFIG_AXIS_NUM >= 2
-        case AXIS_2: return 0;
+        case AXIS_1: return 0;
 #endif
         default: return 0;
     }
@@ -115,10 +115,10 @@ s16 GetCurW(axis_e eAxisNo)  // Q15
     switch (eAxisNo)
     {
 #if CONFIG_AXIS_NUM >= 1
-        case AXIS_1: return (s16)(AD_CUR_C << 4) - 0x8000;
+        case AXIS_0: return (s16)(AD_CUR_C << 4) - 0x8000;
 #endif
 #if CONFIG_AXIS_NUM >= 2
-        case AXIS_2: return 0;
+        case AXIS_1: return 0;
 #endif
         default: return 0;
     }

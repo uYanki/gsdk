@@ -7,34 +7,35 @@
 
 // space vertor
 #if (CONFIG_AXIS_NUM >= 1)
-    #define AXIS1_TIM htim1
+#define AXIS1_TIM htim1
 #endif
 #if (CONFIG_AXIS_NUM >= 2)
-    #define AXIS2_TIM
+#define AXIS2_TIM
 #endif
 
 void PWM_Start(axis_e eAxisNo)
 {
-    u16 u16Duty = P(eAxisNo).u16PwmDutyMax >> 1;
+    u16 u16Duty = 2000;//P(eAxisNo).u16PwmDutyMax >> 1;
 
     switch (eAxisNo)
     {
 #if (CONFIG_AXIS_NUM >= 1)
-        case AXIS_1 :
+        case AXIS_0:
         {
-        //    PWM_SetDuty(u16Duty, u16Duty, u16Duty, eAxisNo);
+            PWM_SetDuty(u16Duty, u16Duty, u16Duty, eAxisNo);
             HAL_TIM_PWM_Start(&AXIS1_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
-					  HAL_TIMEx_PWMN_Start(&AXIS1_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
+            HAL_TIMEx_PWMN_Start(&AXIS1_TIM, TIM_CHANNEL_4 | TIM_CHANNEL_5 | TIM_CHANNEL_6);
+            // HAL_TIM_OC_Start(&AXIS1_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
             break;
         }
 #endif
 #if (CONFIG_AXIS_NUM >= 2)
-        case AXIS_2 :
+        case AXIS_1:
         {
             break;
         }
 #endif
-        default : break;
+        default: break;
     }
 }
 
@@ -43,20 +44,21 @@ void PWM_Stop(axis_e eAxisNo)
     switch (eAxisNo)
     {
 #if (CONFIG_AXIS_NUM >= 1)
-        case AXIS_1 :
+        case AXIS_0:
         {
             HAL_TIM_PWM_Stop(&AXIS1_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
-					  HAL_TIMEx_PWMN_Stop(&AXIS1_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
+            HAL_TIMEx_PWMN_Stop(&AXIS1_TIM, TIM_CHANNEL_4 | TIM_CHANNEL_5 | TIM_CHANNEL_6);
+            // HAL_TIM_OC_Stop(&AXIS1_TIM, TIM_CHANNEL_1 | TIM_CHANNEL_2 | TIM_CHANNEL_3);
             break;
         }
 #endif
 #if (CONFIG_AXIS_NUM >= 2)
-        case AXIS_2 :
+        case AXIS_1:
         {
             break;
         }
 #endif
-        default : break;
+        default: break;
     }
 }
 
@@ -65,7 +67,7 @@ void PWM_SetDuty(u16 u16DutyA, u16 u16DutyB, u16 u16DutyC, axis_e eAxisNo)
     switch (eAxisNo)
     {
 #if (CONFIG_AXIS_NUM >= 1)
-        case AXIS_1 :
+        case AXIS_0:
         {
             __HAL_TIM_SetCompare(&AXIS1_TIM, TIM_CHANNEL_1, u16DutyA);
             __HAL_TIM_SetCompare(&AXIS1_TIM, TIM_CHANNEL_2, u16DutyB);
@@ -74,11 +76,11 @@ void PWM_SetDuty(u16 u16DutyA, u16 u16DutyB, u16 u16DutyC, axis_e eAxisNo)
         }
 #endif
 #if (CONFIG_AXIS_NUM >= 2)
-        case AXIS_2 :
+        case AXIS_1:
         {
             break;
         }
 #endif
-        default : break;
+        default: break;
     }
 }
