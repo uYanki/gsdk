@@ -1407,7 +1407,7 @@
 
   <Group>
     <GroupName>database</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1464,6 +1464,38 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\Bsp\motdrv.c</PathWithFileName>
       <FilenameWithoutPath>motdrv.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>DSP</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>17</GroupNumber>
+      <FileNumber>95</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_init_q15.c</PathWithFileName>
+      <FilenameWithoutPath>arm_pid_init_q15.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>17</GroupNumber>
+      <FileNumber>96</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_reset_q15.c</PathWithFileName>
+      <FilenameWithoutPath>arm_pid_reset_q15.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

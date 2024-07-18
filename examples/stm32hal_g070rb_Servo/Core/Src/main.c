@@ -41,6 +41,8 @@
 #include "adconv.h"
 #include "pwmctrl.h"
 #include "motdrv.h"
+
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -148,6 +150,8 @@ static void SSD1306_Reset(void)
     DelayBlockMs(20);
     HAL_GPIO_WritePin(OLED091_RST_PIN, GPIO_PIN_SET);
 }
+
+//----------
 
 //----------
 
@@ -290,9 +294,12 @@ void MotDrv_Isr(motdrv_t* pMotDrv, axis_e eAxisNo)
     P(eAxisNo).u16Sector = pMotDrv->eSector;
 
     P(eAxisNo).u16PwmaComp = pMotDrv->Ta;
-    P(eAxisNo).u16PwmaComp = pMotDrv->Tb;
-    P(eAxisNo).u16PwmaComp = pMotDrv->Tc;
+    P(eAxisNo).u16PwmbComp = pMotDrv->Tb;
+    P(eAxisNo).u16PwmcComp = pMotDrv->Tc;
 }
+
+static arm_pid_instance_q15 s_sSpdPi;
+static bool                 s_bInit = true;
 
 void CtrlCmd_Cycle(axis_e eAxisNo)
 {
@@ -315,6 +322,7 @@ void CtrlCmd_Cycle(axis_e eAxisNo)
         {
             PWM_Stop(eAxisNo);
             P(eAxisNo).u16AxisFSM = AXIS_IDLE;
+            s_bInit               = true;
         }
 
         u32CommCmdPre = u32CommCmdCur;
@@ -370,6 +378,8 @@ int main(void)
 
     ParaTblInit();
 
+#if 0
+
     I2C_Master_Init(&i2c, 4e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
 
@@ -383,6 +393,8 @@ int main(void)
     MonoFramebuf_PutString(&fb, "Servo", &g_Font_Conslons_8x16_CpuFlash, MONO_COLOR_WHITE, MONO_COLOR_BLACK);
 
     SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
+
+#endif
 
     // key
     for (int i = 0; i < ARRAY_SIZE(flexbtn); ++i)
@@ -447,7 +459,7 @@ int main(void)
         P(eAxisNo).u16EncPos     = sHallEnc.u16EncPos;
         P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
         P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
-        P(eAxisNo).s32UserSpdFb  = sHallEnc.s16SpdFb;
+        P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
 
         CtrlCmd_Cycle(eAxisNo);
 
@@ -458,12 +470,9 @@ int main(void)
                 case AXIS_APP_GENERIC:
                 {
                     PeriodicTask(125 * UNIT_US, {
-                        motdrv_t foc;
+                        motdrv_t foc = {0};
 
-                        foc.Uq      = P(eAxisNo).s16OpenUqRef;
-                        foc.Ud      = P(eAxisNo).s16OpenUdRef;
-                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
-
+                        foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
                         foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
@@ -475,6 +484,18 @@ int main(void)
 
                             case CTRL_MODE_SPD:
                             {
+                                s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
+                                s_sSpdPi.Ki = P(eAxisNo).u16SpdLoopKi;
+                                s_sSpdPi.Kd = P(eAxisNo).u16SpdLoopKd;
+                                arm_pid_init_q15(&s_sSpdPi, s_bInit);
+
+                                s_bInit = false;
+
+                                P(eAxisNo).s32DrvSpdRef = P(eAxisNo).s32SpdDigRef;
+
+                                // qdAxis.pdf
+                                foc.Uq = arm_pid_q15(&s_sSpdPi, P(eAxisNo).s32DrvSpdRef - P(eAxisNo).s32DrvSpdFb);
+
                                 break;
                             }
 

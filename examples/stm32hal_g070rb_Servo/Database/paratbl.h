@@ -474,8 +474,8 @@ typedef struct __packed {
     u16 u16OpenPeriod;       // P0611 开环运行周期
     s16 s16OpenElecAngInit;  // P0612 开环电角度初值
     s16 s16OpenElecAngInc;   // P0613 开环电角度自增量
-    s16 s16OpenUdRef;        // P0614 开环D轴指令
-    s16 s16OpenUqRef;        // P0615 开环Q轴指令
+    s16 s16OpenUqRef;        // P0614 开环D轴指令
+    s16 s16OpenUdRef;        // P0615 开环Q轴指令
     u16 _Resv616;            // P0616 
     u16 _Resv617;            // P0617 
     u16 _Resv618;            // P0618 
@@ -528,9 +528,6 @@ typedef struct __packed {
     u16 _Resv675;            // P0675 
     u16 _Resv676;            // P0676 
     u16 _Resv677;            // P0677 
-    u16 _Resv678;            // P0678 
-    u16 _Resv679;            // P0679 
-    u16 _Resv680;            // P0680 
 } axis_para_t;
 
 // clang-format on
