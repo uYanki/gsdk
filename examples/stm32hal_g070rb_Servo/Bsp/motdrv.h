@@ -125,7 +125,7 @@ void MC_InvPark(motdrv_t* p);
 void MC_Clark(motdrv_t* p);
 void MC_InvClark(motdrv_t* p);
 void MC_RebuildCurrent(motdrv_t* p, q15 Ix[]);
-void MC_SinCos(motdrv_t* p, q15 s16Angle);
+void MC_SinCos(motdrv_t* p);
 void MC_MinMaxU(motdrv_t* p);
 void MC_OverMod(motdrv_t* p);
 void MC_CirLim(motdrv_t* p);

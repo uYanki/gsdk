@@ -285,21 +285,20 @@ typedef struct __packed {
     u16 _Resv319;            // P0319 
     u16 u16EncWorkMode;      // P0320 编码器工作模式
     u16 u16EncRes;           // P0321 编码器分辨率
-    u16 u16EncInitPos;       // P0322 编码器初始位置
-    u16 u16EncPos;           // P0323 编码器单圈位置
-    s32 s32EncTurns;         // P0324 编码器圈数
-    s64 s64EncMultPos;       // P0326 编码器多圈位置
-    u16 _Resv330;            // P0330 
-    u16 u16HallState;        // P0331 霍尔真值
-    u16 _Resv332;            // P0332 
-    u16 u16CurSampType;      // P0333 电流采样类型
-    u16 u16PwmDutyMax;       // P0334 
-    u16 _Resv335;            // P0335 
-    u16 u16CarryFreq;        // P0336 载波频率
-    u16 u16PosLoopFreq;      // P0337 位置环频率
-    u16 u16SpdLoopFreq;      // P0338 速度环频率
-    u16 u16CurLoopFreq;      // P0339 电流环频率
-    u16 _Resv340;            // P0340 
+    u32 u32EncPosInit;       // P0322 编码器初始位置
+    u16 u16EncPos;           // P0324 编码器单圈位置
+    s64 s64EncMultPos;       // P0325 编码器多圈位置
+    s32 s32EncTurns;         // P0329 编码器圈数
+    u16 _Resv331;            // P0331 
+    u16 u16HallState;        // P0332 霍尔真值
+    u16 _Resv333;            // P0333 
+    u16 u16CurSampType;      // P0334 电流采样类型
+    u16 u16PwmDutyMax;       // P0335 
+    u16 _Resv336;            // P0336 
+    u16 u16CarryFreq;        // P0337 载波频率
+    u16 u16PosLoopFreq;      // P0338 位置环频率
+    u16 u16SpdLoopFreq;      // P0339 速度环频率
+    u16 u16CurLoopFreq;      // P0340 电流环频率
     u16 _Resv341;            // P0341 
     u16 _Resv342;            // P0342 
     u16 _Resv343;            // P0343 
@@ -453,94 +452,85 @@ typedef struct __packed {
     u16 _Resv589;            // P0589 
     u16 _Resv590;            // P0590 
     u16 _Resv591;            // P0591 
-    u16 _Resv592;            // P0592 
-    u16 _Resv593;            // P0593 
-    u16 _Resv594;            // P0594 
-    u16 _Resv595;            // P0595 
-    u16 _Resv596;            // P0596 
-    u16 _Resv597;            // P0597 
-    u16 _Resv598;            // P0598 
-    u16 _Resv599;            // P0599 
-    u16 _Resv600;            // P0600 
-    u16 _Resv601;            // P0601 
-    u16 _Resv602;            // P0602 
-    u16 _Resv603;            // P0603 
-    u16 _Resv604;            // P0604 
-    u16 _Resv605;            // P0605 
-    u16 _Resv606;            // P0606 
-    u16 _Resv607;            // P0607 
+    u16 s16TrqDigRef00;      // P0592 多段数字转矩指令00
+    u16 s16TrqDigRef01;      // P0593 多段数字转矩指令01
+    u16 s16TrqDigRef02;      // P0594 多段数字转矩指令02
+    u16 s16TrqDigRef03;      // P0595 多段数字转矩指令03
+    u16 s16TrqDigRef04;      // P0596 多段数字转矩指令04
+    u16 s16TrqDigRef05;      // P0597 多段数字转矩指令05
+    u16 s16TrqDigRef06;      // P0598 多段数字转矩指令06
+    u16 s16TrqDigRef07;      // P0599 多段数字转矩指令07
+    u16 s16TrqDigRef08;      // P0600 多段数字转矩指令08
+    u16 s16TrqDigRef09;      // P0601 多段数字转矩指令09
+    u16 s16TrqDigRef10;      // P0602 多段数字转矩指令10
+    u16 s16TrqDigRef11;      // P0603 多段数字转矩指令11
+    u16 s16TrqDigRef12;      // P0604 多段数字转矩指令12
+    u16 s16TrqDigRef13;      // P0605 多段数字转矩指令13
+    u16 s16TrqDigRef14;      // P0606 多段数字转矩指令14
+    u16 s16TrqDigRef15;      // P0607 多段数字转矩指令15
     u16 _Resv608;            // P0608 
     u16 _Resv609;            // P0609 
     u16 _Resv610;            // P0610 
-    s16 s16TrqDigRef00;      // P0611 多段数字转矩指令00
-    s16 s16TrqDigRef01;      // P0612 多段数字转矩指令01
-    s16 s16TrqDigRef02;      // P0613 多段数字转矩指令02
-    s16 s16TrqDigRef03;      // P0614 多段数字转矩指令03
-    s16 s16TrqDigRef04;      // P0615 多段数字转矩指令04
-    s16 s16TrqDigRef05;      // P0616 多段数字转矩指令05
-    s16 s16TrqDigRef06;      // P0617 多段数字转矩指令06
-    s16 s16TrqDigRef07;      // P0618 多段数字转矩指令07
-    s16 s16TrqDigRef08;      // P0619 多段数字转矩指令08
-    s16 s16TrqDigRef09;      // P0620 多段数字转矩指令09
-    s16 s16TrqDigRef10;      // P0621 多段数字转矩指令10
-    s16 s16TrqDigRef11;      // P0622 多段数字转矩指令11
-    s16 s16TrqDigRef12;      // P0623 多段数字转矩指令12
-    s16 s16TrqDigRef13;      // P0624 多段数字转矩指令13
-    s16 s16TrqDigRef14;      // P0625 多段数字转矩指令14
-    s16 s16TrqDigRef15;      // P0626 多段数字转矩指令15
+    u16 u16OpenPeriod;       // P0611 开环运行周期
+    s16 s16OpenElecAngInit;  // P0612 开环电角度初值
+    s16 s16OpenElecAngInc;   // P0613 开环电角度自增量
+    s16 s16OpenUdRef;        // P0614 开环D轴指令
+    s16 s16OpenUqRef;        // P0615 开环Q轴指令
+    u16 _Resv616;            // P0616 
+    u16 _Resv617;            // P0617 
+    u16 _Resv618;            // P0618 
+    u16 _Resv619;            // P0619 
+    u16 _Resv620;            // P0620 
+    u16 _Resv621;            // P0621 
+    u16 _Resv622;            // P0622 
+    u16 _Resv623;            // P0623 
+    u16 _Resv624;            // P0624 
+    u16 u16AxisFSM;          // P0625 轴状态机
+    u16 _Resv626;            // P0626 
     u16 _Resv627;            // P0627 
     u16 _Resv628;            // P0628 
     u16 _Resv629;            // P0629 
-    u16 _Resv630;            // P0630 
-    u16 _Resv631;            // P0631 
-    u16 _Resv632;            // P0632 
-    u16 u16AxisFSM;          // P0633 轴状态机
+    s32 s32DrvSpdRef;        // P0630 驱动层速度指令
+    s32 s32DrvSpdFb;         // P0632 驱动层速度反馈
     u16 _Resv634;            // P0634 
     u16 _Resv635;            // P0635 
     u16 _Resv636;            // P0636 
-    u16 _Resv637;            // P0637 
-    s32 s32DrvSpdRef;        // P0638 驱动层速度指令
-    s32 s32DrvSpdFb;         // P0640 驱动层速度反馈
-    u16 _Resv642;            // P0642 
-    u16 _Resv643;            // P0643 
-    u16 _Resv644;            // P0644 
-    u16 u16ElecAngle;        // P0645 驱动层电角度
-    u16 _Resv646;            // P0646 
-    u16 _Resv647;            // P0647 
-    u16 _Resv648;            // P0648 
-    u16 _Resv649;            // P0649 
-    s16 s16Ud;               // P0650 驱动层D轴电压输出
-    s16 s16Uq;               // P0651 驱动层Q轴电压输出
-    s16 s16Ualpha;           // P0652 驱动层Alpha轴电压输出
-    s16 s16Ubeta;            // P0653 驱动层Beta轴电压输出
-    u16 u16Sector;           // P0654 驱动层SVPWM矢量扇区
-    u16 u16PwmaComp;         // P0655 驱动层A相PWM比较值
-    u16 u16PwmbComp;         // P0656 驱动层B相PWM比较值
-    u16 u16PwmcComp;         // P0657 驱动层C相PWM比较值
-    u16 _Resv658;            // P0658 
-    u16 _Resv659;            // P0659 
+    u16 u16ElecAngle;        // P0637 驱动层电角度
+    u16 _Resv638;            // P0638 
+    u16 _Resv639;            // P0639 
+    u16 _Resv640;            // P0640 
+    u16 _Resv641;            // P0641 
+    s16 s16Ud;               // P0642 驱动层D轴电压输出
+    s16 s16Uq;               // P0643 驱动层Q轴电压输出
+    s16 s16Ualpha;           // P0644 驱动层Alpha轴电压输出
+    s16 s16Ubeta;            // P0645 驱动层Beta轴电压输出
+    u16 u16Sector;           // P0646 驱动层SVPWM矢量扇区
+    u16 u16PwmaComp;         // P0647 驱动层A相PWM比较值
+    u16 u16PwmbComp;         // P0648 驱动层B相PWM比较值
+    u16 u16PwmcComp;         // P0649 驱动层C相PWM比较值
+    u16 _Resv650;            // P0650 
+    u16 _Resv651;            // P0651 
+    u16 _Resv652;            // P0652 
+    u16 _Resv653;            // P0653 
+    u16 _Resv654;            // P0654 
+    u16 _Resv655;            // P0655 
+    u16 _Resv656;            // P0656 
+    s16 s16IaFbSi;           // P0657 A相反馈电流物理值
+    s16 s16IbFbSi;           // P0658 B相反馈电流物理值
+    s16 s16IcFbSi;           // P0659 C相反馈电流物理值
     u16 _Resv660;            // P0660 
-    u16 _Resv661;            // P0661 
-    u16 _Resv662;            // P0662 
-    u16 _Resv663;            // P0663 
-    u16 _Resv664;            // P0664 
-    s16 s16IaFbSi;           // P0665 A相反馈电流物理值
-    s16 s16IbFbSi;           // P0666 B相反馈电流物理值
-    s16 s16IcFbSi;           // P0667 C相反馈电流物理值
-    u16 _Resv668;            // P0668 
-    s64 s64UserPosRef;       // P0669 用户位置指令
-    s64 s64UserPosFb;        // P0673 用户位置反馈
-    s32 s32UserSpdRef;       // P0677 用户速度指令
-    s32 s32UserSpdFb;        // P0679 用户速度反馈
-    s16 s16UserTrqRef;       // P0681 用户转矩指令
-    s16 s16UserTrqFb;        // P0682 用户转矩反馈
-    u16 _Resv683;            // P0683 
-    u16 _Resv684;            // P0684 
-    u16 _Resv685;            // P0685 
-    u16 _Resv686;            // P0686 
-    u16 _Resv687;            // P0687 
-    u16 _Resv688;            // P0688 
-    u16 _Resv689;            // P0689 
+    s64 s64UserPosRef;       // P0661 用户位置指令
+    s64 s64UserPosFb;        // P0665 用户位置反馈
+    s32 s32UserSpdRef;       // P0669 用户速度指令
+    s32 s32UserSpdFb;        // P0671 用户速度反馈
+    s16 s16UserTrqRef;       // P0673 用户转矩指令
+    s16 s16UserTrqFb;        // P0674 用户转矩反馈
+    u16 _Resv675;            // P0675 
+    u16 _Resv676;            // P0676 
+    u16 _Resv677;            // P0677 
+    u16 _Resv678;            // P0678 
+    u16 _Resv679;            // P0679 
+    u16 _Resv680;            // P0680 
 } axis_para_t;
 
 // clang-format on

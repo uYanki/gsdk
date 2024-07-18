@@ -98,10 +98,10 @@ void MC_InvPark(motdrv_t* p)
  */
 void MC_Clark(motdrv_t* p)
 {
-#if 0  // with 3 currents
+#if 0  // 3 currents
     p->Ialpha = p->Ia;
     p->Ibeta  = Q15Mul(p->Ib - p->Ic, Q15(M_INVSQRT3));
-#else  // with 2 currents
+#else  // 2 currents
     p->Ialpha = p->Ia;
     p->Ibeta  = Q15Mul(p->Ia + (p->Ib << 1), Q15(M_INVSQRT3));
 #endif
@@ -111,9 +111,6 @@ void MC_Clark(motdrv_t* p)
  * @note a = alpha
  *       b = -0.5 * alpha + sqrt(3) / 2 * beta
  *       c = -0.5 * alpha - sqrt(3) / 2 * beta
- * @note b = beta
- *       a = -0.5 * beta + sqrt(3) / 2 * alpha
- *       c = -0.5 * beta - sqrt(3) / 2 * alpha
  */
 void MC_InvClark(motdrv_t* p)
 {
@@ -254,7 +251,7 @@ void MC_RebuildCurrent(motdrv_t* p, q15 Ix[])
 /**
  * @brief
  */
-void MC_SinCos(motdrv_t* p, q15 s16Angle)
+void MC_SinCos(motdrv_t* p)
 {
     // clang-format off
     static const u16 u16SinTbl[] = {
@@ -276,7 +273,7 @@ void MC_SinCos(motdrv_t* p, q15 s16Angle)
     /*   u16Index = (u16)(s16Angle + 32768); */
     /*   u16Index /= 64;     */
 
-    u16 u16Index = (u16)(s16Angle + 32768) >> 6;
+    u16 u16Index = (u16)(p->u16ElecAngle + 32768) >> 6;
 
     switch (u16Index & 0x0300)
     {

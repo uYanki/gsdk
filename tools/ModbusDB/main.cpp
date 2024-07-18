@@ -19,7 +19,7 @@
 #include "xlsxworkbook.h"
 #include "QDesktopServices"
 
-#define PATH qApp->applicationDirPath() + "/"
+//#define PATH qApp->applicationDirPath() + "/"
 // #define PATH QString("F:/gsdk/tools/ModbusParatblMaker/")
 #define PATH QString("F:/gsdk/examples/stm32hal_g070rb_Servo/Database/")
 
@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
                 break;
             }
 
-#if 0
+#if 1
             qDebug() << workSheet->sheetName()
                      << workSheet->cellAt(row, PARA_ADDRESS)->value().toString()
                      << workSheet->cellAt(row, PARA_VAR_NAME)->value().toString();

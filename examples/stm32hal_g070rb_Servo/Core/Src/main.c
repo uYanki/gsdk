@@ -40,6 +40,7 @@
 #include "gconf.h"
 #include "adconv.h"
 #include "pwmctrl.h"
+#include "motdrv.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -172,6 +173,14 @@ static hall_enc_t sHallEnc = {
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+void CloseLoop_Creat(axis_e eAxisNo);
+void CloseLoop_Init(axis_e eAxisNo);
+void CloseLoop_Cycle(axis_e eAxisNo);
+void OpenLoop_Creat(axis_e eAxisNo);
+void OpenLoop_Init(axis_e eAxisNo);
+void OpenLoop_Cycle(axis_e eAxisNo);
+void OpenLoop_Isr(axis_e eAxisNo);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -215,6 +224,9 @@ typedef enum {
     AXIS_APP_ENCIDENT,  // 编码器辨识
 } axis_app_e;
 
+/**
+ * @brief 控制字
+ */
 typedef union {
     struct {
         uint32_t ServoOn : 1;
@@ -223,7 +235,91 @@ typedef union {
     uint32_t u32All;
 } ctrlword_u;
 
-#include "motdrv.h"
+/**
+ * @brief 状态字
+ */
+typedef union {
+    struct {
+        uint32_t ServoOn : 1;
+        uint32_t _Resv   : 31;
+    } u32Bit;
+    uint32_t u32All;
+} statusword_u;
+
+typedef enum {
+    CTRL_MODE_POS,    ///< position mode
+    CTRL_MODE_SPD,    ///< speed mode
+    CTRL_MODE_TRQ,    ///< torque mode
+    CTRL_MODE_DS402,  ///< torque mode
+} ctrl_mode_e;
+
+void MotDrv_Isr(motdrv_t* pMotDrv, axis_e eAxisNo)
+{
+    MC_SinCos(pMotDrv);
+    MC_InvPark(pMotDrv);
+
+    switch (P(eAxisNo)._Resv519)
+    {
+        default:
+        case 0:
+            MC_InvClark(pMotDrv);
+            MC_MinMaxU(pMotDrv);
+            MC_ZeroSeqInj(pMotDrv);
+            break;
+        case 1:
+            SVPWMx(pMotDrv);
+            break;
+        case 2:
+            svm(pMotDrv);
+            break;
+        case 3:
+            SVGEN_run(pMotDrv, 0);
+            break;
+    }
+
+    PWM_SetDuty(pMotDrv->Ta, pMotDrv->Tb, pMotDrv->Tc, eAxisNo);
+
+    P(eAxisNo).u16ElecAngle = pMotDrv->u16ElecAngle;
+
+    P(eAxisNo).s16Ualpha = pMotDrv->Ualpha;
+    P(eAxisNo).s16Ubeta  = pMotDrv->Ubeta;
+
+    P(eAxisNo).s16Ud = pMotDrv->Ud;
+    P(eAxisNo).s16Uq = pMotDrv->Uq;
+
+    P(eAxisNo).u16Sector = pMotDrv->eSector;
+
+    P(eAxisNo).u16PwmaComp = pMotDrv->Ta;
+    P(eAxisNo).u16PwmaComp = pMotDrv->Tb;
+    P(eAxisNo).u16PwmaComp = pMotDrv->Tc;
+}
+
+void CtrlCmd_Cycle(axis_e eAxisNo)
+{
+    static u32 u32CommCmdPre = 0;
+
+    u32 u32CommCmdCur = P(eAxisNo).u32CommCmd;
+
+    if (u32CommCmdPre ^ u32CommCmdCur)
+    {
+        ctrlword_u uCtrlWord;
+
+        uCtrlWord.u32All = u32CommCmdCur;
+
+        if (uCtrlWord.u32Bit.ServoOn)
+        {
+            PWM_Start(eAxisNo);
+            P(eAxisNo).u16AxisFSM = AXIS_RUN;
+        }
+        else
+        {
+            PWM_Stop(eAxisNo);
+            P(eAxisNo).u16AxisFSM = AXIS_IDLE;
+        }
+
+        u32CommCmdPre = u32CommCmdCur;
+    }
+}
 
 /* USER CODE END 0 */
 
@@ -329,8 +425,6 @@ int main(void)
 
     sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
 
-    // P(AXIS_0).u32CommCmd = 1;
-
     while (1)
     {
         // led
@@ -338,8 +432,6 @@ int main(void)
 
         // key
         PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
-
-        // PeriodicTask(125 * UNIT_US, HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv)));
 
         // modbus
         eMBPoll();
@@ -355,36 +447,9 @@ int main(void)
         P(eAxisNo).u16EncPos     = sHallEnc.u16EncPos;
         P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
         P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
-        P(eAxisNo).u16ElecAngle  = sHallEnc.u16ElecAngle;
+        P(eAxisNo).s32UserSpdFb  = sHallEnc.s16SpdFb;
 
-        P(eAxisNo).s32UserSpdFb = sHallEnc.s16SpdFb;
-
-        {
-#define BIT_SERVO_ON 0
-
-            static u32 u32CommCmdPre = 0;
-            u32        u32CommCmdCur = P(eAxisNo).u32CommCmd;
-
-            if (u32CommCmdPre ^ u32CommCmdCur)
-            {
-                ctrlword_u uCtrlWord;
-
-                uCtrlWord.u32All = u32CommCmdCur;
-
-                if (uCtrlWord.u32Bit.ServoOn)  // TODO: use union
-                {
-                    PWM_Start(eAxisNo);
-                    P(eAxisNo).u16AxisFSM = AXIS_RUN;
-                }
-                else
-                {
-                    PWM_Stop(eAxisNo);
-                    P(eAxisNo).u16AxisFSM = AXIS_IDLE;
-                }
-
-                u32CommCmdPre = u32CommCmdCur;
-            }
-        }
+        CtrlCmd_Cycle(eAxisNo);
 
         if (P(eAxisNo).u16AxisFSM == AXIS_RUN)
         {
@@ -392,48 +457,72 @@ int main(void)
             {
                 case AXIS_APP_GENERIC:
                 {
-                    break;
-                }
-                case AXIS_APP_OPENLOOP:
-                {
                     PeriodicTask(125 * UNIT_US, {
                         motdrv_t foc;
 
-                        foc.Uq      = 8000;
-                        foc.Ud      = 0;
+                        foc.Uq      = P(eAxisNo).s16OpenUqRef;
+                        foc.Ud      = P(eAxisNo).s16OpenUdRef;
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
 
-                        P(eAxisNo).u16ElecAngle += 125;
+                        foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
 
-                        MC_SinCos(&foc, P(eAxisNo).u16ElecAngle);
-                        MC_InvPark(&foc);
-
-                        switch (P(eAxisNo).s16Uq)
+                        switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
+                            case CTRL_MODE_POS:
+                            {
+                                break;
+                            }
+
+                            case CTRL_MODE_SPD:
+                            {
+                                break;
+                            }
+
+                            case CTRL_MODE_TRQ:
+                            {
+                                break;
+                            }
+
                             default:
-                            case 0:
-                                MC_InvClark(&foc);
-                                MC_MinMaxU(&foc);
-                                MC_ZeroSeqInj(&foc);
+                            case CTRL_MODE_DS402:
+                            {
                                 break;
-                            case 1:
-                                SVPWMx(&foc);
-                                break;
-                            case 2:
-                                svm(&foc);
-                                break;
-                            case 3:
-                                SVGEN_run(&foc, 0);
-                                break;
+                            }
                         }
 
-                        PWM_SetDuty(foc.Ta, foc.Tb, foc.Tc, eAxisNo);
+                        MotDrv_Isr(&foc, eAxisNo);
                     });
 
                     break;
                 }
+
+                case AXIS_APP_OPENLOOP:
+                {
+                    // P(eAxisNo).u16ElecAngle = P(eAxisNo).s16OpenElecAngInit;
+
+                    PeriodicTask(P(eAxisNo).u16OpenPeriod * UNIT_US, {
+                        motdrv_t foc;
+
+                        foc.Uq      = P(eAxisNo).s16OpenUqRef;
+                        foc.Ud      = P(eAxisNo).s16OpenUdRef;
+                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
+
+                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngle + P(eAxisNo).s16OpenElecAngInc;
+
+                        MotDrv_Isr(&foc, eAxisNo);
+                    });
+
+                    break;
+                }
+
                 case AXIS_APP_ENCIDENT:
                 {
+                    break;
+                }
+
+                default:
+                {
+                    // AlmUpdate()
                     break;
                 }
             }
@@ -561,6 +650,13 @@ void ParaTblInit(void)
 }
 
 void AxisApp()
+{
+}
+
+void CloseLoop_Creat(axis_e eAxisNo) {}
+void CloseLoop_Init(axis_e eAxisNo) {}
+
+void CloseLoop_Cycle(axis_e eAxisNo)
 {
 }
 
