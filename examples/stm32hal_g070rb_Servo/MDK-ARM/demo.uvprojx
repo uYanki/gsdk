@@ -2969,6 +2969,16 @@
               <FileType>1</FileType>
               <FilePath>..\Bsp\pwmctrl.c</FilePath>
             </File>
+            <File>
+              <FileName>abs_tformat.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\encoder\abs_tformat.c</FilePath>
+            </File>
+            <File>
+              <FileName>absEnc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\encoder\absEnc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3103,6 +3113,101 @@
               <FileName>arm_pid_reset_q15.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_reset_q15.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_pid_init_q31.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_init_q31.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_pid_reset_q31.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_reset_q31.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>axis/motdrv</GroupName>
+          <Files>
+            <File>
+              <FileName>motdrv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\motdrv.c</FilePath>
+            </File>
+            <File>
+              <FileName>posloop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\posloop.c</FilePath>
+            </File>
+            <File>
+              <FileName>spdloop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\spdloop.c</FilePath>
+            </File>
+            <File>
+              <FileName>trqloop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\trqloop.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>axis/pathplan</GroupName>
+          <Files>
+            <File>
+              <FileName>pathplan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\pathplan\pathplan.c</FilePath>
+            </File>
+            <File>
+              <FileName>posplan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\pathplan\posplan.c</FilePath>
+            </File>
+            <File>
+              <FileName>spdplan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\pathplan\spdplan.c</FilePath>
+            </File>
+            <File>
+              <FileName>trqplan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\pathplan\trqplan.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>axis/logicctrl</GroupName>
+          <Files>
+            <File>
+              <FileName>cmdctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\logicctrl\cmdctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>homing.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\logicctrl\homing.c</FilePath>
+            </File>
+            <File>
+              <FileName>logicctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\logicctrl\logicctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>posctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\logicctrl\posctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>spdctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\logicctrl\spdctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>trqctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\logicctrl\trqctrl.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -324,30 +324,30 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),      W(U16_MAX), B_RW_M2 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0316 u16MotEmfCoeff
     {            W(0),            W(0),      W(U16_MAX), B_RW_M2 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0317 u16MotTrqCoeff
     {            W(0),            W(0),      W(U16_MAX), B_RW_M2 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0318 u16MotTm
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0319 _Resv319
-    {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0320 u16EncWorkMode
-    {            W(6),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0321 u16EncRes
-    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0322 u32EncPosInitWL
-    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0322 u32EncPosInitWH
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0324 u16EncPos
-    {           W0(0),           W0(0),           W0(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD0 }, // P0325 s64EncMultPosW0
-    {           W1(0),           W1(0),           W1(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD1 }, // P0325 s64EncMultPosW1
-    {           W2(0),           W2(0),           W2(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD2 }, // P0325 s64EncMultPosW2
-    {           W3(0),           W3(0),           W3(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD3 }, // P0325 s64EncMultPosW3
-    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0329 s32EncTurnsWL
-    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0329 s32EncTurnsWH
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0331 _Resv331
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0332 u16HallState
+    {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0319 u16EncType
+    {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0320 u16AbsEncWorkMode
+    {           WL(6),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0321 u32EncResWL
+    {           WH(6),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0321 u32EncResWH
+    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0323 u32EncPosInitWL
+    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0323 u32EncPosInitWH
+    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0325 u32EncPosWL
+    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0325 u32EncPosWH
+    {           W0(0),           W0(0),           W0(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD0 }, // P0327 s64EncMultPosW0
+    {           W1(0),           W1(0),           W1(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD1 }, // P0327 s64EncMultPosW1
+    {           W2(0),           W2(0),           W2(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD2 }, // P0327 s64EncMultPosW2
+    {           W3(0),           W3(0),           W3(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD3 }, // P0327 s64EncMultPosW3
+    {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0331 s32EncTurnsWL
+    {           WH(0),           WH(0),           WH(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB1 }, // P0331 s32EncTurnsWH
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0333 _Resv333
-    {            W(0),            W(0),      W(U16_MAX),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0334 u16CurSampType
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0335 u16PwmDutyMax
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0336 _Resv336
-    {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0337 u16CarryFreq
-    {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0338 u16PosLoopFreq
-    {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0339 u16SpdLoopFreq
-    {         W(4000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0340 u16CurLoopFreq
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0341 _Resv341
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0342 _Resv342
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0334 u16HallState
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0335 _Resv335
+    {            W(0),            W(0),      W(U16_MAX),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0336 u16CurSampType
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0337 u16PwmDutyMax
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0338 _Resv338
+    {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0339 u16CarryFreq
+    {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0340 u16PosLoopFreq
+    {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0341 u16SpdLoopFreq
+    {         W(4000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0342 u16CurLoopFreq
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0343 _Resv343
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0344 _Resv344
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0345 _Resv345
@@ -625,9 +625,9 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0617 _Resv617
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0618 _Resv618
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0619 _Resv619
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0620 _Resv620
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0621 _Resv621
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0622 _Resv622
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0620 u16EncCmd
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0621 u16EncErrCode
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0622 u16EncComErrSum
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0623 _Resv623
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0624 _Resv624
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0625 u16AxisFSM

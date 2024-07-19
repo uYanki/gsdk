@@ -435,17 +435,15 @@ void SVPWMx(motdrv_t* p)
 
 void MC_ZeroSeqInj(motdrv_t* p)
 {
-#if 0
-    q15 U0 = -QDiv2(p->Umax + p->Umin);
-#else
-    q15 U0 = (p->Umid) >> 1;
-#endif
+    q15 U0 = -QDiv2(p->Umax + p->Umin);  // V0=-0.5*(Vmax+Vmin)
 
     float32_t m = 2 / M_SQRT3;
 
-    p->Ta = m * Q15Mul(p->Ua + U0, p->DutyMax / 2) + p->DutyMax / 2;
-    p->Tb = m * Q15Mul(p->Ub + U0, p->DutyMax / 2) + p->DutyMax / 2;
-    p->Tc = m * Q15Mul(p->Uc + U0, p->DutyMax / 2) + p->DutyMax / 2;
+    u16 u16DutyHalf = p->DutyMax / 2;
+
+    p->Ta = m * Q15Mul(p->Ua + U0, u16DutyHalf) + u16DutyHalf;
+    p->Tb = m * Q15Mul(p->Ub + U0, u16DutyHalf) + u16DutyHalf;
+    p->Tc = m * Q15Mul(p->Uc + U0, u16DutyHalf) + u16DutyHalf;
 }
 
 void MC_SVPWM5(motdrv_t* p)

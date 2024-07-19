@@ -282,25 +282,23 @@ typedef struct __packed {
     u16 u16MotEmfCoeff;      // P0316 电机反电动势常数
     u16 u16MotTrqCoeff;      // P0317 电机转矩系数
     u16 u16MotTm;            // P0318 电机机械时间常数
-    u16 _Resv319;            // P0319 
-    u16 u16EncWorkMode;      // P0320 编码器工作模式
-    u16 u16EncRes;           // P0321 编码器分辨率
-    u32 u32EncPosInit;       // P0322 编码器初始位置
-    u16 u16EncPos;           // P0324 编码器单圈位置
-    s64 s64EncMultPos;       // P0325 编码器多圈位置
-    s32 s32EncTurns;         // P0329 编码器圈数
-    u16 _Resv331;            // P0331 
-    u16 u16HallState;        // P0332 霍尔真值
+    u16 u16EncType;          // P0319 编码器类型
+    u16 u16AbsEncWorkMode;   // P0320 绝对值编码器工作模式
+    u32 u32EncRes;           // P0321 编码器分辨率
+    u32 u32EncPosInit;       // P0323 编码器初始位置
+    u32 u32EncPos;           // P0325 编码器单圈位置
+    s64 s64EncMultPos;       // P0327 编码器多圈位置
+    s32 s32EncTurns;         // P0331 编码器圈数
     u16 _Resv333;            // P0333 
-    u16 u16CurSampType;      // P0334 电流采样类型
-    u16 u16PwmDutyMax;       // P0335 
-    u16 _Resv336;            // P0336 
-    u16 u16CarryFreq;        // P0337 载波频率
-    u16 u16PosLoopFreq;      // P0338 位置环频率
-    u16 u16SpdLoopFreq;      // P0339 速度环频率
-    u16 u16CurLoopFreq;      // P0340 电流环频率
-    u16 _Resv341;            // P0341 
-    u16 _Resv342;            // P0342 
+    u16 u16HallState;        // P0334 霍尔真值
+    u16 _Resv335;            // P0335 
+    u16 u16CurSampType;      // P0336 电流采样类型
+    u16 u16PwmDutyMax;       // P0337 
+    u16 _Resv338;            // P0338 
+    u16 u16CarryFreq;        // P0339 载波频率
+    u16 u16PosLoopFreq;      // P0340 位置环频率
+    u16 u16SpdLoopFreq;      // P0341 速度环频率
+    u16 u16CurLoopFreq;      // P0342 电流环频率
     u16 _Resv343;            // P0343 
     u16 _Resv344;            // P0344 
     u16 _Resv345;            // P0345 
@@ -480,9 +478,9 @@ typedef struct __packed {
     u16 _Resv617;            // P0617 
     u16 _Resv618;            // P0618 
     u16 _Resv619;            // P0619 
-    u16 _Resv620;            // P0620 
-    u16 _Resv621;            // P0621 
-    u16 _Resv622;            // P0622 
+    u16 u16EncCmd;           // P0620 
+    u16 u16EncErrCode;       // P0621 编码器错误代码
+    u16 u16EncComErrSum;     // P0622 编码器通信错误次数
     u16 _Resv623;            // P0623 
     u16 _Resv624;            // P0624 
     u16 u16AxisFSM;          // P0625 轴状态机

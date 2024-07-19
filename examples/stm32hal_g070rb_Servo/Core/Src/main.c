@@ -193,6 +193,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 }
 
+#include "encoder/absEnc.h"
+
+abs_drv_t AbsDrv;
+abs_enc_t AbsEnc;
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
     D._Resv100 = ADConv[0];
@@ -212,6 +217,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D.s16UaiSi0 = GetUai1();
     D.s16UaiSi1 = GetUai2();
     D.u16UcdcSi = D.u16UmdcSi = GetUai2();
+
+    AbsEncIsr(&AbsEnc, AXIS_0);
 
     // AxisIsr(AXIS_1);
 }
@@ -257,6 +264,36 @@ typedef enum {
     CTRL_MODE_DS402,  ///< torque mode
 } ctrl_mode_e;
 
+#if 1
+
+#include "usart.h"
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+{
+    if (huart->Instance == TFORMAT_UART_PORT)
+    {
+        TFormatRdPos(&AbsDrv);
+        P(0).s32SpdDigRef03 = AbsDrv.u32Pos;
+        P(0).s32SpdDigRef04++;
+    }
+}
+
+#endif  // __ABS_ENC_TFORMAT_SW
+
+void EncInit(axis_e eAxisNo)
+{
+    static abs_tformat_t sAbsTformat;
+
+    abs_drv_t* pAbsDrv = &AbsDrv;
+    abs_enc_t* pAbsEnc = &AbsEnc;
+
+    pAbsEnc->u8EncBit     = 14;
+    pAbsEnc->u32EncRes    = 1 << pAbsEnc->u8EncBit;
+    pAbsDrv->u8Mode       = 0;  // ABS_COMM_RS485;
+    pAbsDrv->pArgs        = &sAbsTformat;
+    P(eAxisNo).u16EncType = ABS_ENC_TFORMAT;
+}
+
 void MotDrv_Isr(motdrv_t* pMotDrv, axis_e eAxisNo)
 {
     MC_SinCos(pMotDrv);
@@ -299,7 +336,9 @@ void MotDrv_Isr(motdrv_t* pMotDrv, axis_e eAxisNo)
 }
 
 static arm_pid_instance_q15 s_sSpdPi;
-static bool                 s_bInit = true;
+static arm_pid_instance_q31 s_sPosPi;
+static bool                 s_bSpdInit = true;
+static bool                 s_bPosInit = true;
 
 void CtrlCmd_Cycle(axis_e eAxisNo)
 {
@@ -322,7 +361,7 @@ void CtrlCmd_Cycle(axis_e eAxisNo)
         {
             PWM_Stop(eAxisNo);
             P(eAxisNo).u16AxisFSM = AXIS_IDLE;
-            s_bInit               = true;
+            s_bSpdInit = s_bPosInit = true;
         }
 
         u32CommCmdPre = u32CommCmdCur;
@@ -437,6 +476,10 @@ int main(void)
 
     sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
 
+    P(eAxisNo).u16CtrlMode = CTRL_MODE_POS;
+
+    EncInit(eAxisNo);
+
     while (1)
     {
         // led
@@ -448,6 +491,8 @@ int main(void)
         // modbus
         eMBPoll();
 
+        AbsEncCycle(&AbsEnc, eAxisNo);
+
         D.u32SysRunTime = GetTickMs();
 
         HallEnc_Isr(&sHallEnc);
@@ -455,13 +500,17 @@ int main(void)
         axis_e eAxisNo = AXIS_0;
 
         P(eAxisNo).u16HallState  = sHallEnc.eHallState;
-        P(eAxisNo).u16EncRes     = sHallEnc.u16EncRes;
-        P(eAxisNo).u16EncPos     = sHallEnc.u16EncPos;
+        P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
+        P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
         P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
         P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
         P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
 
         CtrlCmd_Cycle(eAxisNo);
+
+        PeriodicTask(125 * UNIT_US, {
+            P(eAxisNo).s32SpdDigRef02 = AbsEnc.s64MultPos;
+        });
 
         if (P(eAxisNo).u16AxisFSM == AXIS_RUN)
         {
@@ -479,6 +528,31 @@ int main(void)
                         {
                             case CTRL_MODE_POS:
                             {
+                                s_sPosPi.Kp = P(eAxisNo).u16PosLoopKp / 10;
+                                s_sPosPi.Ki = P(eAxisNo).u16PosLoopKi / 10;
+                                s_sPosPi.Kd = P(eAxisNo).u16PosLoopKd / 10;
+                                arm_pid_init_q31(&s_sPosPi, s_bPosInit);
+
+                                s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
+                                s_sSpdPi.Ki = P(eAxisNo).u16SpdLoopKi;
+                                s_sSpdPi.Kd = P(eAxisNo).u16SpdLoopKd;
+                                arm_pid_init_q15(&s_sSpdPi, s_bSpdInit);
+
+                                s_bSpdInit = s_bPosInit = false;
+
+                                // P(eAxisNo).s32DrvSpdRef = P(eAxisNo).s32SpdDigRef;
+                                // P(eAxisNo).s64EncMultPos
+                                // P(eAxisNo).s32SpdDigRef00;
+                                P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
+
+                                // int32_t delta = P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).s32SpdDigRef01;
+
+                                // if (abs(delta) > 20)
+                                {
+                                    q31_t q = arm_pid_q31(&s_sPosPi, 200 - P(eAxisNo).s64EncMultPos);
+                                    foc.Uq  = arm_pid_q15(&s_sSpdPi, CLAMP(q, S16_MIN, S16_MAX));
+                                }
+
                                 break;
                             }
 
@@ -487,9 +561,9 @@ int main(void)
                                 s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
                                 s_sSpdPi.Ki = P(eAxisNo).u16SpdLoopKi;
                                 s_sSpdPi.Kd = P(eAxisNo).u16SpdLoopKd;
-                                arm_pid_init_q15(&s_sSpdPi, s_bInit);
+                                arm_pid_init_q15(&s_sSpdPi, s_bSpdInit);
 
-                                s_bInit = false;
+                                s_bSpdInit = false;
 
                                 P(eAxisNo).s32DrvSpdRef = P(eAxisNo).s32SpdDigRef;
 
@@ -625,13 +699,18 @@ static bool IsPressed(flexbtn_t* pHandle)
 
 static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
 {
-    if (flexbtn[BUTTON_NEXT].eEvent == FLEXBTN_EVENT_LONG_HOLD && flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
+    //     if (flexbtn[BUTTON_NEXT].eEvent == FLEXBTN_EVENT_LONG_HOLD && flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
+    //     {
+    //         LOGI("combined key event = %s + %s", FlexBtnEventStr(flexbtn[BUTTON_NEXT].eEvent), FlexBtnEventStr(flexbtn[BUTTON_OKAY].eEvent));
+    //     }
+    //     else
+    //     {
+    //         LOGI("key%d event = %s", pHandle->u8ID, FlexBtnEventStr(eEvent));
+    //     }
+
+    if (flexbtn[BUTTON_NEXT].eEvent == FLEXBTN_EVENT_RELEASE)
     {
-        LOGI("combined key event = %s + %s", FlexBtnEventStr(flexbtn[BUTTON_NEXT].eEvent), FlexBtnEventStr(flexbtn[BUTTON_OKAY].eEvent));
-    }
-    else
-    {
-        LOGI("key%d event = %s", pHandle->u8ID, FlexBtnEventStr(eEvent));
+        HAL_NVIC_SystemReset();
     }
 }
 
