@@ -344,47 +344,8 @@ void AbsEncCreat(abs_enc_t* pEnc, axis_e eAxisNo)
 void AbsEncInit(abs_enc_t* pEnc, axis_e eAxisNo)
 {}
 
-typedef union {
-    struct {
-        u16 TurnsClear : 1;
-        u16 ErrorClear : 1;
-        u16 StateReset : 1;
-    } u16Bit;
-
-    uint16_t u16All;
-
-} enc_cmd_u;
-
 void AbsEncCycle(abs_enc_t* pEnc, axis_e eAxisNo)
 {
-    if (pEnc->u16CmdPre ^ P(eAxisNo).u16EncCmd)  // 上升沿触发
-    {
-        enc_cmd_u uCmdPre;
-        enc_cmd_u uCmdCur;
-
-        uCmdPre.u16All = pEnc->u16CmdPre;
-        uCmdCur.u16All = P(eAxisNo).u16EncCmd;
-
-        if (uCmdCur.u16Bit.TurnsClear && !uCmdPre.u16Bit.TurnsClear)
-        {
-            P(eAxisNo).s32EncTurns = 0;
-            pEnc->s32Turns         = 0;
-        }
-
-        if (uCmdCur.u16Bit.ErrorClear && !uCmdPre.u16Bit.ErrorClear)
-        {
-            P(eAxisNo).u16EncErrCode   = 0;
-            P(eAxisNo).u16EncComErrSum = 0;
-            pEnc->pEncDrv->u16CommErr  = 0;
-        }
-
-        if (uCmdCur.u16Bit.StateReset && !uCmdPre.u16Bit.StateReset)
-        {
-            pEnc->eState = ABS_ENC_STATE_INIT;
-        }
-
-        pEnc->u16CmdPre = P(eAxisNo).u16EncCmd;
-    }
 }
 
 void AbsEncIsr(abs_enc_t* pEnc, axis_e eAxisNo)

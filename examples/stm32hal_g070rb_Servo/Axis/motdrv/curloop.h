@@ -3,6 +3,9 @@
 
 #include "paratbl.h"
 
+#include "motpos.h"
+#include "cursamp.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,7 +15,8 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    u16 _Resv;
+    mot_pos_t  sMotPos;
+    cur_samp_t sCurSamp;
 } cur_loop_t;
 
 //---------------------------------------------------------------------------

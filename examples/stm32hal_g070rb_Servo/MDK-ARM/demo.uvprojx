@@ -3154,6 +3154,16 @@
               <FileType>1</FileType>
               <FilePath>..\Axis\motdrv\cursamp.c</FilePath>
             </File>
+            <File>
+              <FileName>motpos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\motpos.c</FilePath>
+            </File>
+            <File>
+              <FileName>motspd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\motspd.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

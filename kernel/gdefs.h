@@ -73,8 +73,12 @@ extern "C" {
 #define FALSE (0) /* boolean false */
 #endif
 
+#if 0
 typedef float  float32_t;
 typedef double float64_t;
+#else
+#include "arm_math.h"
+#endif
 
 typedef int8_t  s8;
 typedef int16_t s16;

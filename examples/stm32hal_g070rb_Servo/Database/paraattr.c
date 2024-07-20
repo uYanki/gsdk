@@ -370,7 +370,7 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0362 _Resv362
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0363 _Resv363
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0364 _Resv364
-    {            W(0),            W(0),            W(2), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0365 u16AppSel
+    {            W(1),            W(0),            W(2), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0365 u16AppSel
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0366 u16CtrlMethod
     {            W(1),            W(0),            W(3), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0367 u16CtrlMode
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0368 u16CtrlCmdSrc
@@ -618,7 +618,7 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0610 _Resv610
     {            W(5),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0611 u16OpenPeriod
     {            W(0),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0612 s16OpenElecAngInit
-    {         W(1000),        W(-3000),         W(3000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0613 s16OpenElecAngInc
+    {         W(10),        W(-3000),         W(3000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0613 s16OpenElecAngInc
     {        W(16000),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0614 s16OpenUqRef
     {            W(0),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0615 s16OpenUdRef
     {            W(0),            W(0),           W(15), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0616 u16TrqMulRefSel

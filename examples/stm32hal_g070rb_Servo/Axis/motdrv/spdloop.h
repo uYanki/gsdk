@@ -2,6 +2,7 @@
 #define __SPD_LOOP_H__
 
 #include "paratbl.h"
+#include "motspd.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,6 +14,8 @@ extern "C" {
 
 typedef struct {
     arm_pid_instance_q15 sPID;
+
+    mot_spd_t sMotSpd;
 } spd_loop_t;
 
 //---------------------------------------------------------------------------

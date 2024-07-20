@@ -31,18 +31,23 @@
 
 void SpdLoopCreat(spd_loop_t* pSpdLoop, axis_e eAxisNo)
 {
+    MotSpdCreat(&pSpdLoop->sMotSpd, eAxisNo);
 }
 
 void SpdLoopInit(spd_loop_t* pSpdLoop, axis_e eAxisNo)
 {
+    MotSpdInit(&pSpdLoop->sMotSpd, eAxisNo);
 }
 
 void SpdLoopCycle(spd_loop_t* pSpdLoop, axis_e eAxisNo)
 {
+    MotSpdCycle(&pSpdLoop->sMotSpd, eAxisNo);
 }
 
 void SpdLoopIsr(spd_loop_t* pSpdLoop, axis_e eAxisNo)
 {
+    MotSpdIsr(&pSpdLoop->sMotSpd, eAxisNo);
+
     if (u16AxisFSM_i(eAxisNo) == AXIS_RUN)
     {
         pSpdLoop->sPID.Kp = u16SpdLoopKp_i(eAxisNo);

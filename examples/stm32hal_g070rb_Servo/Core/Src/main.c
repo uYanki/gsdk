@@ -231,18 +231,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
     if (huart->Instance == TFORMAT_UART_PORT)
     {
+        // if (__HAL_DMA_GetCounter(huart->hdmarx) == 0) {}
         TFormatRdPos(&AbsDrv);
-        P(0).s32SpdDigRef03 = AbsDrv.u32Pos;
-        P(0).s32SpdDigRef04++;
     }
 }
 
 #endif  // __ABS_ENC_TFORMAT_SW
 
+abs_tformat_t sAbsTformat;
+
 void EncInit(axis_e eAxisNo)
 {
-    static abs_tformat_t sAbsTformat;
-
     abs_drv_t* pAbsDrv = &AbsDrv;
     abs_enc_t* pAbsEnc = &AbsEnc;
 
@@ -412,7 +411,7 @@ int main(void)
 
     P(eAxisNo).u16CtrlMode = CTRL_MODE_POS;
 
-    EncInit(eAxisNo);
+    // EncInit(eAxisNo);
 
     axis_t sAxis;
 
@@ -430,7 +429,7 @@ int main(void)
         // modbus
         eMBPoll();
 
-        AbsEncCycle(&AbsEnc, eAxisNo);
+        // AbsEncCycle(&AbsEnc, eAxisNo);
 
         D.u32SysRunTime = GetTickMs();
 
@@ -449,7 +448,48 @@ int main(void)
 
         PeriodicTask(125 * UNIT_US, {
             // P(eAxisNo).s32SpdDigRef02 = AbsEnc.s64MultPos;
+
+            static uint8_t sau8TxBuf[1] = {0x02};
+            static uint8_t pau8RxBuf[6] = {0};
+
             AxisIsr(&sAxis, eAxisNo);
+            // TFormatRdPos(&AbsDrv);
+            // P(0).s32SpdDigRef03 = AbsDrv.u32Pos;
+            // P(0).s32SpdDigRef04++;
+            // P(0).s32SpdDigRef12 = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+
+            // TFormatWrCmd2(&AbsDrv);
+
+            // void cmd_tx(u8 * pau8TxBuf, u8 u8TxCnt);
+            // void cmd_rx(u8 * pau8RxBuf, u8 u8RxCnt);
+
+            // P(0).s32SpdDigRef04 = (((u32)pau8RxBuf[4] << 16) + ((u32)pau8RxBuf[3] << 8) + (u32)pau8RxBuf[2]) >> 2;
+
+            // P(0).s32SpdDigRef07 = pau8RxBuf[2];
+            // P(0).s32SpdDigRef08 = pau8RxBuf[3];
+            // P(0).s32SpdDigRef09 = pau8RxBuf[4];
+            // P(0).s32SpdDigRef10 = pau8RxBuf[5];
+
+            // cmd_tx(sau8TxBuf, 1);
+            // cmd_rx(pau8RxBuf, 6);
+            // DelayBlockUs(100);
+
+            // P(0).s32SpdDigRef11++;
+
+            static uint8_t au8Rxbuf[6];
+            static uint8_t au8Txbuf[1] = {0x02};
+
+            // P(0).s32SpdDigRef05 = (((u32)au8Rxbuf[4] << 16) + ((u32)au8Rxbuf[3] << 8) + (u32)au8Rxbuf[2]) >> 2;
+
+            // HAL_GPIO_WritePin(RS485_RTS2_GPIO_Port, RS485_RTS2_Pin, GPIO_PIN_SET);  // TX
+            // HAL_UART_Transmit(&UART_TFORMAT, au8Txbuf, 1, 0xFF);
+            // HAL_GPIO_WritePin(RS485_RTS2_GPIO_Port, RS485_RTS2_Pin, GPIO_PIN_RESET);  // RX
+            // DelayBlockUs(20);
+            // HAL_UART_Receive_DMA(&UART_TFORMAT, au8Rxbuf, 6);
+            // DelayBlockUs(20);
+            // DelayBlockUs(1);
+            // void TFormatRdPos2(u8 * pau8RxBuf);
+            // TFormatRdPos2(sAbsTformat.au8RxBuf);
         });
 
         if (P(eAxisNo).u16AxisFSM == AXIS_RUN)
