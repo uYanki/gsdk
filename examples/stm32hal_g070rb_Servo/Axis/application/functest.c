@@ -1,10 +1,10 @@
-#include "encident.h"
+#include "functest.h"
 
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG   "encident"
+#define LOG_LOCAL_TAG   "functest"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
@@ -19,14 +19,14 @@
 // Functions
 //---------------------------------------------------------------------------
 
-void EncIdentCreat(enc_ident_t* pEncident, axis_e eAxisNo) {}
+void FuncTestCreat(func_test_t* pFuncTest, axis_e eAxisNo) {}
 
-void EncIdentInit(enc_ident_t* pEncident, axis_e eAxisNo) {}
+void FuncTestInit(func_test_t* pFuncTest, axis_e eAxisNo) {}
 
-void EncIdentEnter(enc_ident_t* pEncident, axis_e eAxisNo) {}
+void FuncTestEnter(func_test_t* pFuncTest, axis_e eAxisNo) {}
 
-void EncIdentExit(enc_ident_t* pEncident, axis_e eAxisNo) {}
+void FuncTestExit(func_test_t* pFuncTest, axis_e eAxisNo) {}
 
-void EncIdentCycle(enc_ident_t* pEncident, axis_e eAxisNo) {}
+void FuncTestCycle(func_test_t* pFuncTest, axis_e eAxisNo) {}
 
-void EncIdentIsr(enc_ident_t* pEncident, axis_e eAxisNo) {}
+void FuncTestIsr(func_test_t* pFuncTest, axis_e eAxisNo) {}

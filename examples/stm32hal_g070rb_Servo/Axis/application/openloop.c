@@ -19,18 +19,26 @@
 // Functions
 //---------------------------------------------------------------------------
 
-void OpenLoopCreat(openloop_t* pOpenLoop, axis_e eAxisNo)
+void OpenLoopCreat(open_loop_t* pOpenLoop, axis_e eAxisNo)
 {
 }
 
-void OpenLoopInit(openloop_t* pOpenLoop, axis_e eAxisNo)
+void OpenLoopInit(open_loop_t* pOpenLoop, axis_e eAxisNo)
 {
 }
 
-void OpenLoopCycle(openloop_t* pOpenLoop, axis_e eAxisNo)
+void OpenLoopEnter(open_loop_t* pOpenLoop, axis_e eAxisNo)
 {
 }
 
-void OpenLoopIsr(openloop_t* pOpenLoop, axis_e eAxisNo)
+void OpenLoopExit(open_loop_t* pOpenLoop, axis_e eAxisNo)
+{
+}
+
+void OpenLoopCycle(open_loop_t* pOpenLoop, axis_e eAxisNo)
+{
+}
+
+void OpenLoopIsr(open_loop_t* pOpenLoop, axis_e eAxisNo)
 {
 }

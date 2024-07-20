@@ -1,5 +1,5 @@
-#ifndef __OPENLOOP_H__
-#define __OPENLOOP_H__
+#ifndef __FUNC_TEST_H__
+#define __FUNC_TEST_H__
 
 #include "paratbl.h"
 
@@ -13,18 +13,18 @@ extern "C" {
 
 typedef struct {
     u16 _Resv;
-} open_loop_t;
+} func_test_t;
 
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void OpenLoopCreat(open_loop_t* pOpenLoop, axis_e eAxisNo);
-void OpenLoopInit(open_loop_t* pOpenLoop, axis_e eAxisNo);
-void OpenLoopEnter(open_loop_t* pOpenLoop, axis_e eAxisNo);
-void OpenLoopExit(open_loop_t* pOpenLoop, axis_e eAxisNo);
-void OpenLoopCycle(open_loop_t* pOpenLoop, axis_e eAxisNo);
-void OpenLoopIsr(open_loop_t* pOpenLoop, axis_e eAxisNo);
+void FuncTestCreat(func_test_t* pFuncTest, axis_e eAxisNo);
+void FuncTestInit(func_test_t* pFuncTest, axis_e eAxisNo);
+void FuncTestEnter(func_test_t* pFuncTest, axis_e eAxisNo);
+void FuncTestExit(func_test_t* pFuncTest, axis_e eAxisNo);
+void FuncTestCycle(func_test_t* pFuncTest, axis_e eAxisNo);
+void FuncTestIsr(func_test_t* pFuncTest, axis_e eAxisNo);
 
 #ifdef __cplusplus
 }

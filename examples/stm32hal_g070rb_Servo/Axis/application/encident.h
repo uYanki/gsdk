@@ -13,16 +13,18 @@ extern "C" {
 
 typedef struct {
     u16 _Resv;
-} encident_t;
+} enc_ident_t;
 
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void EncidentCreat(encident_t* pEncident, axis_e eAxisNo);
-void EncidentInit(encident_t* pEncident, axis_e eAxisNo);
-void EncidentCycle(encident_t* pEncident, axis_e eAxisNo);
-void EncidentIsr(encident_t* pEncident, axis_e eAxisNo);
+void EncIdentCreat(enc_ident_t* pEncident, axis_e eAxisNo);
+void EncIdentInit(enc_ident_t* pEncident, axis_e eAxisNo);
+void EncIdentEnter(enc_ident_t* pEncident, axis_e eAxisNo);
+void EncIdentExit(enc_ident_t* pEncident, axis_e eAxisNo);
+void EncIdentCycle(enc_ident_t* pEncident, axis_e eAxisNo);
+void EncIdentIsr(enc_ident_t* pEncident, axis_e eAxisNo);
 
 #ifdef __cplusplus
 }

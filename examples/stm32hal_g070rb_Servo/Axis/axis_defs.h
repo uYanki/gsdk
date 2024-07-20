@@ -20,6 +20,7 @@ typedef enum {
     AXIS_APP_GENERIC,   // 通用控制
     AXIS_APP_OPENLOOP,  // 开环测试
     AXIS_APP_ENCIDENT,  // 编码器辨识
+    AXIS_APP_FUNCTEST,  // 功能测试
 } axis_app_e;
 
 /**

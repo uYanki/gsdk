@@ -2741,6 +2741,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\mono_font.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_mt6701.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\spi_mt6701.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3230,6 +3235,11 @@
           <GroupName>axis/application</GroupName>
           <Files>
             <File>
+              <FileName>appmgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\application\appmgr.c</FilePath>
+            </File>
+            <File>
               <FileName>encident.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Axis\application\encident.c</FilePath>
@@ -3238,6 +3248,11 @@
               <FileName>openloop.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Axis\application\openloop.c</FilePath>
+            </File>
+            <File>
+              <FileName>functest.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\application\functest.c</FilePath>
             </File>
           </Files>
         </Group>

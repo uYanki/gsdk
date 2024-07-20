@@ -301,6 +301,8 @@ static bool                 s_bPosInit = true;
 #include "axis.h"
 #include "axis_defs.h"
 
+#include "spi_mt6701.h"
+
 /* USER CODE END 0 */
 
 /**
@@ -342,7 +344,7 @@ int main(void)
     MX_CRC_Init();
     MX_TIM6_Init();
     MX_USART2_UART_Init();
-    MX_SPI1_Init();
+    // MX_SPI1_Init();
     MX_TIM3_Init();
     MX_TIM14_Init();
     /* USER CODE BEGIN 2 */
@@ -367,6 +369,21 @@ int main(void)
     SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
 
 #endif
+
+    spi_mst_t spi = {
+        .MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
+        .MOSI = {GPIOB,             GPIO_PIN_4 },
+        .SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
+        .CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* RST */
+    };
+
+    spi_mt6701_t mt6701 = {
+        .hSPI = &spi,
+    };
+
+    SPI_Master_Init(&spi, 50000, SPI_DUTYCYCLE_50_50, MT6701_SPI_TIMING | SPI_FLAG_FAST_CLOCK_ENABLE | SPI_FLAG_SOFT_CS);
+
+    MT6701_Init(&mt6701);
 
     // key
     for (int i = 0; i < ARRAY_SIZE(flexbtn); ++i)
@@ -447,49 +464,8 @@ int main(void)
         AxisCycle(&sAxis, eAxisNo);
 
         PeriodicTask(125 * UNIT_US, {
-            // P(eAxisNo).s32SpdDigRef02 = AbsEnc.s64MultPos;
-
-            static uint8_t sau8TxBuf[1] = {0x02};
-            static uint8_t pau8RxBuf[6] = {0};
-
             AxisIsr(&sAxis, eAxisNo);
-            // TFormatRdPos(&AbsDrv);
-            // P(0).s32SpdDigRef03 = AbsDrv.u32Pos;
-            // P(0).s32SpdDigRef04++;
-            // P(0).s32SpdDigRef12 = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
-
-            // TFormatWrCmd2(&AbsDrv);
-
-            // void cmd_tx(u8 * pau8TxBuf, u8 u8TxCnt);
-            // void cmd_rx(u8 * pau8RxBuf, u8 u8RxCnt);
-
-            // P(0).s32SpdDigRef04 = (((u32)pau8RxBuf[4] << 16) + ((u32)pau8RxBuf[3] << 8) + (u32)pau8RxBuf[2]) >> 2;
-
-            // P(0).s32SpdDigRef07 = pau8RxBuf[2];
-            // P(0).s32SpdDigRef08 = pau8RxBuf[3];
-            // P(0).s32SpdDigRef09 = pau8RxBuf[4];
-            // P(0).s32SpdDigRef10 = pau8RxBuf[5];
-
-            // cmd_tx(sau8TxBuf, 1);
-            // cmd_rx(pau8RxBuf, 6);
-            // DelayBlockUs(100);
-
-            // P(0).s32SpdDigRef11++;
-
-            static uint8_t au8Rxbuf[6];
-            static uint8_t au8Txbuf[1] = {0x02};
-
-            // P(0).s32SpdDigRef05 = (((u32)au8Rxbuf[4] << 16) + ((u32)au8Rxbuf[3] << 8) + (u32)au8Rxbuf[2]) >> 2;
-
-            // HAL_GPIO_WritePin(RS485_RTS2_GPIO_Port, RS485_RTS2_Pin, GPIO_PIN_SET);  // TX
-            // HAL_UART_Transmit(&UART_TFORMAT, au8Txbuf, 1, 0xFF);
-            // HAL_GPIO_WritePin(RS485_RTS2_GPIO_Port, RS485_RTS2_Pin, GPIO_PIN_RESET);  // RX
-            // DelayBlockUs(20);
-            // HAL_UART_Receive_DMA(&UART_TFORMAT, au8Rxbuf, 6);
-            // DelayBlockUs(20);
-            // DelayBlockUs(1);
-            // void TFormatRdPos2(u8 * pau8RxBuf);
-            // TFormatRdPos2(sAbsTformat.au8RxBuf);
+            P(eAxisNo).s64DrvPosFb = MT6701_ReadAngle(&mt6701);
         });
 
         if (P(eAxisNo).u16AxisFSM == AXIS_RUN)
