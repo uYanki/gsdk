@@ -12,7 +12,6 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    q15_t                q15SpdOut;  // PID
     arm_pid_instance_q15 sPID;
 } spd_loop_t;
 

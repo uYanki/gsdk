@@ -5,7 +5,7 @@
 
 #include "posloop.h"
 #include "spdloop.h"
-#include "trqloop.h"
+#include "curloop.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,8 +17,8 @@ extern "C" {
 
 typedef struct {
     pos_loop_t sPosLoop;
-    trq_loop_t sTrqLoop;
     spd_loop_t sSpdLoop;
+    cur_loop_t sCurLoop;
 } motdrv_t;
 
 //---------------------------------------------------------------------------

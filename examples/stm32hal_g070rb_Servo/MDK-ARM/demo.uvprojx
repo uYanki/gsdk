@@ -3145,9 +3145,14 @@
               <FilePath>..\Axis\motdrv\spdloop.c</FilePath>
             </File>
             <File>
-              <FileName>trqloop.c</FileName>
+              <FileName>curloop.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Axis\motdrv\trqloop.c</FilePath>
+              <FilePath>..\Axis\motdrv\curloop.c</FilePath>
+            </File>
+            <File>
+              <FileName>cursamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\cursamp.c</FilePath>
             </File>
           </Files>
         </Group>

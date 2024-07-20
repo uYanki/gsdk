@@ -1,5 +1,5 @@
-#ifndef __CUR_LOOP_H__
-#define __CUR_LOOP_H__
+#ifndef __CUR_SAMP_H__
+#define __CUR_SAMP_H__
 
 #include "paratbl.h"
 
@@ -13,16 +13,16 @@ extern "C" {
 
 typedef struct {
     u16 _Resv;
-} cur_loop_t;
+} cur_samp_t;
 
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void CurLoopCreat(cur_loop_t* pCurLoop, axis_e eAxisNo);
-void CurLoopInit(cur_loop_t* pCurLoop, axis_e eAxisNo);
-void CurLoopCycle(cur_loop_t* pCurLoop, axis_e eAxisNo);
-void CurLoopIsr(cur_loop_t* pCurLoop, axis_e eAxisNo);
+void CurSampCreat(cur_samp_t* pCurSamp, axis_e eAxisNo);
+void CurSampInit(cur_samp_t* pCurSamp, axis_e eAxisNo);
+void CurSampCycle(cur_samp_t* pCurSamp, axis_e eAxisNo);
+void CurSampIsr(cur_samp_t* pCurSamp, axis_e eAxisNo);
 
 #ifdef __cplusplus
 }

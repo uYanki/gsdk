@@ -26,6 +26,7 @@
 #define u16JogSpdRef_i(eAxisNo)         P(eAxisNo).u16JogSpdRef
 #define u16JogAccDecTime_i(eAxisNo)     P(eAxisNo).u16JogAccDecTime
 
+#define u16SpdLimSrc_i(eAxisNo)         P(eAxisNo).u16SpdLimSrc
 #define u16SpdLimFwd_i(eAxisNo)         P(eAxisNo).u16SpdLimFwd
 #define u16SpdLimRev_i(eAxisNo)         P(eAxisNo).u16SpdLimRev
 #define s32MotMaxSpeed_i(eAxisNo)       SPD_RPM(4000)  // 额定速度
@@ -131,31 +132,31 @@ static void _SpdLimSel(spd_ctrl_t* pSpdCtrl, axis_e eAxisNo)
     s32 s32LimFwd = 0;
     s32 s32LimRev = 0;
 
-    switch ((spd_lim_src_e)P(eAxisNo).u16SpdLimSrc)
+    switch ((spd_lim_src_e)u16SpdLimSrc_i(eAxisNo))
     {
         default:
         case SPD_LIM_NONE:  // 默认
         {
             s32LimFwd = s32MotMaxSpeed_i(eAxisNo);  // 额定速度
-            s32LimRev = -s32LimFwd;
+            s32LimRev = s32LimFwd;
         }
         case SPD_LIM_S:  // 单数字量
         {
             s32LimFwd = (s32)u16SpdLimFwd_i(eAxisNo);
-            s32LimRev = -s32LimFwd;
+            s32LimRev = s32LimFwd;
             break;
         }
         case SPD_LIM_M:  // 双数字量
         {
-            s32LimFwd = +(s32)u16SpdLimFwd_i(eAxisNo);
-            s32LimRev = -(s32)u16SpdLimRev_i(eAxisNo);
+            s32LimFwd = (s32)u16SpdLimFwd_i(eAxisNo);
+            s32LimRev = (s32)u16SpdLimRev_i(eAxisNo);
             break;
         }
 #if CONFIG_EXT_AI_NUM >= 1
         case SPD_LIM_AI_S:  // 单模拟量
         {
             s32LimFwd = (s32)s16UaiSi0_i(eAxisNo) * (s32)u16AiSpdCoeff0_i(eAxisNo) / 100;
-            s32LimRev = -s32LimRev;
+            s32LimRev = s32LimRev;
             break;
         }
 #endif

@@ -1,14 +1,11 @@
-#include "trqplan.h"
+#include "cursamp.h"
 
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG             "trqplan"
-#define LOG_LOCAL_LEVEL           LOG_LEVEL_INFO
-
-#define s16LogicTrqRef_i(eAxisNo) P(eAxisNo).s16LogicTrqRef
-#define s32DrvTrqRef_o(eAxisNo)   P(eAxisNo).s32DrvTrqRef
+#define LOG_LOCAL_TAG   "cursamp"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -22,19 +19,18 @@
 // Functions
 //---------------------------------------------------------------------------
 
-void TrqPlanCreat(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void CurSampCreat(cur_samp_t* pCurSamp, axis_e eAxisNo)
 {
 }
 
-void TrqPlanInit(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void CurSampInit(cur_samp_t* pCurSamp, axis_e eAxisNo)
 {
 }
 
-void TrqPlanCycle(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void CurSampCycle(cur_samp_t* pCurSamp, axis_e eAxisNo)
 {
 }
 
-void TrqPlanIsr(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void CurSampIsr(cur_samp_t* pCurSamp, axis_e eAxisNo)
 {
-    s32DrvTrqRef_o(eAxisNo) = s16LogicTrqRef_i(eAxisNo);
 }

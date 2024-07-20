@@ -3,5 +3,6 @@
 
 #include "paraattr.h"
 #include "axis_defs.h"
+#include "arm_math.h"
 
 // clang-format off
