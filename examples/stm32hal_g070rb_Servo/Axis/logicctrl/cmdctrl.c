@@ -54,7 +54,7 @@ void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
                 }
                 else
                 {
-                    u16AxisFSM_i(eAxisNo) = AXIS_IDLE;
+                    u16AxisFSM_i(eAxisNo) = AXIS_STANDBY;
                     PWM_Stop(eAxisNo);
                 }
 

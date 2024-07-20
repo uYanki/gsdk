@@ -193,10 +193,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 }
 
-#include "encoder/absEnc.h"
+//#include "encoder/absEnc.h"
 
-abs_drv_t AbsDrv;
-abs_enc_t AbsEnc;
+//abs_drv_t AbsDrv;
+//abs_enc_t AbsEnc;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -218,39 +218,39 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D.s16UaiSi1 = GetUai2();
     D.u16UcdcSi = D.u16UmdcSi = GetUai2();
 
-    AbsEncIsr(&AbsEnc, AXIS_0);
+   // AbsEncIsr(&AbsEnc, AXIS_0);
 
     // AxisIsr(AXIS_1);
 }
 
-#if 1
+//#if 1
 
-#include "usart.h"
+//#include "usart.h"
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-{
-    if (huart->Instance == TFORMAT_UART_PORT)
-    {
-        // if (__HAL_DMA_GetCounter(huart->hdmarx) == 0) {}
-        TFormatRdPos(&AbsDrv);
-    }
-}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+//{
+//    if (huart->Instance == TFORMAT_UART_PORT)
+//    {
+//        // if (__HAL_DMA_GetCounter(huart->hdmarx) == 0) {}
+//        TFormatRdPos(&AbsDrv);
+//    }
+//}
 
-#endif  // __ABS_ENC_TFORMAT_SW
+//#endif  // __ABS_ENC_TFORMAT_SW
 
-abs_tformat_t sAbsTformat;
+//abs_tformat_t sAbsTformat;
 
-void EncInit(axis_e eAxisNo)
-{
-    abs_drv_t* pAbsDrv = &AbsDrv;
-    abs_enc_t* pAbsEnc = &AbsEnc;
+//void EncInit(axis_e eAxisNo)
+//{
+//    abs_drv_t* pAbsDrv = &AbsDrv;
+//    abs_enc_t* pAbsEnc = &AbsEnc;
 
-    pAbsEnc->u8EncBit     = 14;
-    pAbsEnc->u32EncRes    = 1 << pAbsEnc->u8EncBit;
-    pAbsDrv->u8Mode       = 0;  // ABS_COMM_RS485;
-    pAbsDrv->pArgs        = &sAbsTformat;
-    P(eAxisNo).u16EncType = ABS_ENC_TFORMAT;
-}
+//    pAbsEnc->u8EncBit     = 14;
+//    pAbsEnc->u32EncRes    = 1 << pAbsEnc->u8EncBit;
+//    pAbsDrv->u8Mode       = 0;  // ABS_COMM_RS485;
+//    pAbsDrv->pArgs        = &sAbsTformat;
+//    P(eAxisNo).u16EncType = ABS_ENC_TFORMAT;
+//}
 
 void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
 {
@@ -302,6 +302,18 @@ static bool                 s_bPosInit = true;
 #include "axis_defs.h"
 
 #include "spi_mt6701.h"
+
+ spi_mst_t spi = {
+			.MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
+			.MOSI = {GPIOB,             GPIO_PIN_4 },
+			.SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
+			.CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* RST */
+	};
+
+	spi_mt6701_t mt6701 = {
+			.hSPI = &spi,
+	};
+
 
 /* USER CODE END 0 */
 
@@ -370,17 +382,7 @@ int main(void)
 
 #endif
 
-    spi_mst_t spi = {
-        .MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
-        .MOSI = {GPIOB,             GPIO_PIN_4 },
-        .SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
-        .CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* RST */
-    };
-
-    spi_mt6701_t mt6701 = {
-        .hSPI = &spi,
-    };
-
+ 
     SPI_Master_Init(&spi, 50000, SPI_DUTYCYCLE_50_50, MT6701_SPI_TIMING | SPI_FLAG_FAST_CLOCK_ENABLE | SPI_FLAG_SOFT_CS);
 
     MT6701_Init(&mt6701);
@@ -450,16 +452,16 @@ int main(void)
 
         D.u32SysRunTime = GetTickMs();
 
-        HallEnc_Isr(&sHallEnc);
+    //    HallEnc_Isr(&sHallEnc);
 
         axis_e eAxisNo = AXIS_0;
 
-        P(eAxisNo).u16HallState  = sHallEnc.eHallState;
-        P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
-        P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
-        P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
-        P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
-        P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
+//        P(eAxisNo).u16HallState  = sHallEnc.eHallState;
+//        P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
+//        P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
+//        P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
+//        P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
+//        P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
 
         AxisCycle(&sAxis, eAxisNo);
 

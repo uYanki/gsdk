@@ -13,11 +13,14 @@ extern "C" {
 
 #define CONFIG_ENCODER_TYPE ENC_ABS
 
-#define abs_enc_t u16
-
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
+
+typedef struct {
+    s32 s32PosDelt;
+    s32 s32PosPre;
+} abs_enc_t;
 
 typedef struct {
 #if (CONFIG_ENCODER_TYPE == ENC_INC)

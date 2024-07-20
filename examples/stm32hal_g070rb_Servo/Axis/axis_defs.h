@@ -13,7 +13,7 @@ typedef enum {
 typedef enum {
     AXIS_INIT,
     AXIS_RUN,
-    AXIS_IDLE,
+    AXIS_STANDBY,
 } axis_state_e;
 
 typedef enum {

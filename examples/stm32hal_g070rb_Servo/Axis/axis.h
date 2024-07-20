@@ -3,6 +3,7 @@
 
 #include "paratbl.h"
 
+#include "application/appmgr.h"
 #include "logicctrl/logicctrl.h"
 #include "pathplan/pathplan.h"
 #include "motdrv/motdrv.h"
@@ -16,6 +17,7 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
+    app_mgr_t    sAppMgr;
     logic_ctrl_t sLogicCtrl;
     path_plan_t  sPathPlan;
     motdrv_t     sMotDrv;
