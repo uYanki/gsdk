@@ -1,7 +1,7 @@
 #ifndef __SPD_CTRL_H__
 #define __SPD_CTRL_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +12,7 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    u16 _Resv;
+    bool bJogFlag;  ///< 点动标志
 } spd_ctrl_t;
 
 //---------------------------------------------------------------------------

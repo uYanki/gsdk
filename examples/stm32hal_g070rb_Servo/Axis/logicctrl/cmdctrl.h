@@ -1,7 +1,7 @@
 #ifndef __CMD_CTRL_H__
 #define __CMD_CTRL_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +12,7 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    u16 _Resv;
+    u32 u32CommCmdPre;
 } cmd_ctrl_t;
 
 //---------------------------------------------------------------------------

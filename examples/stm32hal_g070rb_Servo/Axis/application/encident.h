@@ -1,7 +1,7 @@
 #ifndef __ENCIDENT_H__
 #define __ENCIDENT_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {

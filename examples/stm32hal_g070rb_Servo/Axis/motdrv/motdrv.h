@@ -1,7 +1,7 @@
 #ifndef __MOT_DRV_H__
 #define __MOT_DRV_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #include "posloop.h"
 #include "spdloop.h"

@@ -1,7 +1,9 @@
 #ifndef __SPD_PLAN_H__
 #define __SPD_PLAN_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
+
+#include "logicctrl/spdctrl.h"
 
 #ifdef __cplusplus
 extern "C" {

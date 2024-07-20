@@ -21,28 +21,28 @@
 
 void AxisCreat(axis_t* pAxis, axis_e eAxisNo)
 {
-    LogicCtrlCreat(&pAxis->pLogicCtrl, eAxisNo);
-    PathPlanCreat(&pAxis->pTrqPlan, eAxisNo);
-    MotDrvCreat(&pAxis->pTrqLoop, eAxisNo);
+    LogicCtrlCreat(&pAxis->sLogicCtrl, eAxisNo);
+    PathPlanCreat(&pAxis->sPathPlan, eAxisNo);
+    MotDrvCreat(&pAxis->sMotDrv, eAxisNo);
 }
 
 void AxisInit(axis_t* pAxis, axis_e eAxisNo)
 {
-    LogicCtrlInit(&pAxis->pLogicCtrl, eAxisNo);
-    PathPlanInit(&pAxis->pTrqPlan, eAxisNo);
-    MotDrvInit(&pAxis->pTrqLoop, eAxisNo);
+    LogicCtrlInit(&pAxis->sLogicCtrl, eAxisNo);
+    PathPlanInit(&pAxis->sPathPlan, eAxisNo);
+    MotDrvInit(&pAxis->sMotDrv, eAxisNo);
 }
 
 void AxisCycle(axis_t* pAxis, axis_e eAxisNo)
 {
-    LogicCtrlCycle(&pAxis->pLogicCtrl, eAxisNo);
-    PathPlanCycle(&pAxis->pTrqPlan, eAxisNo);
-    MotDrvCycle(&pAxis->pTrqLoop, eAxisNo);
+    LogicCtrlCycle(&pAxis->sLogicCtrl, eAxisNo);
+    PathPlanCycle(&pAxis->sPathPlan, eAxisNo);
+    MotDrvCycle(&pAxis->sMotDrv, eAxisNo);
 }
 
 void AxisIsr(axis_t* pAxis, axis_e eAxisNo)
 {
-    LogicCtrlIsr(&pAxis->pLogicCtrl, eAxisNo);
-    PathPlanIsr(&pAxis->pTrqPlan, eAxisNo);
-    MotDrvIsr(&pAxis->pTrqLoop, eAxisNo);
+    LogicCtrlIsr(&pAxis->sLogicCtrl, eAxisNo);
+    PathPlanIsr(&pAxis->sPathPlan, eAxisNo);
+    MotDrvIsr(&pAxis->sMotDrv, eAxisNo);
 }

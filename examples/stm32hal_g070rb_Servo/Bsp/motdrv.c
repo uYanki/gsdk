@@ -74,7 +74,7 @@ q15 Q15Mul(q15 q1, q15 q2)
  * @note d = alpha * cos(theta) + beta  * sin(theta)
  *       q = beta  * cos(theta) - alpha * sin(theta)
  */
-void MC_Park(motdrv_t* p)
+void MC_Park(mc_t* p)
 {
     p->Id = Q15Mul(p->Ialpha, p->Cos) + Q15Mul(p->Ibeta, p->Sin);
     p->Iq = Q15Mul(p->Ibeta, p->Cos) - Q15Mul(p->Ialpha, p->Sin);
@@ -84,7 +84,7 @@ void MC_Park(motdrv_t* p)
  * @note alpha = d * cos(theta) - q * sin(theta)
  *       beta  = d * sin(theta) + q * cos(theta)
  */
-void MC_InvPark(motdrv_t* p)
+void MC_InvPark(mc_t* p)
 {
     p->Ualpha = Q15Mul(p->Ud, p->Cos) - Q15Mul(p->Uq, p->Sin);
     p->Ubeta  = Q15Mul(p->Ud, p->Sin) + Q15Mul(p->Uq, p->Cos);
@@ -96,7 +96,7 @@ void MC_InvPark(motdrv_t* p)
  * @note alpha = a
  *       beta  = a / sqrt(3)  + b * 2 / sqrt(3)
  */
-void MC_Clark(motdrv_t* p)
+void MC_Clark(mc_t* p)
 {
 #if 0  // 3 currents
     p->Ialpha = p->Ia;
@@ -112,7 +112,7 @@ void MC_Clark(motdrv_t* p)
  *       b = -0.5 * alpha + sqrt(3) / 2 * beta
  *       c = -0.5 * alpha - sqrt(3) / 2 * beta
  */
-void MC_InvClark(motdrv_t* p)
+void MC_InvClark(mc_t* p)
 {
     p->Ua = p->Ualpha;
     p->Ub = -(p->Ualpha >> 1) + Q15Mul(p->Ubeta, Q15(M_SQRT3_2));
@@ -123,7 +123,7 @@ void MC_InvClark(motdrv_t* p)
  * @brief rebuild three-phase current
  * @note  电流方向：流入绕组为正，流出绕组为负(未适配)
  */
-void MC_RebuildCurrent(motdrv_t* p, q15 Ix[])
+void MC_RebuildCurrent(mc_t* p, q15 Ix[])
 {
     /**
      * @note
@@ -251,7 +251,7 @@ void MC_RebuildCurrent(motdrv_t* p, q15 Ix[])
 /**
  * @brief
  */
-void MC_SinCos(motdrv_t* p)
+void MC_SinCos(mc_t* p)
 {
     // clang-format off
     static const u16 u16SinTbl[] = {
@@ -304,7 +304,7 @@ void MC_SinCos(motdrv_t* p)
     }
 }
 
-void MC_MinMaxU(motdrv_t* p)
+void MC_MinMaxU(mc_t* p)
 {
     if (p->Ua >= p->Ub)
     {
@@ -362,13 +362,13 @@ void MC_MinMaxU(motdrv_t* p)
     }
 }
 
-void MC_OverMod(motdrv_t* p)
+void MC_OverMod(mc_t* p)
 {}
 
 /**
  * @brief circle limitation
  */
-void MC_CirLim(motdrv_t* p)
+void MC_CirLim(mc_t* p)
 {
     u32 UdSq  = (u32)((q31)p->Ud * (q31)p->Ud);
     u32 UqSq  = (u32)((q31)p->Uq * (q31)p->Uq);
@@ -380,7 +380,7 @@ void MC_CirLim(motdrv_t* p)
     }
 }
 
-void SVPWMx(motdrv_t* p)
+void SVPWMx(mc_t* p)
 {
     u16 hPWM_PERIOD = p->DutyMax;
     s16 nAlph       = p->Ualpha;
@@ -433,7 +433,7 @@ void SVPWMx(motdrv_t* p)
  *
  */
 
-void MC_ZeroSeqInj(motdrv_t* p)
+void MC_ZeroSeqInj(mc_t* p)
 {
     q15 U0 = -QDiv2(p->Umax + p->Umin);  // V0=-0.5*(Vmax+Vmin)
 
@@ -446,7 +446,7 @@ void MC_ZeroSeqInj(motdrv_t* p)
     p->Tc = m * Q15Mul(p->Uc + U0, u16DutyHalf) + u16DutyHalf;
 }
 
-void MC_SVPWM5(motdrv_t* p)
+void MC_SVPWM5(mc_t* p)
 {}
 
 #if 0
@@ -526,7 +526,7 @@ u16 hTimePhA = 0, hTimePhB = 0, hTimePhC = 0;
 #define SECTION_5 0
 #define SECTION_7 1
 
-void svm(motdrv_t* pfoc)
+void svm(mc_t* pfoc)
 {
     s32 wX, wY, wZ, wUAlpha, wUBeta;
 
@@ -667,7 +667,7 @@ typedef enum {
  * @param[in] pVabc_pu  The pointer to the three phase voltages, pu
  *
  */
-void SVGEN_run(motdrv_t* p, uint8_t eMode)
+void SVGEN_run(mc_t* p, uint8_t eMode)
 {
     float32_t oneOverDcBus_invV__ = 1;  //!< The inverse DC bus voltage value, 1/V
 

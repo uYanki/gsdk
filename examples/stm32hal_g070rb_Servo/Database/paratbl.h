@@ -2,13 +2,8 @@
 #define __PARA_TABLE_H__
 
 #include "paraattr.h"
-
-typedef enum {
-    AXIS_0,
-    AXIS_1,
-    AXIS_2,
-    // ...
-} axis_e;
+#include "axis_defs.h"
+#include "arm_math.h"
 
 // clang-format off
 
@@ -507,25 +502,45 @@ typedef struct __packed {
     u16 u16PwmbComp;         // P0648 驱动层B相PWM比较值
     u16 u16PwmcComp;         // P0649 驱动层C相PWM比较值
     u16 _Resv650;            // P0650 
-    u16 _Resv651;            // P0651 
+    u16 u16StopCmd;          // P0651 停机指令
     u16 _Resv652;            // P0652 
-    u16 _Resv653;            // P0653 
-    u16 _Resv654;            // P0654 
-    u16 _Resv655;            // P0655 
-    u16 _Resv656;            // P0656 
-    s16 s16IaFbSi;           // P0657 A相反馈电流物理值
-    s16 s16IbFbSi;           // P0658 B相反馈电流物理值
-    s16 s16IcFbSi;           // P0659 C相反馈电流物理值
+    s32 s32LogicSpdRef;      // P0653 逻辑层速度指令
+    u16 u16LogicSpdAccTime;  // P0655 逻辑层加速度时间
+    u16 u16LogicSpdDecTime;  // P0656 逻辑层减速度时间
+    u16 u16LogicSpdPlanMode; // P0657 逻辑层速度规划模式
+    u16 u16JogCmd;           // P0658 点动指令使能信号
+    u16 u16JogSpdRef;        // P0659 点动速度指令
     u16 _Resv660;            // P0660 
-    s64 s64UserPosRef;       // P0661 用户位置指令
-    s64 s64UserPosFb;        // P0665 用户位置反馈
-    s32 s32UserSpdRef;       // P0669 用户速度指令
-    s32 s32UserSpdFb;        // P0671 用户速度反馈
-    s16 s16UserTrqRef;       // P0673 用户转矩指令
-    s16 s16UserTrqFb;        // P0674 用户转矩反馈
-    u16 _Resv675;            // P0675 
-    u16 _Resv676;            // P0676 
+    u16 u16SpdAccTime;       // P0661 
+    u16 u16SpdDecTime;       // P0662 
+    u16 _Resv663;            // P0663 
+    u16 u16MultMotionEn;     // P0664 多段模式启动
+    u16 _Resv665;            // P0665 
+    u16 u16SpdPlanMode;      // P0666 速度规划模式
+    u16 u16StopPlanMode;     // P0667 停机模式
+    u16 u16SpdMulRefSel;     // P0668 多段速度选择
+    u16 _Resv669;            // P0669 
+    s32 s32LogicSpdLimFwd;   // P0670 逻辑层正向速度限制
+    s32 s32LogicSpdLimRev;   // P0672 逻辑层反向速度限制
+    u16 _Resv674;            // P0674 
+    s32 s32PlanSpdRef;       // P0675 规划层速度指令
     u16 _Resv677;            // P0677 
+    u16 _Resv678;            // P0678 
+    u16 _Resv679;            // P0679 
+    u16 _Resv680;            // P0680 
+    s16 s16IaFbSi;           // P0681 A相反馈电流物理值
+    s16 s16IbFbSi;           // P0682 B相反馈电流物理值
+    s16 s16IcFbSi;           // P0683 C相反馈电流物理值
+    u16 _Resv684;            // P0684 
+    s64 s64UserPosRef;       // P0685 用户位置指令
+    s64 s64UserPosFb;        // P0689 用户位置反馈
+    s32 s32UserSpdRef;       // P0693 用户速度指令
+    s32 s32UserSpdFb;        // P0695 用户速度反馈
+    s16 s16UserTrqRef;       // P0697 用户转矩指令
+    s16 s16UserTrqFb;        // P0698 用户转矩反馈
+    u16 _Resv699;            // P0699 
+    u16 _Resv700;            // P0700 
+    u16 _Resv701;            // P0701 
 } axis_para_t;
 
 // clang-format on

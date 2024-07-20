@@ -1,7 +1,7 @@
 #ifndef __SPD_LOOP_H__
 #define __SPD_LOOP_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +12,8 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    u16 _Resv;
+    q15_t                q15SpdOut;  // PID
+    arm_pid_instance_q15 sPID;
 } spd_loop_t;
 
 //---------------------------------------------------------------------------

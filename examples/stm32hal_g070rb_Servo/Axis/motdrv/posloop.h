@@ -1,7 +1,7 @@
 #ifndef __POS_LOOP_H__
 #define __POS_LOOP_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {

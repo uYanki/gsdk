@@ -1,7 +1,7 @@
 #ifndef __AXIS_H__
 #define __AXIS_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #include "logicctrl/logicctrl.h"
 #include "pathplan/pathplan.h"
@@ -16,9 +16,9 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    logicctrl_t sLogicCtrl;
-    path_plan_t sPathPlan;
-    motdrv_t    sMotDrv;
+    logic_ctrl_t sLogicCtrl;
+    path_plan_t  sPathPlan;
+    motdrv_t     sMotDrv;
 } axis_t;
 
 //---------------------------------------------------------------------------

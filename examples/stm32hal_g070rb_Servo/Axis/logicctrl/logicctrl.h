@@ -1,7 +1,7 @@
 #ifndef __LOGIC_CTRL_H__
 #define __LOGIC_CTRL_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #include "posctrl.h"
 #include "spdctrl.h"

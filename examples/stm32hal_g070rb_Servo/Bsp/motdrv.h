@@ -114,27 +114,27 @@ typedef struct foc {
     s16 Tb;  // Ton, phase-b switching function
     s16 Tc;  // Ton, phase-c switching function
 
-} motdrv_t;
+} mc_t;
 
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void MC_Park(motdrv_t* p);
-void MC_InvPark(motdrv_t* p);
-void MC_Clark(motdrv_t* p);
-void MC_InvClark(motdrv_t* p);
-void MC_RebuildCurrent(motdrv_t* p, q15 Ix[]);
-void MC_SinCos(motdrv_t* p);
-void MC_MinMaxU(motdrv_t* p);
-void MC_OverMod(motdrv_t* p);
-void MC_CirLim(motdrv_t* p);
-void MC_ZeroSeqInj(motdrv_t* p);
-void MC_SVPWM5(motdrv_t* p);
+void MC_Park(mc_t* p);
+void MC_InvPark(mc_t* p);
+void MC_Clark(mc_t* p);
+void MC_InvClark(mc_t* p);
+void MC_RebuildCurrent(mc_t* p, q15 Ix[]);
+void MC_SinCos(mc_t* p);
+void MC_MinMaxU(mc_t* p);
+void MC_OverMod(mc_t* p);
+void MC_CirLim(mc_t* p);
+void MC_ZeroSeqInj(mc_t* p);
+void MC_SVPWM5(mc_t* p);
 
-void SVPWMx(motdrv_t* p);
-void svm(motdrv_t* pfoc);
-void SVGEN_run(motdrv_t* p, uint8_t mode);
+void SVPWMx(mc_t* p);
+void svm(mc_t* pfoc);
+void SVGEN_run(mc_t* p, uint8_t mode);
 
 #ifdef __cplusplus
 }

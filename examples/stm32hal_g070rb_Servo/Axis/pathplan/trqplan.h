@@ -1,7 +1,7 @@
 #ifndef __TRQ_PLAN_H__
 #define __TRQ_PLAN_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {

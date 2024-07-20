@@ -19,30 +19,30 @@
 // Functions
 //---------------------------------------------------------------------------
 
-void PathPlanCreat(path_plan_t* pTrqPlan, axis_e eAxisNo)
+void PathPlanCreat(path_plan_t* pPathPlan, axis_e eAxisNo)
 {
-    PosPathIsr(&pPathPlan->sPosPath, eAxisNo);
-    TrqPathIsr(&pPathPlan->sTrqPath, eAxisNo);
-    SpdPathIsr(&pPathPlan->sSpdPath, eAxisNo);
+    PosPlanIsr(&pPathPlan->sPosPlan, eAxisNo);
+    TrqPlanIsr(&pPathPlan->sTrqPlan, eAxisNo);
+    SpdPlanIsr(&pPathPlan->sSpdPlan, eAxisNo);
 }
 
-void PathPlanInit(path_plan_t* pTrqPlan, axis_e eAxisNo)
+void PathPlanInit(path_plan_t* pPathPlan, axis_e eAxisNo)
 {
-    PosPathCreat(&pPathPlan->sPosPath, eAxisNo);
-    TrqPathCreat(&pPathPlan->sTrqPath, eAxisNo);
-    SpdPathCreat(&pPathPlan->sSpdPath, eAxisNo);
+    PosPlanCreat(&pPathPlan->sPosPlan, eAxisNo);
+    TrqPlanCreat(&pPathPlan->sTrqPlan, eAxisNo);
+    SpdPlanCreat(&pPathPlan->sSpdPlan, eAxisNo);
 }
 
-void PathPlanCycle(path_plan_t* pTrqPlan, axis_e eAxisNo)
+void PathPlanCycle(path_plan_t* pPathPlan, axis_e eAxisNo)
 {
-    PosPathInit(&pPathPlan->sPosPath, eAxisNo);
-    TrqPathInit(&pPathPlan->sTrqPath, eAxisNo);
-    SpdPathInit(&pPathPlan->sSpdPath, eAxisNo);
+    PosPlanInit(&pPathPlan->sPosPlan, eAxisNo);
+    TrqPlanInit(&pPathPlan->sTrqPlan, eAxisNo);
+    SpdPlanInit(&pPathPlan->sSpdPlan, eAxisNo);
 }
 
-void PathPlanIsr(path_plan_t* pTrqPlan, axis_e eAxisNo)
+void PathPlanIsr(path_plan_t* pPathPlan, axis_e eAxisNo)
 {
-    PosPathCycle(&pPathPlan->sPosPath, eAxisNo);
-    TrqPathCycle(&pPathPlan->sTrqPath, eAxisNo);
-    SpdPathCycle(&pPathPlan->sSpdPath, eAxisNo);
+    PosPlanCycle(&pPathPlan->sPosPlan, eAxisNo);
+    TrqPlanCycle(&pPathPlan->sTrqPlan, eAxisNo);
+    SpdPlanCycle(&pPathPlan->sSpdPlan, eAxisNo);
 }

@@ -1,7 +1,7 @@
 #ifndef __OPENLOOP_H__
 #define __OPENLOOP_H__
 
-#include "gsdk.h"
+#include "paratbl.h"
 
 #ifdef __cplusplus
 extern "C" {
