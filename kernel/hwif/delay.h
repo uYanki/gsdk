@@ -11,7 +11,8 @@ extern "C" {
 // Definitions
 //---------------------------------------------------------------------------
 
-typedef uint64_t tick_t;
+// typedef uint64_t tick_t; 
+typedef uint32_t tick_t;
 
 #define UNIT_US (tick_t)1
 #define UNIT_MS (tick_t)1000

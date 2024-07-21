@@ -58,11 +58,13 @@ static void AbsEncInit(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 }
 
 static void AbsEncCycle(abs_enc_t* pAbsEnc, axis_e eAxisNo)
-{}
+{
+		PeriodicTask(250*UNIT_US, AbsEncSyncSamp(eAxisNo));
+}
 
 static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 {
-    AbsEncSyncSamp(eAxisNo);
+    
 
     // 1. 单圈值
 

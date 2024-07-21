@@ -45,7 +45,7 @@ void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
 
             if (pCmdCtrl->u32CommCmdPre ^ u32CommCmdCur)
             {
-                ctrlword_t* pCtrlWord = (ctrlword_t*) &u32CommCmdCur;
+                ctrlword_t* pCtrlWord = (ctrlword_t*)&u32CommCmdCur;
 
                 if (pCtrlWord->ServoOn)
                 {

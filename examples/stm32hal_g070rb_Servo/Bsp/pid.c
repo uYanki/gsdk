@@ -9,7 +9,7 @@ void Ramp() {}
 
 void PID_PostHandler(PID_t* p, f32 out_p)
 {
-#if 1
+#if 0
 
     // 幅度限制
 
@@ -24,7 +24,7 @@ void PID_PostHandler(PID_t* p, f32 out_p)
 
 #endif
 
-#if 1
+#if 0
 
     // 斜率限制
 

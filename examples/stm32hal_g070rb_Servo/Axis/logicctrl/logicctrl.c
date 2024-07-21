@@ -21,6 +21,8 @@
 
 void LogicCtrlCreat(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo)
 {
+    P(eAxisNo).u16AxisFSM = AXIS_STATE_INITIAL;
+
     PosCtrlCreat(&pLogicCtrl->sPosCtrl, eAxisNo);
     TrqCtrlCreat(&pLogicCtrl->sTrqCtrl, eAxisNo);
     SpdCtrlCreat(&pLogicCtrl->sSpdCtrl, eAxisNo);

@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -3155,17 +3155,25 @@
               <FileType>1</FileType>
               <FilePath>..\Bsp\motdrv.c</FilePath>
             </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_pid_init_q15.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_init_q15.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_pid_reset_q15.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_reset_q15.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>DSP</GroupName>
-          <Files>
-            <File>
-              <FileName>ControllerFunctions.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\ControllerFunctions.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>axis/motdrv</GroupName>
@@ -3299,6 +3307,11 @@
               <FileName>axis.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Axis\axis.c</FilePath>
+            </File>
+            <File>
+              <FileName>drvsche.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\drvsche.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -15,38 +15,42 @@
 // Variables
 //---------------------------------------------------------------------------
 
+static axis_e s_eAxisNo = AXIS_0;
+
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void AxisCreat(axis_t* pAxis, axis_e eAxisNo)
+void AxisCreat(axis_t* pAxis)
 {
-    AppMgrCreat(&pAxis->sAppMgr, eAxisNo);
-    LogicCtrlCreat(&pAxis->sLogicCtrl, eAxisNo);
-    PathPlanCreat(&pAxis->sPathPlan, eAxisNo);
-    MotDrvCreat(&pAxis->sMotDrv, eAxisNo);
+    pAxis->eAxisNo = s_eAxisNo++;
+
+    AppMgrCreat(&pAxis->sAppMgr, pAxis->eAxisNo);
+    LogicCtrlCreat(&pAxis->sLogicCtrl, pAxis->eAxisNo);
+    PathPlanCreat(&pAxis->sPathPlan, pAxis->eAxisNo);
+    MotDrvCreat(&pAxis->sMotDrv, pAxis->eAxisNo);
 }
 
-void AxisInit(axis_t* pAxis, axis_e eAxisNo)
+void AxisInit(axis_t* pAxis)
 {
-    AppMgrInit(&pAxis->sAppMgr, eAxisNo);
-    LogicCtrlInit(&pAxis->sLogicCtrl, eAxisNo);
-    PathPlanInit(&pAxis->sPathPlan, eAxisNo);
-    MotDrvInit(&pAxis->sMotDrv, eAxisNo);
+    AppMgrInit(&pAxis->sAppMgr, pAxis->eAxisNo);
+    LogicCtrlInit(&pAxis->sLogicCtrl, pAxis->eAxisNo);
+    PathPlanInit(&pAxis->sPathPlan, pAxis->eAxisNo);
+    MotDrvInit(&pAxis->sMotDrv, pAxis->eAxisNo);
 }
 
-void AxisCycle(axis_t* pAxis, axis_e eAxisNo)
+void AxisCycle(axis_t* pAxis)
 {
-    AppMgrCycle(&pAxis->sAppMgr, eAxisNo);
-    LogicCtrlCycle(&pAxis->sLogicCtrl, eAxisNo);
-    PathPlanCycle(&pAxis->sPathPlan, eAxisNo);
-    MotDrvCycle(&pAxis->sMotDrv, eAxisNo);
+    AppMgrCycle(&pAxis->sAppMgr, pAxis->eAxisNo);
+    LogicCtrlCycle(&pAxis->sLogicCtrl, pAxis->eAxisNo);
+    PathPlanCycle(&pAxis->sPathPlan, pAxis->eAxisNo);
+    MotDrvCycle(&pAxis->sMotDrv, pAxis->eAxisNo);
 }
 
-void AxisIsr(axis_t* pAxis, axis_e eAxisNo)
+void AxisIsr(axis_t* pAxis)
 {
-    AppMgrIsr(&pAxis->sAppMgr, eAxisNo);
-    LogicCtrlIsr(&pAxis->sLogicCtrl, eAxisNo);
-    PathPlanIsr(&pAxis->sPathPlan, eAxisNo);
-    MotDrvIsr(&pAxis->sMotDrv, eAxisNo);
+    AppMgrIsr(&pAxis->sAppMgr, pAxis->eAxisNo);
+    LogicCtrlIsr(&pAxis->sLogicCtrl, pAxis->eAxisNo);
+    PathPlanIsr(&pAxis->sPathPlan, pAxis->eAxisNo);
+    MotDrvIsr(&pAxis->sMotDrv, pAxis->eAxisNo);
 }

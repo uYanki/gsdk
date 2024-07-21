@@ -17,6 +17,7 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
+    axis_e       eAxisNo;
     app_mgr_t    sAppMgr;
     logic_ctrl_t sLogicCtrl;
     path_plan_t  sPathPlan;
@@ -27,10 +28,10 @@ typedef struct {
 // Functions
 //---------------------------------------------------------------------------
 
-void AxisCreat(axis_t* pAxis, axis_e eAxisNo);
-void AxisInit(axis_t* pAxis, axis_e eAxisNo);
-void AxisCycle(axis_t* pAxis, axis_e eAxisNo);
-void AxisIsr(axis_t* pAxis, axis_e eAxisNo);
+void AxisCreat(axis_t* pAxis);
+void AxisInit(axis_t* pAxis);
+void AxisCycle(axis_t* pAxis);
+void AxisIsr(axis_t* pAxis);
 
 #ifdef __cplusplus
 }

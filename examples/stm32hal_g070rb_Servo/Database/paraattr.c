@@ -351,9 +351,9 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0343 _Resv343
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0344 _Resv344
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0345 _Resv345
-    {         W(1000),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0346 u16PosLoopKp
-    {          W(300),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0347 u16PosLoopKi
-    {           W(50),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0348 u16PosLoopKd
+    {         W(800),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0346 u16PosLoopKp
+    {          W(400),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0347 u16PosLoopKi
+    {           W(100),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0348 u16PosLoopKd
     {         W(1000),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0349 u16SpdLoopKp
     {          W(300),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0350 u16SpdLoopKi
     {           W(50),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0351 u16SpdLoopKd
