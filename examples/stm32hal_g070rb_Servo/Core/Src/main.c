@@ -196,23 +196,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
     tick_t t = GetTick100ns();
 
-    D._Resv100 = ADConv[0];
-    D._Resv101 = ADConv[1];
-    D._Resv102 = ADConv[2];
-    D._Resv103 = ADConv[3];
-    D._Resv104 = ADConv[4];
-    D._Resv105 = ADConv[5];
+//    D._Resv100 = ADConv[0];
+//    D._Resv101 = ADConv[1];
+//    D._Resv102 = ADConv[2];
+//    D._Resv103 = ADConv[3];
+//    D._Resv104 = ADConv[4];
+//    D._Resv105 = ADConv[5];
 
     //    D._Resv104 = GetCurU(AXIS_0);
     //    D._Resv105 = GetCurV(AXIS_0);
     //    D._Resv106 = GetCurW(AXIS_0);
 
-    D.s16UaiPu0 = GetUai1();
-    D.s16UaiPu1 = GetUai2();
+//    D.s16UaiPu0 = GetUai1();
+//    D.s16UaiPu1 = GetUai2();
 
-    D.s16UaiSi0 = GetUai1();
-    D.s16UaiSi1 = GetUai2();
-    D.u16UcdcSi = D.u16UmdcSi = GetUai2();
+//    D.s16UaiSi0 = GetUai1();
+//    D.s16UaiSi1 = GetUai2();
+//    D.u16UcdcSi = D.u16UmdcSi = GetUai2();
 
     mc_t foc = {0};
 
@@ -235,41 +235,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     P(0).s32SpdDigRef04 = GetTick100ns() - t;
 }
 
-// #if 1
-
-// #include "usart.h"
-
-// void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-//{
-//     if (huart->Instance == TFORMAT_UART_PORT)
-//     {
-//         // if (__HAL_DMA_GetCounter(huart->hdmarx) == 0) {}
-//         TFormatRdPos(&AbsDrv);
-//     }
-// }
-
-// #endif  // __ABS_ENC_TFORMAT_SW
-
-// abs_tformat_t sAbsTformat;
-
-// void EncInit(axis_e eAxisNo)
-//{
-//     abs_drv_t* pAbsDrv = &AbsDrv;
-//     abs_enc_t* pAbsEnc = &AbsEnc;
-
-//    pAbsEnc->u8EncBit     = 14;
-//    pAbsEnc->u32EncRes    = 1 << pAbsEnc->u8EncBit;
-//    pAbsDrv->u8Mode       = 0;  // ABS_COMM_RS485;
-//    pAbsDrv->pArgs        = &sAbsTformat;
-//    P(eAxisNo).u16EncType = ABS_ENC_TFORMAT;
-//}
-
 void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
 {
     MC_SinCos(pMotDrv);
     MC_InvPark(pMotDrv);
-
-    // P(eAxisNo)._Resv519 = 1;
 
     switch (P(eAxisNo)._Resv519)
     {
@@ -427,15 +396,16 @@ int main(void)
 
     // adc
     HAL_ADCEx_Calibration_Start(&hadc1);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
+  //  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
+	 HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&(D._Resv100), ARRAY_SIZE(ADConv));
 
-    HAL_ADC_Start(&hadc1);
+     HAL_ADC_Start(&hadc1);
 
     axis_e eAxisNo = AXIS_0;
 
-    __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
+     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
     // HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
-    HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4);
+       HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4);
 
     /* USER CODE END 2 */
 
