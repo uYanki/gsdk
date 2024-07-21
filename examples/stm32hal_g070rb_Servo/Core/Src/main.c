@@ -257,7 +257,7 @@ void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
     MC_SinCos(pMotDrv);
     MC_InvPark(pMotDrv);
 
-    P(eAxisNo)._Resv519 = 0;
+    // P(eAxisNo)._Resv519 = 1;
 
     switch (P(eAxisNo)._Resv519)
     {
@@ -296,7 +296,7 @@ void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
 }
 
 static arm_pid_instance_q15 s_sSpdPi;
-static arm_pid_instance_q31 s_sPosPi;
+static arm_pid_instance_f32 s_sPosPi;
 static bool                 s_bSpdInit = true;
 static bool                 s_bPosInit = true;
 
@@ -315,6 +315,8 @@ spi_mst_t spi = {
 spi_mt6701_t mt6701 = {
     .hSPI = &spi,
 };
+
+#include "pid.h"
 
 /* USER CODE END 0 */
 
@@ -445,26 +447,7 @@ int main(void)
     P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
 #endif
 
-    {
-        // get zero elec angle
-
-        mc_t foc         = {0};
-        foc.u16ElecAngle = P(eAxisNo).u32EncRes * 270 / 360;  // -90 deg => 270 deg
-        foc.Uq           = 0;
-        foc.Ud           = 8000;
-        foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
-
-        PWM_Start(eAxisNo);
-        MotDrv_Isr(&foc, eAxisNo);
-        DelayBlockMs(100);
-
-        P(eAxisNo)._Resv343 = MT6701_ReadAngle(&mt6701);
-
-        DelayBlockMs(20);
-        PWM_Start(eAxisNo);
-    }
-
-    // P(eAxisNo).u32CommCmd = 1;
+    P(eAxisNo)._Resv343 = 1092;
 
     while (1)
     {
@@ -485,12 +468,12 @@ int main(void)
 
         axis_e eAxisNo = AXIS_0;
 
-        //        P(eAxisNo).u16HallState  = sHallEnc.eHallState;
-        //        P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
-        //        P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
-        //        P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
-        //        P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
-        //        P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
+        // P(eAxisNo).u16HallState  = sHallEnc.eHallState;
+        // P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
+        // P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
+        // P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
+        // P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
+        // P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
 
         AxisCycle(&sAxis, eAxisNo);
 
@@ -498,13 +481,11 @@ int main(void)
             AxisIsr(&sAxis, eAxisNo);
         });
 
-        if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
+        switch (P(eAxisNo).u16AppSel)
         {
-            //	static u16 Offset;
-
-            switch (P(eAxisNo).u16AppSel)
+            case AXIS_APP_GENERIC:
             {
-                case AXIS_APP_GENERIC:
+                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
                 {
                     PeriodicTask(125 * UNIT_US, {
                         mc_t foc = {0};
@@ -512,19 +493,46 @@ int main(void)
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
                         // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
 
-                        // elec angle
-                        foc.u16ElecAngle = (u32)(P(eAxisNo).u32EncPos * 4) * 7 - P(eAxisNo)._Resv343 * 4;
+                        uint16_t u16MotPolePairs = P(eAxisNo).u16MotPolePairs;
+                        uint32_t u32EncRes       = P(eAxisNo).u32EncRes;
+                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;  // 电角度偏置为 270 deg 时的编码器读数，共有 u16MotPolePairs 个
+                        uint16_t u16EncPos       = P(eAxisNo).u32EncPos;
 
-                        P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
+                        if (u16EncPos >= u16EncPosOffset)
+                        {
+                            u16EncPos -= u16EncPosOffset;
+                        }
+                        else
+                        {
+                            u16EncPos = u32EncRes - u16EncPosOffset + u16EncPos;
+                        }
+
+                        // elecAng map to 0 ~ 65535
+                        uint16_t u16ElecAng = u16EncPos * u16MotPolePairs;
+
+                        if (u32EncRes < 65536)
+                        {
+                            u16ElecAng *= 65536 / u32EncRes;
+                        }
+                        else
+                        {
+                            u16ElecAng /= 65536 / u32EncRes;
+                        }
+
+                        foc.u16ElecAngle = u16ElecAng;
+
+                        // P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
                             case CTRL_MODE_POS:
                             {
-                                s_sPosPi.Kp = (s32)P(eAxisNo).u16PosLoopKp * 10000;
-                                s_sPosPi.Ki = (s32)P(eAxisNo).u16PosLoopKi * 10000;
-                                s_sPosPi.Kd = (s32)P(eAxisNo).u16PosLoopKd * 10000;
-                                arm_pid_init_q31(&s_sPosPi, s_bPosInit);
+														static	PID_t pid={0};
+															
+                                s_sPosPi.Kp = (s32)P(eAxisNo).u16PosLoopKp / 1000.f;
+                                s_sPosPi.Ki = (s32)P(eAxisNo).u16PosLoopKi / 1000.f;
+                                s_sPosPi.Kd = (s32)P(eAxisNo).u16PosLoopKd / 1000.f;
+                                arm_pid_init_f32(&s_sPosPi, s_bPosInit);
 
                                 s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
                                 s_sSpdPi.Ki = P(eAxisNo).u16SpdLoopKi;
@@ -533,29 +541,14 @@ int main(void)
 
                                 s_bSpdInit = s_bPosInit = false;
 
-                                // P(eAxisNo).s32DrvSpdRef = P(eAxisNo).s32SpdDigRef;
-                                // P(eAxisNo).s64EncMultPos
-                                // P(eAxisNo).s32SpdDigRef00;
-                                // P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
+                                P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
 
-                                // int32_t delta = P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).s32SpdDigRef01;
+                                q31_t q = arm_pid_f32(&s_sPosPi, -(P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).s64EncMultPos));  // to 0.1rpm
 
-                                // posloop output is pulse. required convert into rpm as speed loop input
+                                q      = q * 60 * 10 / P(eAxisNo).u32EncRes;
+                                foc.Uq = arm_pid_q15(&s_sSpdPi, q - P(eAxisNo).s32DrvSpdFb);
 
-                                // if (abs(delta) > 20)
-                                //  P(eAxisNo).s64DrvPosFb
-
-                                foc.u16ElecAngle = P(eAxisNo).u32EncPos * P(eAxisNo).u16MotPolePairs;
-                                //															foc.u16ElecAngle = foc.u16ElecAngle	- eOffset;
-
-                                {
-                                    q31_t q = arm_pid_q31(&s_sPosPi, (P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).u32EncPos));  // to 0.1rpm
-
-                                    q      = q * 60 * 10 / P(eAxisNo).u32EncRes;
-                                    foc.Uq = arm_pid_q15(&s_sSpdPi, CLAMP(q, -10000, 10000));
-
-                                    foc.Uq = CLAMP(foc.Uq, -10000, 10000);
-                                }
+                                foc.Uq = CLAMP(foc.Uq, -10000, 10000);
 
                                 break;
                             }
@@ -563,10 +556,7 @@ int main(void)
                             case CTRL_MODE_SPD:
                             {
                                 // qdAxis.pdf
-
                                 foc.Uq = P(eAxisNo).s32DrvSpdRef;
-                                //	 foc.Uq  =  CLAMP( P(eAxisNo).s32DrvSpdRef , -8000, 8000);
-
                                 break;
                             }
 
@@ -578,20 +568,21 @@ int main(void)
                             default:
                             case CTRL_MODE_DS402:  // Get ElecAngle Offset
                             {
-                                foc.u16ElecAngle = 65535 * 270 / 360;  // -90 deg => 270 deg
-                                foc.Uq           = 16000;
-
                                 break;
                             }
                         }
 
                         MotDrv_Isr(&foc, eAxisNo);
                     });
-
-                    break;
                 }
 
-                case AXIS_APP_OPENLOOP:
+                break;
+            }
+
+            case AXIS_APP_ENCIDENT:
+            case AXIS_APP_OPENLOOP:
+            {
+                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
                 {
                     // P(eAxisNo).u16ElecAngle = P(eAxisNo).s16OpenElecAngInit;
 
@@ -607,47 +598,70 @@ int main(void)
 
                         MotDrv_Isr(&foc, eAxisNo);
 
-#if 1
+#if 1  // 电角度偏置辨识
+
                         // 正方向定义: 编码器递增方向和电角度递增方向相同。若方向相反，则任意调换电机的两根相线
 
-                        uint16_t u16MotPolePairs  = P(eAxisNo).u16MotPolePairs;
-                        uint32_t u32EncRes        = P(eAxisNo).u32EncRes;
-                        uint16_t u16ElecAngOffset = P(eAxisNo)._Resv343;  // the EncPos at ElecAngle = 270 deg
-                        uint16_t u16MechAng       = P(eAxisNo).u32EncPos;
+                        uint16_t u16MotPolePairs = P(eAxisNo).u16MotPolePairs;
+                        uint32_t u32EncRes       = P(eAxisNo).u32EncRes;
+                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;  // 电角度偏置为 270 deg 时的编码器读数，共有 u16MotPolePairs 个
+                        uint16_t u16EncPos       = P(eAxisNo).u32EncPos;
 
-                        uint16_t u16ElecAng = (u32)u16MechAng * (u32)u16MotPolePairs - (u32)u16ElecAngOffset;
-
-                        // elecAng map to 0 ~ 65535
-
-                        if (u32EncRes < U16_MAX)
+                        if (u16EncPos >= u16EncPosOffset)
                         {
-                            u16ElecAng *= U16_MAX / u32EncRes;
+                            u16EncPos -= u16EncPosOffset;
                         }
                         else
                         {
-                            u16ElecAng /= u32EncRes / U16_MAX;
+                            u16EncPos = u32EncRes - u16EncPosOffset + u16EncPos;
+                        }
+
+                        // 电角度标幺 [0,u32EncRes) => [0,65536)
+                        uint16_t u16ElecAng = u16EncPos * u16MotPolePairs;
+
+                        if (u32EncRes <= 65536)
+                        {
+                            u16ElecAng *= 65536 / u32EncRes;
+                        }
+                        else
+                        {
+                            u16ElecAng /= 65536 / u32EncRes;
                         }
 
                         P(eAxisNo)._Resv358 = foc.u16ElecAngle;
-                        P(eAxisNo)._Resv359 = u16MechAng;
+                        P(eAxisNo)._Resv359 = u16EncPos;
                         P(eAxisNo)._Resv360 = u16ElecAng;
+                        P(eAxisNo)._Resv361 = u16ElecAng - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
+
+                        static uint16_t u16Times = 0;
+
+                        if (P(eAxisNo)._Resv361 > 7000)  // 阈值是手动调整的
+                        {
+                            P(eAxisNo)._Resv343 += 1;
+                            u16Times = 0;
+
+                            if (P(eAxisNo)._Resv343 > P(eAxisNo).u32EncRes)
+                            {
+                                // 出错 !!
+                            }
+                        }
+                        else if (++u16Times > 500)
+                        {
+                            u16Times = 0;  // 已稳定
+                            P(eAxisNo).u32CommCmd &= ~BV(0);
+                        }
 
 #endif
                     });
-
-                    break;
                 }
 
-                case AXIS_APP_ENCIDENT:
-                {
-                    break;
-                }
+                break;
+            }
 
-                default:
-                {
-                    // AlmUpdate()
-                    break;
-                }
+            default:
+            {
+                // AlmUpdate()
+                break;
             }
         }
 

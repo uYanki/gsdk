@@ -3161,24 +3161,9 @@
           <GroupName>DSP</GroupName>
           <Files>
             <File>
-              <FileName>arm_pid_init_q15.c</FileName>
+              <FileName>ControllerFunctions.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_init_q15.c</FilePath>
-            </File>
-            <File>
-              <FileName>arm_pid_reset_q15.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_reset_q15.c</FilePath>
-            </File>
-            <File>
-              <FileName>arm_pid_init_q31.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_init_q31.c</FilePath>
-            </File>
-            <File>
-              <FileName>arm_pid_reset_q31.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\arm_pid_reset_q31.c</FilePath>
+              <FilePath>..\..\..\platform\stm32g0_hal\fwlib\STM32Cube_FW_G0_V1.6.0\Drivers\CMSIS\DSP\Source\ControllerFunctions\ControllerFunctions.c</FilePath>
             </File>
           </Files>
         </Group>
