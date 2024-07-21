@@ -348,21 +348,21 @@ const para_attr_t sAxisAttr[] = {
     {         W(4000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0340 u16PosLoopFreq
     {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0341 u16SpdLoopFreq
     {         W(8000),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0342 u16CurLoopFreq
-    {            W(0),            W(0),            W(0), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0343 _Resv343
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0343 _Resv343
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0344 _Resv344
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0345 _Resv345
-    {         W(800),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0346 u16PosLoopKp
-    {          W(400),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0347 u16PosLoopKi
-    {           W(100),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0348 u16PosLoopKd
-    {         W(1000),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0349 u16SpdLoopKp
-    {          W(300),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0350 u16SpdLoopKi
-    {           W(50),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0351 u16SpdLoopKd
-    {         W(1000),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0352 u16CurLoopIqKp
-    {          W(300),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0353 u16CurLoopIqKi
-    {           W(50),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0354 u16CurLoopIqKd
-    {         W(1000),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0355 u16CurLoopIdKp
-    {          W(300),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0356 u16CurLoopIdKi
-    {           W(50),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0357 u16CurLoopIdKd
+    {           W(12),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0346 u16PosLoopKp
+    {           W(30),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0347 u16PosLoopKi
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0348 u16PosLoopKd
+    {           W(12),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0349 u16SpdLoopKp
+    {           W(30),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0350 u16SpdLoopKi
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0351 u16SpdLoopKd
+    {           W(12),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0352 u16CurLoopIqKp
+    {           W(30),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0353 u16CurLoopIqKi
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0354 u16CurLoopIqKd
+    {           W(12),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0355 u16CurLoopIdKp
+    {           W(30),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0356 u16CurLoopIdKi
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV |  B_SIG }, // P0357 u16CurLoopIdKd
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0358 _Resv358
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0359 _Resv359
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0360 _Resv360
@@ -372,7 +372,7 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0364 _Resv364
     {            W(0),            W(0),            W(2), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0365 u16AppSel
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0366 u16CtrlMethod
-    {            W(0),            W(0),            W(3), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0367 u16CtrlMode
+    {            W(1),            W(0),            W(3), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0367 u16CtrlMode
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0368 u16CtrlCmdSrc
     {            W(0),            W(0),            W(0), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0369 u16PwrOnAutoRun
     {           WL(0),     WL(U32_MIN),     WL(U32_MAX), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0370 u32CommCmdWL
@@ -502,14 +502,14 @@ const para_attr_t sAxisAttr[] = {
     {           W3(0),     W3(S64_MIN),     W3(S64_MAX),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_QUD3 }, // P0491 s64ProbeNegEdgePo03W3
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0495 _Resv495
     {            W(0),            W(0),            W(1), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0496 u16SpdRefSrc
-    {           WL(2000),           WL(0),           WL(0), B_RW_M0 |    B_NR |  B_SYNC |  B_COV | B_DOB0 }, // P0497 s32SpdDigRefWL
-    {           WH(2000),           WH(0),           WH(0), B_RW_M0 |    B_NR |  B_SYNC |  B_COV | B_DOB1 }, // P0497 s32SpdDigRefWH
+    {        WL(2000),      WL(-30000),       WL(30000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV | B_DOB0 }, // P0497 s32SpdDigRefWL
+    {        WH(2000),      WH(-30000),       WH(30000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV | B_DOB1 }, // P0497 s32SpdDigRefWH
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0499 _Resv499
-    {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0500 u16AccTime
-    {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0501 u16DecTime
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0500 u16AccTime
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0501 u16DecTime
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0502 _Resv502
-    {            W(0),            W(0),            W(0), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0503 u16JogDigRef
-    {            W(0),            W(0),            W(0), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0504 u16JogAccDecTime
+    {         W(1000),       W(-30000),        W(30000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0503 u16JogDigRef
+    {            W(0),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0504 u16JogAccDecTime
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0505 _Resv505
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0506 u16SpdLimSrc
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0507 u16SpdLimFwd
@@ -618,8 +618,8 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0610 _Resv610
     {          W(125),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0611 u16OpenPeriod
     {            W(0),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0612 s16OpenElecAngInit
-    {           W(100),        W(-3000),         W(3000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0613 s16OpenElecAngInc
-    {        W(5000),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0614 s16OpenUqRef
+    {         W(1000),        W(-3000),         W(3000), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0613 s16OpenElecAngInc
+    {         W(8000),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0614 s16OpenUqRef
     {            W(0),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0615 s16OpenUdRef
     {            W(0),            W(0),           W(15), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0616 u16TrqMulRefSel
     {          W(100),      W(U16_MIN),      W(U16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0617 u16AiTrqCoeff0
@@ -639,10 +639,10 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0631 _Resv631
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0632 _Resv632
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0633 _Resv633
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0634 _Resv634
-    {            W(0),      W(U16_MIN),      W(U16_MAX),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0635 u16ElecAngle
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0636 _Resv636
-    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0637 _Resv637
+    {            W(0),      W(U16_MIN),      W(U16_MAX),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0634 u16ElecAngleRef
+    {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0635 u16ElecAngleFb
+    {           WL(0),     WL(U32_MIN),     WL(U32_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV | B_DOB0 }, // P0636 u32EncPosOffsetWL
+    {           WH(0),     WH(U32_MIN),     WH(U32_MAX), B_RW_M0 |    B_NR |  B_SYNC | B_NCOV | B_DOB1 }, // P0636 u32EncPosOffsetWH
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0638 _Resv638
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0639 _Resv639
     {            W(0),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0640 s16Ud

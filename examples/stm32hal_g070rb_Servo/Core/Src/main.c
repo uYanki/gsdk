@@ -209,6 +209,8 @@ int shunt_conductance=	500;  //100 means 1 mOh, current sensing resistor
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
+	
+	return;
     tick_t t = GetTick100ns();
 	
 	s16   _Resv100Pre = D._Resv100;
@@ -250,7 +252,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	else{
 	 mc_t foc = {0};
 		
-		foc.u16ElecAngle = 	P(0).u16ElecAngle;
+		foc.u16ElecAngle = 	P(0).u16ElecAngleFb;
 
     foc.Ia = ((D._Resv100*70  + _Resv100Pre*30)/100-off[0]);//mA
     foc.Ib = ((D._Resv101*70  + _Resv101Pre*30)/100-off[1]);//mA
@@ -301,7 +303,7 @@ void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
 
     PWM_SetDuty(pMotDrv->Ta, pMotDrv->Tb, pMotDrv->Tc, eAxisNo);
 
-    P(eAxisNo).u16ElecAngle = pMotDrv->u16ElecAngle;
+    P(eAxisNo).u16ElecAngleRef = pMotDrv->u16ElecAngle;
 
     P(eAxisNo).s16Ualpha = pMotDrv->Ualpha;
     P(eAxisNo).s16Ubeta  = pMotDrv->Ubeta;
@@ -458,11 +460,11 @@ int main(void)
     P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
 #endif
 
-    P(eAxisNo)._Resv343 =0;// 1092;
+  // P(eAxisNo).u32EncPosOffset = 1092;
 		
 		#if 1
 		
-		P(eAxisNo).u16AppSel = 1;
+		P(eAxisNo).u16AppSel = 0;
 		
 		//	P(eAxisNo).u32CommCmd = 1;
 		#endif
@@ -493,6 +495,8 @@ int main(void)
         DrvScheCycle();
 
         P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
+				
+				PeriodicTask(125 * UNIT_US,   DrvScheIsr() );
 
         switch (P(eAxisNo).u16AppSel)
         {
@@ -507,10 +511,9 @@ int main(void)
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
                         // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
 
-                      
-                        foc.u16ElecAngle =  P(eAxisNo)._Resv344;
+                        foc.u16ElecAngle =  P(eAxisNo).u16ElecAngleFb;
 
-                        // P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
+                         P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
@@ -518,9 +521,9 @@ int main(void)
                             {
                                 static PID_t pid = {0};
 
-                                pid.Kp = P(eAxisNo).u16PosLoopKp / 100000.f;
-                                pid.Ki = P(eAxisNo).u16PosLoopKi / 100000.f;
-                                pid.Kd = P(eAxisNo).u16PosLoopKd / 100000.f;
+                                pid.Kp = P(eAxisNo).u16PosLoopKp / 1000.f;
+                                pid.Ki = P(eAxisNo).u16PosLoopKi / 1000.f;
+                                pid.Kd = P(eAxisNo).u16PosLoopKd / 1000.f;
                                 // arm_pid_init_f32(&s_sPosPi, s_bPosInit);
 
                                 s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
@@ -552,7 +555,7 @@ int main(void)
                             case CTRL_MODE_SPD:
                             {
                                 // qdAxis.pdf
-                                foc.Uq = P(eAxisNo).s32DrvSpdRef;
+                                foc.Uq =P(eAxisNo).s32DrvSpdRef;
                                 break;
                             }
 
@@ -590,8 +593,8 @@ int main(void)
 
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
 											
-
-                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngle + P(eAxisNo).s16OpenElecAngInc;
+											P(eAxisNo).s16OpenElecAngInc= 20;
+                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef + P(eAxisNo).s16OpenElecAngInc;
 
                         MotDrv_Isr(&foc, eAxisNo);
 
@@ -603,16 +606,16 @@ int main(void)
 											
 											//  P(eAxisNo)._Resv343 是机械角偏置
 											//  P(eAxisNo)._Resv344 是电角度反馈
-                        P(eAxisNo)._Resv361 =  P(eAxisNo)._Resv344 - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
+                        P(eAxisNo)._Resv361 =  P(eAxisNo).u16ElecAngleFb - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
 
                         static uint16_t u16Times = 0;
 
                         if (P(eAxisNo)._Resv361 > 7000)  // 阈值是手动调整的
                         {
-                            P(eAxisNo)._Resv343 += 1;
+                            P(eAxisNo).u32EncPosOffset += 1;
                             u16Times = 0;
 
-                            if (P(eAxisNo)._Resv343 > P(eAxisNo).u32EncRes)
+                            if (P(eAxisNo).u32EncPosOffset > P(eAxisNo).u32EncRes)
                             {
                                 // 出错 !!
 															  P(eAxisNo).u32CommCmd &= ~BV(0);
@@ -721,7 +724,7 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
 
     if (flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
     {
-        //  P(0)._Resv343 += 2000;
+       
     }
 }
 

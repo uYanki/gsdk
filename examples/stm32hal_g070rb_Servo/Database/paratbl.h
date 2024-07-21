@@ -487,10 +487,9 @@ typedef struct __packed {
     u16 _Resv631;            // P0631 
     u16 _Resv632;            // P0632 
     u16 _Resv633;            // P0633 
-    u16 _Resv634;            // P0634 
-    u16 u16ElecAngle;        // P0635 驱动层电角度
-    u16 _Resv636;            // P0636 
-    u16 _Resv637;            // P0637 
+    u16 u16ElecAngleRef;     // P0634 驱动层电角度指令
+    u16 u16ElecAngleFb;      // P0635 驱动层电角度反馈
+    u32 u32EncPosOffset;     // P0636 机械角度偏置
     u16 _Resv638;            // P0638 
     u16 _Resv639;            // P0639 
     s16 s16Ud;               // P0640 驱动层D轴电压输出

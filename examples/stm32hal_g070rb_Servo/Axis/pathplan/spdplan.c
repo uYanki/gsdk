@@ -38,7 +38,7 @@ void SpdPlanInit(spd_plan_t* pSpdPlan, axis_e eAxisNo)
 
 void SpdPlanCycle(spd_plan_t* pSpdPlan, axis_e eAxisNo)
 {
-    s32PlanSpdRef_o(eAxisNo) = s32LogicSpdRef_i(eAxisNo);
+    s32PlanSpdRef_o(eAxisNo) = s32LogicSpdRef_i(eAxisNo); 
 }
 
 void SpdPlanIsr(spd_plan_t* pSpdPlan, axis_e eAxisNo)

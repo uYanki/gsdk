@@ -74,7 +74,7 @@ void PID_Handler_Tustin(PID_t* p)  // Tustin 散点积分
 
     p->out += p->Kp * p->prop + p->Ki * p->inte + p->Kd * p->deri;
 
-    PID_PostHandler(p, out_p);
+   // PID_PostHandler(p, out_p);
 }
 
 void PID_Handler_Inc(PID_t* p)  // 增量式

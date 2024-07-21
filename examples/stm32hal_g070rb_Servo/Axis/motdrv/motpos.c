@@ -20,8 +20,8 @@
 #define s64EncMultPos_o(eAxisNo)   P(eAxisNo).s64EncMultPos
 #define s64DrvPosFb_o(eAxisNo)     P(eAxisNo).s64DrvPosFb
 #define u16MotPolePairs_i(eAxisNo) P(eAxisNo).u16MotPolePairs
-#define u32EncPosOffset_i(eAxisNo) P(eAxisNo)._Resv343  // 机械角偏置
-#define u16ElecAngleFb_o(eAxisNo)  P(eAxisNo)._Resv344  // 电角度反馈
+#define u32EncPosOffset_i(eAxisNo) P(eAxisNo).u32EncPosOffset  // 机械角偏置
+#define u16ElecAngleFb_o(eAxisNo)  P(eAxisNo).u16ElecAngleFb   // 电角度反馈
 
 typedef union {
     u16 u16All;
@@ -125,7 +125,7 @@ static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
     PeriodicTask(500 * UNIT_US, {
         static s64 PosPre = 0;
 
-        s32 Spd = 2000 * 10 * 60 * (s64EncMultPos_o(eAxisNo) - PosPre) / (s32)u32EncRes_i(eAxisNo);
+        s32 Spd = 2000 * 10 * 60 * (s32)(s64EncMultPos_o(eAxisNo) - PosPre) / (s32)u32EncRes_i(eAxisNo);  // 0.1 rpm
 
         P(eAxisNo).s32DrvSpdFb = P(eAxisNo).s32DrvSpdFb * 0.15 + Spd * 0.85;
 
