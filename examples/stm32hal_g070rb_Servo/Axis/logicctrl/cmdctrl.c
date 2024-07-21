@@ -49,12 +49,12 @@ void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
 
                 if (pCtrlWord->ServoOn)
                 {
-                    u16AxisFSM_i(eAxisNo) = AXIS_RUN;
+                    u16AxisFSM_i(eAxisNo) = AXIS_STATE_ENABLE;
                     PWM_Start(eAxisNo);
                 }
                 else
                 {
-                    u16AxisFSM_i(eAxisNo) = AXIS_STANDBY;
+                    u16AxisFSM_i(eAxisNo) = AXIS_STATE_STANDBY;
                     PWM_Stop(eAxisNo);
                 }
 

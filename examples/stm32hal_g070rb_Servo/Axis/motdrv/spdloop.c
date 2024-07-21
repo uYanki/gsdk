@@ -48,7 +48,7 @@ void SpdLoopIsr(spd_loop_t* pSpdLoop, axis_e eAxisNo)
 {
     MotSpdIsr(&pSpdLoop->sMotSpd, eAxisNo);
 
-    if (u16AxisFSM_i(eAxisNo) == AXIS_RUN)
+    if (u16AxisFSM_i(eAxisNo) == AXIS_STATE_ENABLE)
     {
         pSpdLoop->sPID.Kp = u16SpdLoopKp_i(eAxisNo);
         pSpdLoop->sPID.Ki = u16SpdLoopKi_i(eAxisNo);

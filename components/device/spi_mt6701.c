@@ -56,6 +56,7 @@ uint16_t MT6701_ReadAngle(spi_mt6701_t* pHandle)
 //---------------------------------------------------------------------------
 
 #if CONFIG_DEMOS_SW
+
 void MT6701_Test(void)
 {
     spi_mst_t spi = {
@@ -79,4 +80,5 @@ void MT6701_Test(void)
         DelayBlockMs(10);
     }
 }
+
 #endif /* CONFIG_DEMOS_SW */

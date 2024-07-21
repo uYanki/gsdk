@@ -85,6 +85,20 @@ static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
     // 3. 多圈值
 
     s64EncMultPos_o(eAxisNo) = (s64)s32EncTurns_o(eAxisNo) * (s64)u32EncRes_i(eAxisNo) + (s64)u32EncPos_io(eAxisNo);
+		
+
+		PeriodicTask(500*UNIT_US, {
+		
+		static s64 PosPre = 0;
+			
+			s32 Spd = 2000 * 10 * 60 * ( s64EncMultPos_o(eAxisNo) - PosPre) / (s32) u32EncRes_i(eAxisNo);
+			
+			P(eAxisNo).s32DrvSpdFb = P(eAxisNo).s32DrvSpdFb*0.15+Spd*0.85;
+
+			PosPre =	s64EncMultPos_o(eAxisNo);
+			
+		});
+	  
 }
 
 void MotPosCreat(mot_pos_t* pMotPos, axis_e eAxisNo)
@@ -164,6 +178,4 @@ void MotPosIsr(mot_pos_t* pMotPos, axis_e eAxisNo)
 #endif
 
     P(eAxisNo).s64DrvPosFb = s64EncMultPos_o(eAxisNo);
-
-    // P(eAxisNo).s32SpdDigRef14 = s64EncMultPos_o(eAxisNo);
 }

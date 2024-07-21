@@ -11,9 +11,10 @@ typedef enum {
 } axis_e;
 
 typedef enum {
-    AXIS_INIT,
-    AXIS_RUN,
-    AXIS_STANDBY,
+  AXIS_STATE_INITIAL,         ///< axis initial
+  AXIS_STATE_STANDBY,         ///< axis status is ok, waiting for command
+  AXIS_STATE_ENABLE,          ///< axis is enabled
+  AXIS_STATE_FAULT,           ///< axis fault
 } axis_state_e;
 
 typedef enum {

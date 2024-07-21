@@ -193,10 +193,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 }
 
-//#include "encoder/absEnc.h"
+// #include "encoder/absEnc.h"
 
-//abs_drv_t AbsDrv;
-//abs_enc_t AbsEnc;
+// abs_drv_t AbsDrv;
+// abs_enc_t AbsEnc;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -218,32 +218,32 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D.s16UaiSi1 = GetUai2();
     D.u16UcdcSi = D.u16UmdcSi = GetUai2();
 
-   // AbsEncIsr(&AbsEnc, AXIS_0);
+    // AbsEncIsr(&AbsEnc, AXIS_0);
 
     // AxisIsr(AXIS_1);
 }
 
-//#if 1
+// #if 1
 
-//#include "usart.h"
+// #include "usart.h"
 
-//void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 //{
-//    if (huart->Instance == TFORMAT_UART_PORT)
-//    {
-//        // if (__HAL_DMA_GetCounter(huart->hdmarx) == 0) {}
-//        TFormatRdPos(&AbsDrv);
-//    }
-//}
+//     if (huart->Instance == TFORMAT_UART_PORT)
+//     {
+//         // if (__HAL_DMA_GetCounter(huart->hdmarx) == 0) {}
+//         TFormatRdPos(&AbsDrv);
+//     }
+// }
 
-//#endif  // __ABS_ENC_TFORMAT_SW
+// #endif  // __ABS_ENC_TFORMAT_SW
 
-//abs_tformat_t sAbsTformat;
+// abs_tformat_t sAbsTformat;
 
-//void EncInit(axis_e eAxisNo)
+// void EncInit(axis_e eAxisNo)
 //{
-//    abs_drv_t* pAbsDrv = &AbsDrv;
-//    abs_enc_t* pAbsEnc = &AbsEnc;
+//     abs_drv_t* pAbsDrv = &AbsDrv;
+//     abs_enc_t* pAbsEnc = &AbsEnc;
 
 //    pAbsEnc->u8EncBit     = 14;
 //    pAbsEnc->u32EncRes    = 1 << pAbsEnc->u8EncBit;
@@ -256,6 +256,8 @@ void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
 {
     MC_SinCos(pMotDrv);
     MC_InvPark(pMotDrv);
+
+    P(eAxisNo)._Resv519 = 0;
 
     switch (P(eAxisNo)._Resv519)
     {
@@ -303,17 +305,16 @@ static bool                 s_bPosInit = true;
 
 #include "spi_mt6701.h"
 
- spi_mst_t spi = {
-			.MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
-			.MOSI = {GPIOB,             GPIO_PIN_4 },
-			.SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
-			.CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* RST */
-	};
+spi_mst_t spi = {
+    .MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
+    .MOSI = {GPIOB,             GPIO_PIN_4 },
+    .SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
+    .CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* RST */
+};
 
-	spi_mt6701_t mt6701 = {
-			.hSPI = &spi,
-	};
-
+spi_mt6701_t mt6701 = {
+    .hSPI = &spi,
+};
 
 /* USER CODE END 0 */
 
@@ -382,7 +383,6 @@ int main(void)
 
 #endif
 
- 
     SPI_Master_Init(&spi, 50000, SPI_DUTYCYCLE_50_50, MT6701_SPI_TIMING | SPI_FLAG_FAST_CLOCK_ENABLE | SPI_FLAG_SOFT_CS);
 
     MT6701_Init(&mt6701);
@@ -419,7 +419,7 @@ int main(void)
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
     HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
 
-    P(eAxisNo).u16AxisFSM = AXIS_INIT;
+    P(eAxisNo).u16AxisFSM = AXIS_STATE_INITIAL;
 
     /* USER CODE END 2 */
 
@@ -437,6 +437,35 @@ int main(void)
     AxisCreat(&sAxis, eAxisNo);
     AxisInit(&sAxis, eAxisNo);
 
+#if 1  // 2804
+    P(eAxisNo).u16MotPolePairs = 7;
+    P(eAxisNo).u32EncRes       = (1 << 14);
+#else  // hall
+    P(eAxisNo).u16MotPolePairs = 2;
+    P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
+#endif
+
+    {
+        // get zero elec angle
+
+        mc_t foc         = {0};
+        foc.u16ElecAngle = P(eAxisNo).u32EncRes * 270 / 360;  // -90 deg => 270 deg
+        foc.Uq           = 0;
+        foc.Ud           = 8000;
+        foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
+
+        PWM_Start(eAxisNo);
+        MotDrv_Isr(&foc, eAxisNo);
+        DelayBlockMs(100);
+
+        P(eAxisNo)._Resv343 = MT6701_ReadAngle(&mt6701);
+
+        DelayBlockMs(20);
+        PWM_Start(eAxisNo);
+    }
+
+    // P(eAxisNo).u32CommCmd = 1;
+
     while (1)
     {
         // led
@@ -452,26 +481,27 @@ int main(void)
 
         D.u32SysRunTime = GetTickMs();
 
-    //    HallEnc_Isr(&sHallEnc);
+        //    HallEnc_Isr(&sHallEnc);
 
         axis_e eAxisNo = AXIS_0;
 
-//        P(eAxisNo).u16HallState  = sHallEnc.eHallState;
-//        P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
-//        P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
-//        P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
-//        P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
-//        P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
+        //        P(eAxisNo).u16HallState  = sHallEnc.eHallState;
+        //        P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
+        //        P(eAxisNo).u32EncPos     = sHallEnc.u16EncPos;
+        //        P(eAxisNo).s32EncTurns   = sHallEnc.s32EncTurns;
+        //        P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
+        //        P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
 
         AxisCycle(&sAxis, eAxisNo);
 
         PeriodicTask(125 * UNIT_US, {
             AxisIsr(&sAxis, eAxisNo);
-            P(eAxisNo).s64DrvPosFb = MT6701_ReadAngle(&mt6701);
         });
 
-        if (P(eAxisNo).u16AxisFSM == AXIS_RUN)
+        if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
         {
+            //	static u16 Offset;
+
             switch (P(eAxisNo).u16AppSel)
             {
                 case AXIS_APP_GENERIC:
@@ -479,16 +509,21 @@ int main(void)
                     PeriodicTask(125 * UNIT_US, {
                         mc_t foc = {0};
 
-                        foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
-                        foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
+                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
+                        // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
+
+                        // elec angle
+                        foc.u16ElecAngle = (u32)(P(eAxisNo).u32EncPos * 4) * 7 - P(eAxisNo)._Resv343 * 4;
+
+                        P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
                             case CTRL_MODE_POS:
                             {
-                                s_sPosPi.Kp = P(eAxisNo).u16PosLoopKp / 10;
-                                s_sPosPi.Ki = P(eAxisNo).u16PosLoopKi / 10;
-                                s_sPosPi.Kd = P(eAxisNo).u16PosLoopKd / 10;
+                                s_sPosPi.Kp = (s32)P(eAxisNo).u16PosLoopKp * 10000;
+                                s_sPosPi.Ki = (s32)P(eAxisNo).u16PosLoopKi * 10000;
+                                s_sPosPi.Kd = (s32)P(eAxisNo).u16PosLoopKd * 10000;
                                 arm_pid_init_q31(&s_sPosPi, s_bPosInit);
 
                                 s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
@@ -501,14 +536,25 @@ int main(void)
                                 // P(eAxisNo).s32DrvSpdRef = P(eAxisNo).s32SpdDigRef;
                                 // P(eAxisNo).s64EncMultPos
                                 // P(eAxisNo).s32SpdDigRef00;
-                                P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
+                                // P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
 
                                 // int32_t delta = P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).s32SpdDigRef01;
 
+                                // posloop output is pulse. required convert into rpm as speed loop input
+
                                 // if (abs(delta) > 20)
+                                //  P(eAxisNo).s64DrvPosFb
+
+                                foc.u16ElecAngle = P(eAxisNo).u32EncPos * P(eAxisNo).u16MotPolePairs;
+                                //															foc.u16ElecAngle = foc.u16ElecAngle	- eOffset;
+
                                 {
-                                    q31_t q = arm_pid_q31(&s_sPosPi, (-200 - P(eAxisNo).s64EncMultPos) * 10 / 12);  // to 0.1rpm
-                                    foc.Uq  = arm_pid_q15(&s_sSpdPi, CLAMP(q, S16_MIN, S16_MAX));
+                                    q31_t q = arm_pid_q31(&s_sPosPi, (P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).u32EncPos));  // to 0.1rpm
+
+                                    q      = q * 60 * 10 / P(eAxisNo).u32EncRes;
+                                    foc.Uq = arm_pid_q15(&s_sSpdPi, CLAMP(q, -10000, 10000));
+
+                                    foc.Uq = CLAMP(foc.Uq, -10000, 10000);
                                 }
 
                                 break;
@@ -517,7 +563,9 @@ int main(void)
                             case CTRL_MODE_SPD:
                             {
                                 // qdAxis.pdf
+
                                 foc.Uq = P(eAxisNo).s32DrvSpdRef;
+                                //	 foc.Uq  =  CLAMP( P(eAxisNo).s32DrvSpdRef , -8000, 8000);
 
                                 break;
                             }
@@ -528,8 +576,11 @@ int main(void)
                             }
 
                             default:
-                            case CTRL_MODE_DS402:
+                            case CTRL_MODE_DS402:  // Get ElecAngle Offset
                             {
+                                foc.u16ElecAngle = 65535 * 270 / 360;  // -90 deg => 270 deg
+                                foc.Uq           = 16000;
+
                                 break;
                             }
                         }
@@ -547,13 +598,41 @@ int main(void)
                     PeriodicTask(P(eAxisNo).u16OpenPeriod * UNIT_US, {
                         mc_t foc;
 
-                        foc.Uq      = P(eAxisNo).s16OpenUqRef;
-                        foc.Ud      = P(eAxisNo).s16OpenUdRef;
+                        foc.Uq = P(eAxisNo).s16OpenUqRef;
+                        foc.Ud = P(eAxisNo).s16OpenUdRef;
+
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
 
                         foc.u16ElecAngle = P(eAxisNo).u16ElecAngle + P(eAxisNo).s16OpenElecAngInc;
 
                         MotDrv_Isr(&foc, eAxisNo);
+
+#if 1
+                        // 正方向定义: 编码器递增方向和电角度递增方向相同。若方向相反，则任意调换电机的两根相线
+
+                        uint16_t u16MotPolePairs  = P(eAxisNo).u16MotPolePairs;
+                        uint32_t u32EncRes        = P(eAxisNo).u32EncRes;
+                        uint16_t u16ElecAngOffset = P(eAxisNo)._Resv343;  // the EncPos at ElecAngle = 270 deg
+                        uint16_t u16MechAng       = P(eAxisNo).u32EncPos;
+
+                        uint16_t u16ElecAng = (u32)u16MechAng * (u32)u16MotPolePairs - (u32)u16ElecAngOffset;
+
+                        // elecAng map to 0 ~ 65535
+
+                        if (u32EncRes < U16_MAX)
+                        {
+                            u16ElecAng *= U16_MAX / u32EncRes;
+                        }
+                        else
+                        {
+                            u16ElecAng /= u32EncRes / U16_MAX;
+                        }
+
+                        P(eAxisNo)._Resv358 = foc.u16ElecAngle;
+                        P(eAxisNo)._Resv359 = u16MechAng;
+                        P(eAxisNo)._Resv360 = u16ElecAng;
+
+#endif
                     });
 
                     break;
@@ -660,6 +739,11 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
     if (flexbtn[BUTTON_NEXT].eEvent == FLEXBTN_EVENT_RELEASE)
     {
         HAL_NVIC_SystemReset();
+    }
+
+    if (flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
+    {
+        P(0)._Resv343 += 2000;
     }
 }
 
