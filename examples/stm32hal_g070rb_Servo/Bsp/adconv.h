@@ -39,6 +39,6 @@ extern s16 GetTs1(void);
 extern u16 NTC_GetTempSi(u16 adconv);
 #endif
 
-extern __IO u16 ADConv[7];
+extern __IO u16 ADConv[6];
 
 #endif

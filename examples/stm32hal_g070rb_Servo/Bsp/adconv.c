@@ -1,13 +1,13 @@
 #include "./adconv.h"
 
-#define AD_POT1  (ADConv[0])
-#define AD_POT2  (ADConv[1])
+#define AD_CUR_C (ADConv[0])
+#define AD_CUR_A (ADConv[1])
 #define AD_NTC   (ADConv[2])
 #define AD_VBUS  (ADConv[3])
-#define AD_CUR_C (ADConv[4])
-#define AD_CUR_A (ADConv[5])
+#define AD_POT1  (ADConv[4])
+#define AD_POT2  (ADConv[5])
 
-__IO u16 ADConv[7] = {0};
+__IO u16 ADConv[6] = {0};
 
 #if (CONFIG_EXT_AI_NUM >= 1)
 s16 GetUai1(void)

@@ -194,18 +194,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	tick_t t =GetTick100ns();
-	
+    tick_t t = GetTick100ns();
+
     D._Resv100 = ADConv[0];
     D._Resv101 = ADConv[1];
     D._Resv102 = ADConv[2];
     D._Resv103 = ADConv[3];
-    // D._Resv104 = ADConv[4];
-    // D._Resv105 = ADConv[5];
+    D._Resv104 = ADConv[4];
+    D._Resv105 = ADConv[5];
 
-    D._Resv104 = GetCurU(AXIS_0);
-    D._Resv105 = GetCurV(AXIS_0);
-    D._Resv106 = GetCurW(AXIS_0);
+    //    D._Resv104 = GetCurU(AXIS_0);
+    //    D._Resv105 = GetCurV(AXIS_0);
+    //    D._Resv106 = GetCurW(AXIS_0);
 
     D.s16UaiPu0 = GetUai1();
     D.s16UaiPu1 = GetUai2();
@@ -214,10 +214,25 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D.s16UaiSi1 = GetUai2();
     D.u16UcdcSi = D.u16UmdcSi = GetUai2();
 
-	
-		DrvScheIsr();
-		P(0).s32SpdDigRef04=	GetTick100ns()- t;
+    mc_t foc = {0};
 
+    foc.Ia = (2100 - (s16)D._Resv100) << 1;
+    foc.Ib = (2133 - (s16)D._Resv101) << 1;
+    foc.Id = -foc.Ia - foc.Ib;
+
+    MC_Clark(&foc);
+    MC_Park(&foc);
+
+    D._Resv106 = foc.Ia;
+    D._Resv107 = foc.Ib;
+    D._Resv108 = foc.Ic;
+    D._Resv109 = foc.Ialpha;
+    D._Resv110 = foc.Ibeta;
+    D._Resv111 = foc.Iq;
+    D._Resv112 = foc.Id;
+
+    DrvScheIsr();
+    P(0).s32SpdDigRef04 = GetTick100ns() - t;
 }
 
 // #if 1
@@ -313,7 +328,6 @@ spi_mt6701_t mt6701 = {
     .hSPI = &spi,
 };
 
-
 /* USER CODE END 0 */
 
 /**
@@ -333,7 +347,7 @@ int main(void)
 
     /* USER CODE BEGIN Init */
     SEGGER_RTT_Init();
-    cm_backtrace_init("demo", "stm32", "V0.01");
+    //  cm_backtrace_init("demo", "stm32", "V0.01");
     /* USER CODE END Init */
 
     /* Configure the system clock */
@@ -355,17 +369,17 @@ int main(void)
     MX_CRC_Init();
     MX_TIM6_Init();
     MX_USART2_UART_Init();
-    // MX_SPI1_Init();
+    MX_SPI1_Init();
     MX_TIM3_Init();
     MX_TIM14_Init();
     /* USER CODE BEGIN 2 */
     DelayInit();
 
-		ParaTblInit();
-		
+    ParaTblInit();
+
     SPI_Master_Init(&spi, 50000, SPI_DUTYCYCLE_50_50, MT6701_SPI_TIMING | SPI_FLAG_FAST_CLOCK_ENABLE | SPI_FLAG_SOFT_CS);
     MT6701_Init(&mt6701);
-		
+
 #if 0
 
     I2C_Master_Init(&i2c, 4e6, I2C_DUTYCYCLE_50_50);
@@ -383,8 +397,6 @@ int main(void)
     SSD1306_FillBuffer(&ssd1306, MonoFramebuf_GetBuffer(&fb));
 
 #endif
-
-
 
     // key
     for (int i = 0; i < ARRAY_SIZE(flexbtn); ++i)
@@ -410,19 +422,20 @@ int main(void)
     //     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1 | TIM_CHANNEL_2);
     // #endif
 
-		DrvScheCreat();
-		DrvScheInit();
-		
+    DrvScheCreat();
+    DrvScheInit();
+
     // adc
     HAL_ADCEx_Calibration_Start(&hadc1);
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
 
-		axis_e eAxisNo = AXIS_0;
+    HAL_ADC_Start(&hadc1);
+
+    axis_e eAxisNo = AXIS_0;
 
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
-    HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
-
-    
+    // HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
+    HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4);
 
     /* USER CODE END 2 */
 
@@ -430,7 +443,6 @@ int main(void)
     /* USER CODE BEGIN WHILE */
 
     sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
-
 
 #if 1  // 2804
     P(eAxisNo).u16MotPolePairs = 7;
@@ -448,11 +460,11 @@ int main(void)
         PeriodicTask(UNIT_S, HAL_GPIO_TogglePin(LED2_PIN));
 
         // key
-       PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
+        PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
 
         // modbus
         eMBPoll();
-			
+
         //    HallEnc_Isr(&sHallEnc);
 
         axis_e eAxisNo = AXIS_0;
@@ -464,10 +476,7 @@ int main(void)
         // P(eAxisNo).s64EncMultPos = sHallEnc.s64EncMultPos;
         // P(eAxisNo).s32DrvSpdFb   = sHallEnc.s16SpdFb;
 
-
-			DrvScheCycle();
-
-
+        DrvScheCycle();
 
         P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
 
@@ -485,7 +494,7 @@ int main(void)
 
                         uint16_t u16MotPolePairs = P(eAxisNo).u16MotPolePairs;
                         uint32_t u32EncRes       = P(eAxisNo).u32EncRes;
-                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;  // 电角度偏置为 270 deg 时的编码器读数，共有 u16MotPolePairs 个
+                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;
                         uint16_t u16EncPos       = P(eAxisNo).u32EncPos;
 
                         if (u16EncPos >= u16EncPosOffset)
@@ -601,7 +610,7 @@ int main(void)
 
                         uint16_t u16MotPolePairs = P(eAxisNo).u16MotPolePairs;
                         uint32_t u32EncRes       = P(eAxisNo).u32EncRes;
-                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;  // 电角度偏置为 270 deg 时的编码器读数，共有 u16MotPolePairs 个
+                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;
                         uint16_t u16EncPos       = P(eAxisNo).u32EncPos;
 
                         if (u16EncPos >= u16EncPosOffset)
@@ -613,7 +622,7 @@ int main(void)
                             u16EncPos = u32EncRes - u16EncPosOffset + u16EncPos;
                         }
 
-                        // 电角度标幺 [0,u32EncRes) => [0,65536)
+                        //  电角度标幺 [0,u32EncRes) => [0,65536)
                         uint16_t u16ElecAng = u16EncPos * u16MotPolePairs;
 
                         if (u32EncRes <= 65536)
@@ -645,7 +654,7 @@ int main(void)
                         else if (++u16Times > 500)
                         {
                             u16Times = 0;  // 已稳定
-                            P(eAxisNo).u32CommCmd &= ~BV(0);
+                                           // P(eAxisNo).u32CommCmd &= ~BV(0);
                         }
 
 #endif
@@ -738,7 +747,6 @@ static bool IsPressed(flexbtn_t* pHandle)
 
 static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
 {
-
     if (flexbtn[BUTTON_NEXT].eEvent == FLEXBTN_EVENT_RELEASE)
     {
         HAL_NVIC_SystemReset();
@@ -746,11 +754,11 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
 
     if (flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
     {
-      //  P(0)._Resv343 += 2000;
+        //  P(0)._Resv343 += 2000;
     }
 }
 
- void ParaTblInit(void)
+void ParaTblInit(void)
 {
     uint16_t* pParaTbl;
 
@@ -784,7 +792,6 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
     // TIM freq / Carry freq / 2
     P(eAxisNo).u16PwmDutyMax = 64000000 / P(eAxisNo).u16CarryFreq / 2;
 }
-
 
 /* USER CODE END 4 */
 
