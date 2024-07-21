@@ -192,16 +192,34 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 // abs_drv_t AbsDrv;
 // abs_enc_t AbsEnc;
 
+#define ONE_ADC_VOLTAGE 806  // unit uV
+#define AMP_GAIN        11.0
+
+int phase_current_from_adcval(uint32_t ADCValue) 
+{
+    int amp_gain=AMP_GAIN;
+	
+int shunt_conductance=	500;  //100 means 1 mOh, current sensing resistor
+
+    int amp_out_volt = ONE_ADC_VOLTAGE * ADCValue;
+    int shunt_volt = amp_out_volt / amp_gain;
+    int current = (shunt_volt*100) / shunt_conductance; // unit mA
+    return current;
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
     tick_t t = GetTick100ns();
+	
+	s16   _Resv100Pre = D._Resv100;
+   s16 _Resv101Pre =  D._Resv101;
 
-//    D._Resv100 = ADConv[0];
-//    D._Resv101 = ADConv[1];
-//    D._Resv102 = ADConv[2];
-//    D._Resv103 = ADConv[3];
-//    D._Resv104 = ADConv[4];
-//    D._Resv105 = ADConv[5];
+    D._Resv100 = ADConv[0];
+    D._Resv101 = ADConv[1];
+    D._Resv102 = ADConv[2];
+    D._Resv103 = ADConv[3];
+    D._Resv104 = ADConv[4];
+    D._Resv105 = ADConv[5];
 
     //    D._Resv104 = GetCurU(AXIS_0);
     //    D._Resv105 = GetCurV(AXIS_0);
@@ -213,14 +231,33 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 //    D.s16UaiSi0 = GetUai1();
 //    D.s16UaiSi1 = GetUai2();
 //    D.u16UcdcSi = D.u16UmdcSi = GetUai2();
+	static int off[2]={0};
+	static int i=0;
+	
+	#define TT 1000
+	if(i<TT)
+	{
+		off[0]+=(s16)D._Resv100;
+		off[1]+=(s16)D._Resv101;
+		i++;
+	
+	}else if(i==TT)
+	{
+		off[0]/=TT;
+		off[1]/=TT;
+		i+=1;
+	}
+	else{
+	 mc_t foc = {0};
+		
+		foc.u16ElecAngle = 	P(0).u16ElecAngle;
 
-    mc_t foc = {0};
-
-    foc.Ia = (2100 - (s16)D._Resv100) << 1;
-    foc.Ib = (2133 - (s16)D._Resv101) << 1;
-    foc.Id = -foc.Ia - foc.Ib;
+    foc.Ia = ((D._Resv100*70  + _Resv100Pre*30)/100-off[0]);//mA
+    foc.Ib = ((D._Resv101*70  + _Resv101Pre*30)/100-off[1]);//mA
+    foc.Ic = -foc.Ia - foc.Ib;
 
     MC_Clark(&foc);
+		MC_SinCos(&foc);
     MC_Park(&foc);
 
     D._Resv106 = foc.Ia;
@@ -230,9 +267,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D._Resv110 = foc.Ibeta;
     D._Resv111 = foc.Iq;
     D._Resv112 = foc.Id;
-
+   D._Resv113++; // 中断次数
     DrvScheIsr();
     P(0).s32SpdDigRef04 = GetTick100ns() - t;
+	}
+
+   
 }
 
 void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
@@ -397,22 +437,18 @@ int main(void)
     // adc
     HAL_ADCEx_Calibration_Start(&hadc1);
   //  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
-	 HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&(D._Resv100), ARRAY_SIZE(ADConv));
+	 HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
 
-     HAL_ADC_Start(&hadc1);
-
-    axis_e eAxisNo = AXIS_0;
-
-     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, (P(eAxisNo).u16PwmDutyMax >> 1) - 200);
-    // HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4);
-       HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4);
-
+	//	HAL_TIM_Base_Start(&htim1); // TRGO for ADC 
+		HAL_TIM_OC_Start(&htim1,TIM_CHANNEL_4); // TRGO for ADC 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+		
+		axis_e eAxisNo = AXIS_0;
 
-    sHallEnc.u16EncRes = 6 * P(AXIS_0).u16MotPolePairs;
+    sHallEnc.u16EncRes = 6 * P(eAxisNo).u16MotPolePairs;
 
 #if 1  // 2804
     P(eAxisNo).u16MotPolePairs = 7;
@@ -422,12 +458,20 @@ int main(void)
     P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
 #endif
 
-    P(eAxisNo)._Resv343 = 1092;
+    P(eAxisNo)._Resv343 =0;// 1092;
+		
+		#if 1
+		
+		P(eAxisNo).u16AppSel = 1;
+		
+		//	P(eAxisNo).u32CommCmd = 1;
+		#endif
 
     while (1)
     {
         // led
         PeriodicTask(UNIT_S, HAL_GPIO_TogglePin(LED2_PIN));
+				PeriodicTask(2*UNIT_S, D._Resv114=D._Resv113/2;D._Resv113=0;);  // 中断次数 Hz
 
         // key
         PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
@@ -454,6 +498,7 @@ int main(void)
         {
             case AXIS_APP_GENERIC:
             {
+							
                 if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
                 {
                     PeriodicTask(125 * UNIT_US, {
@@ -462,33 +507,8 @@ int main(void)
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
                         // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
 
-                        uint16_t u16MotPolePairs = P(eAxisNo).u16MotPolePairs;
-                        uint32_t u32EncRes       = P(eAxisNo).u32EncRes;
-                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;
-                        uint16_t u16EncPos       = P(eAxisNo).u32EncPos;
-
-                        if (u16EncPos >= u16EncPosOffset)
-                        {
-                            u16EncPos -= u16EncPosOffset;
-                        }
-                        else
-                        {
-                            u16EncPos = u32EncRes - u16EncPosOffset + u16EncPos;
-                        }
-
-                        // elecAng map to 0 ~ 65535
-                        uint16_t u16ElecAng = u16EncPos * u16MotPolePairs;
-
-                        if (u32EncRes < 65536)
-                        {
-                            u16ElecAng *= 65536 / u32EncRes;
-                        }
-                        else
-                        {
-                            u16ElecAng /= 65536 / u32EncRes;
-                        }
-
-                        foc.u16ElecAngle = u16ElecAng;
+                      
+                        foc.u16ElecAngle =  P(eAxisNo)._Resv344;
 
                         // P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
 
@@ -569,6 +589,7 @@ int main(void)
                         foc.Ud = P(eAxisNo).s16OpenUdRef;
 
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
+											
 
                         foc.u16ElecAngle = P(eAxisNo).u16ElecAngle + P(eAxisNo).s16OpenElecAngInc;
 
@@ -576,38 +597,13 @@ int main(void)
 
 #if 1  // 电角度偏置辨识
 
-                        // 正方向定义: 编码器递增方向和电角度递增方向相同。若方向相反，则任意调换电机的两根相线
-
-                        uint16_t u16MotPolePairs = P(eAxisNo).u16MotPolePairs;
-                        uint32_t u32EncRes       = P(eAxisNo).u32EncRes;
-                        uint16_t u16EncPosOffset = P(eAxisNo)._Resv343;
-                        uint16_t u16EncPos       = P(eAxisNo).u32EncPos;
-
-                        if (u16EncPos >= u16EncPosOffset)
-                        {
-                            u16EncPos -= u16EncPosOffset;
-                        }
-                        else
-                        {
-                            u16EncPos = u32EncRes - u16EncPosOffset + u16EncPos;
-                        }
-
-                        //  电角度标幺 [0,u32EncRes) => [0,65536)
-                        uint16_t u16ElecAng = u16EncPos * u16MotPolePairs;
-
-                        if (u32EncRes <= 65536)
-                        {
-                            u16ElecAng *= 65536 / u32EncRes;
-                        }
-                        else
-                        {
-                            u16ElecAng /= 65536 / u32EncRes;
-                        }
-
-                        P(eAxisNo)._Resv358 = foc.u16ElecAngle;
-                        P(eAxisNo)._Resv359 = u16EncPos;
-                        P(eAxisNo)._Resv360 = u16ElecAng;
-                        P(eAxisNo)._Resv361 = u16ElecAng - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
+                      //  P(eAxisNo)._Resv358 = foc.u16ElecAngle;
+                     //   P(eAxisNo)._Resv359 = u16EncPos;
+                      //  P(eAxisNo)._Resv360 = u16ElecAng;
+											
+											//  P(eAxisNo)._Resv343 是机械角偏置
+											//  P(eAxisNo)._Resv344 是电角度反馈
+                        P(eAxisNo)._Resv361 =  P(eAxisNo)._Resv344 - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
 
                         static uint16_t u16Times = 0;
 
@@ -619,12 +615,13 @@ int main(void)
                             if (P(eAxisNo)._Resv343 > P(eAxisNo).u32EncRes)
                             {
                                 // 出错 !!
+															  P(eAxisNo).u32CommCmd &= ~BV(0);
                             }
                         }
                         else if (++u16Times > 500)
                         {
                             u16Times = 0;  // 已稳定
-                                           // P(eAxisNo).u32CommCmd &= ~BV(0);
+                            P(eAxisNo).u32CommCmd &= ~BV(0);
                         }
 
 #endif

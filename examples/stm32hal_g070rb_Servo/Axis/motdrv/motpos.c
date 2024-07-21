@@ -16,9 +16,12 @@
 #define s32EncTurns_o(eAxisNo)     P(eAxisNo).s32EncTurns
 #define u32EncPos_io(eAxisNo)      P(eAxisNo).u32EncPos
 #define u32EncPosInit_i(eAxisNo)   P(eAxisNo).u32EncPosInit
-#define u32EncRes_i(eAxisNo)       (1 << 14)  // P(eAxisNo).u32EncRes
+#define u32EncRes_i(eAxisNo)       P(eAxisNo).u32EncRes
 #define s64EncMultPos_o(eAxisNo)   P(eAxisNo).s64EncMultPos
 #define s64DrvPosFb_o(eAxisNo)     P(eAxisNo).s64DrvPosFb
+#define u16MotPolePairs_i(eAxisNo) P(eAxisNo).u16MotPolePairs
+#define u32EncPosOffset_i(eAxisNo) P(eAxisNo)._Resv343  // 机械角偏置
+#define u16ElecAngleFb_o(eAxisNo)  P(eAxisNo)._Resv344  // 电角度反馈
 
 typedef union {
     u16 u16All;
@@ -59,13 +62,44 @@ static void AbsEncInit(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 
 static void AbsEncCycle(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 {
-		PeriodicTask(250*UNIT_US, AbsEncSyncSamp(eAxisNo));
+    PeriodicTask(250 * UNIT_US, {
+        // 1. 位置采样
+
+        AbsEncSyncSamp(eAxisNo);
+
+        // 2. 计算电角度
+
+        u32 u32EncPosOffset = u32EncPosOffset_i(eAxisNo);  // 机械角偏置
+        u32 u32EncPos       = u32EncPos_io(eAxisNo);
+
+        if (u32EncPos >= u32EncPosOffset)
+        {
+            u32EncPos -= u32EncPosOffset;
+        }
+        else
+        {
+            u32EncPos = u32EncRes_i(eAxisNo) - u32EncPosOffset + u32EncPos;
+        }
+
+        // 电角度标幺 [0,u32EncRes) => [0,65536)
+        u32 u32ElecAng = u32EncPos * u16MotPolePairs_i(eAxisNo);
+
+        if (u32EncRes_i(eAxisNo) <= 65536)
+        {
+            u32ElecAng *= 65536 / u32EncRes_i(eAxisNo);
+        }
+        else
+        {
+            u32ElecAng /= u32EncRes_i(eAxisNo) / 65536;
+        }
+
+        u16ElecAngleFb_o(eAxisNo) = (u16)u32ElecAng;
+    });
 }
 
+// 正方向定义: 编码器递增方向和电角度递增方向相同。若方向相反，则任意调换电机的两根相线
 static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 {
-    
-
     // 1. 单圈值
 
     s32 s32PosPreCur = u32EncPos_io(eAxisNo);
@@ -87,20 +121,16 @@ static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
     // 3. 多圈值
 
     s64EncMultPos_o(eAxisNo) = (s64)s32EncTurns_o(eAxisNo) * (s64)u32EncRes_i(eAxisNo) + (s64)u32EncPos_io(eAxisNo);
-		
 
-		PeriodicTask(500*UNIT_US, {
-		
-		static s64 PosPre = 0;
-			
-			s32 Spd = 2000 * 10 * 60 * ( s64EncMultPos_o(eAxisNo) - PosPre) / (s32) u32EncRes_i(eAxisNo);
-			
-			P(eAxisNo).s32DrvSpdFb = P(eAxisNo).s32DrvSpdFb*0.15+Spd*0.85;
+    PeriodicTask(500 * UNIT_US, {
+        static s64 PosPre = 0;
 
-			PosPre =	s64EncMultPos_o(eAxisNo);
-			
-		});
-	  
+        s32 Spd = 2000 * 10 * 60 * (s64EncMultPos_o(eAxisNo) - PosPre) / (s32)u32EncRes_i(eAxisNo);
+
+        P(eAxisNo).s32DrvSpdFb = P(eAxisNo).s32DrvSpdFb * 0.15 + Spd * 0.85;
+
+        PosPre = s64EncMultPos_o(eAxisNo);
+    });
 }
 
 void MotPosCreat(mot_pos_t* pMotPos, axis_e eAxisNo)
