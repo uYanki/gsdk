@@ -195,26 +195,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 #define ONE_ADC_VOLTAGE 806  // unit uV
 #define AMP_GAIN        11.0
 
-int phase_current_from_adcval(uint32_t ADCValue) 
+int phase_current_from_adcval(uint32_t ADCValue)
 {
-    int amp_gain=AMP_GAIN;
-	
-int shunt_conductance=	500;  //100 means 1 mOh, current sensing resistor
+    int amp_gain = AMP_GAIN;
+
+    int shunt_conductance = 500;  // 100 means 1 mOh, current sensing resistor
 
     int amp_out_volt = ONE_ADC_VOLTAGE * ADCValue;
-    int shunt_volt = amp_out_volt / amp_gain;
-    int current = (shunt_volt*100) / shunt_conductance; // unit mA
+    int shunt_volt   = amp_out_volt / amp_gain;
+    int current      = (shunt_volt * 100) / shunt_conductance;  // unit mA
     return current;
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	
-	return;
+    return;
     tick_t t = GetTick100ns();
-	
-	s16   _Resv100Pre = D._Resv100;
-   s16 _Resv101Pre =  D._Resv101;
+
+    s16 _Resv100Pre = D._Resv100;
+    s16 _Resv101Pre = D._Resv101;
 
     D._Resv100 = ADConv[0];
     D._Resv101 = ADConv[1];
@@ -227,54 +226,53 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     //    D._Resv105 = GetCurV(AXIS_0);
     //    D._Resv106 = GetCurW(AXIS_0);
 
-//    D.s16UaiPu0 = GetUai1();
-//    D.s16UaiPu1 = GetUai2();
+    //    D.s16UaiPu0 = GetUai1();
+    //    D.s16UaiPu1 = GetUai2();
 
-//    D.s16UaiSi0 = GetUai1();
-//    D.s16UaiSi1 = GetUai2();
-//    D.u16UcdcSi = D.u16UmdcSi = GetUai2();
-	static int off[2]={0};
-	static int i=0;
-	
-	#define TT 1000
-	if(i<TT)
-	{
-		off[0]+=(s16)D._Resv100;
-		off[1]+=(s16)D._Resv101;
-		i++;
-	
-	}else if(i==TT)
-	{
-		off[0]/=TT;
-		off[1]/=TT;
-		i+=1;
-	}
-	else{
-	 mc_t foc = {0};
-		
-		foc.u16ElecAngle = 	P(0).u16ElecAngleFb;
+    //    D.s16UaiSi0 = GetUai1();
+    //    D.s16UaiSi1 = GetUai2();
+    //    D.u16UcdcSi = D.u16UmdcSi = GetUai2();
+    static int off[2] = {0};
+    static int i      = 0;
 
-    foc.Ia = ((D._Resv100*70  + _Resv100Pre*30)/100-off[0]);//mA
-    foc.Ib = ((D._Resv101*70  + _Resv101Pre*30)/100-off[1]);//mA
-    foc.Ic = -foc.Ia - foc.Ib;
+#define TT 1000
+    if (i < TT)
+    {
+        off[0] += (s16)D._Resv100;
+        off[1] += (s16)D._Resv101;
+        i++;
+    }
+    else if (i == TT)
+    {
+        off[0] /= TT;
+        off[1] /= TT;
+        i += 1;
+    }
+    else
+    {
+        mc_t foc = {0};
 
-    MC_Clark(&foc);
-		MC_SinCos(&foc);
-    MC_Park(&foc);
+        foc.u16ElecAngle = P(0).u16ElecAngleFb;
 
-    D._Resv106 = foc.Ia;
-    D._Resv107 = foc.Ib;
-    D._Resv108 = foc.Ic;
-    D._Resv109 = foc.Ialpha;
-    D._Resv110 = foc.Ibeta;
-    D._Resv111 = foc.Iq;
-    D._Resv112 = foc.Id;
-   D._Resv113++; // 中断次数
-    DrvScheIsr();
-    P(0).s32SpdDigRef04 = GetTick100ns() - t;
-	}
+        foc.Ia = ((D._Resv100 * 70 + _Resv100Pre * 30) / 100 - off[0]);  // mA
+        foc.Ib = ((D._Resv101 * 70 + _Resv101Pre * 30) / 100 - off[1]);  // mA
+        foc.Ic = -foc.Ia - foc.Ib;
 
-   
+        MC_Clark(&foc);
+        MC_SinCos(&foc);
+        MC_Park(&foc);
+
+        D._Resv106 = foc.Ia;
+        D._Resv107 = foc.Ib;
+        D._Resv108 = foc.Ic;
+        D._Resv109 = foc.Ialpha;
+        D._Resv110 = foc.Ibeta;
+        D._Resv111 = foc.Iq;
+        D._Resv112 = foc.Id;
+        D._Resv113++;  // 中断次数
+        DrvScheIsr();
+        P(0).s32SpdDigRef04 = GetTick100ns() - t;
+    }
 }
 
 void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
@@ -438,17 +436,17 @@ int main(void)
 
     // adc
     HAL_ADCEx_Calibration_Start(&hadc1);
-  //  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
-	 HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
+    //  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADConv[0], ARRAY_SIZE(ADConv));
 
-	//	HAL_TIM_Base_Start(&htim1); // TRGO for ADC 
-		HAL_TIM_OC_Start(&htim1,TIM_CHANNEL_4); // TRGO for ADC 
-    /* USER CODE END 2 */
+    //	HAL_TIM_Base_Start(&htim1); // TRGO for ADC
+    HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4);  // TRGO for ADC
+                                              /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-		
-		axis_e eAxisNo = AXIS_0;
+
+    axis_e eAxisNo = AXIS_0;
 
     sHallEnc.u16EncRes = 6 * P(eAxisNo).u16MotPolePairs;
 
@@ -460,20 +458,20 @@ int main(void)
     P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
 #endif
 
-  // P(eAxisNo).u32EncPosOffset = 1092;
-		
-		#if 1
-		
-		P(eAxisNo).u16AppSel = 0;
-		
-		//	P(eAxisNo).u32CommCmd = 1;
-		#endif
+    // P(eAxisNo).u32EncPosOffset = 1092;
+
+#if 1
+
+// P(eAxisNo).u16AppSel = 0;
+
+//	P(eAxisNo).u32CommCmd = 1;
+#endif
 
     while (1)
     {
         // led
         PeriodicTask(UNIT_S, HAL_GPIO_TogglePin(LED2_PIN));
-				PeriodicTask(2*UNIT_S, D._Resv114=D._Resv113/2;D._Resv113=0;);  // 中断次数 Hz
+        PeriodicTask(2 * UNIT_S, D._Resv114 = D._Resv113 / 2; D._Resv113 = 0;);  // 中断次数 Hz
 
         // key
         PeriodicTask(UNIT_S / CONFIG_FLEXBTN_SCAN_FREQ_HZ, FlexBtn_Cycle());
@@ -495,14 +493,13 @@ int main(void)
         DrvScheCycle();
 
         P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
-				
-				PeriodicTask(125 * UNIT_US,   DrvScheIsr() );
+
+        PeriodicTask(125 * UNIT_US, DrvScheIsr());
 
         switch (P(eAxisNo).u16AppSel)
         {
             case AXIS_APP_GENERIC:
             {
-							
                 if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
                 {
                     PeriodicTask(125 * UNIT_US, {
@@ -511,9 +508,9 @@ int main(void)
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
                         // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
 
-                        foc.u16ElecAngle =  P(eAxisNo).u16ElecAngleFb;
+                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngleFb;
 
-                         P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
+                        P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
@@ -555,7 +552,7 @@ int main(void)
                             case CTRL_MODE_SPD:
                             {
                                 // qdAxis.pdf
-                                foc.Uq =P(eAxisNo).s32DrvSpdRef;
+                                foc.Uq = P(eAxisNo).s32DrvSpdRef;
                                 break;
                             }
 
@@ -579,6 +576,18 @@ int main(void)
             }
 
             case AXIS_APP_ENCIDENT:
+            {
+                PeriodicTask(125 * UNIT_US, {
+                    mc_t foc;
+                    foc.Uq           = P(eAxisNo).s16Uq;
+                    foc.Ud           = P(eAxisNo).s16Ud;
+                    foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
+                    foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef;
+
+                    MotDrv_Isr(&foc, eAxisNo);
+                });
+                break;
+            }
             case AXIS_APP_OPENLOOP:
             {
                 if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
@@ -592,21 +601,21 @@ int main(void)
                         foc.Ud = P(eAxisNo).s16OpenUdRef;
 
                         foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
-											
-											P(eAxisNo).s16OpenElecAngInc= 20;
-                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef + P(eAxisNo).s16OpenElecAngInc;
+
+                        P(eAxisNo).s16OpenElecAngInc = 20;
+                        foc.u16ElecAngle             = P(eAxisNo).u16ElecAngleRef + P(eAxisNo).s16OpenElecAngInc;
 
                         MotDrv_Isr(&foc, eAxisNo);
 
 #if 1  // 电角度偏置辨识
 
-                      //  P(eAxisNo)._Resv358 = foc.u16ElecAngle;
-                     //   P(eAxisNo)._Resv359 = u16EncPos;
-                      //  P(eAxisNo)._Resv360 = u16ElecAng;
-											
-											//  P(eAxisNo)._Resv343 是机械角偏置
-											//  P(eAxisNo)._Resv344 是电角度反馈
-                        P(eAxisNo)._Resv361 =  P(eAxisNo).u16ElecAngleFb - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
+                        //  P(eAxisNo)._Resv358 = foc.u16ElecAngle;
+                        //   P(eAxisNo)._Resv359 = u16EncPos;
+                        //  P(eAxisNo)._Resv360 = u16ElecAng;
+
+                        //  P(eAxisNo)._Resv343 是机械角偏置
+                        //  P(eAxisNo)._Resv344 是电角度反馈
+                        P(eAxisNo)._Resv361 = P(eAxisNo).u16ElecAngleFb - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
 
                         static uint16_t u16Times = 0;
 
@@ -618,7 +627,7 @@ int main(void)
                             if (P(eAxisNo).u32EncPosOffset > P(eAxisNo).u32EncRes)
                             {
                                 // 出错 !!
-															  P(eAxisNo).u32CommCmd &= ~BV(0);
+                                P(eAxisNo).u32CommCmd &= ~BV(0);
                             }
                         }
                         else if (++u16Times > 500)
@@ -724,7 +733,6 @@ static void EventCb(flexbtn_t* pHandle, flexbtn_event_e eEvent)
 
     if (flexbtn[BUTTON_OKAY].eEvent == FLEXBTN_EVENT_RELEASE)
     {
-       
     }
 }
 

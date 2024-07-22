@@ -288,6 +288,8 @@ typedef enum {
  */
 #define MapTo(inVal, inMin, inMax, outMin, outMax) ((((outMax) - (outMin)) / (f32)((inMax) - (inMin))) * ((inVal) - (inMin)) + (outMin))
 
+#define AbsDelta(lhs, rhs) ((lhs) > (rhs)) ? ((lhs) - (rhs)) : ((rhs) - (lhs))
+
 /**
  * @}
  */

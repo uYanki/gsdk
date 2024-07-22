@@ -11,10 +11,10 @@ typedef enum {
 } axis_e;
 
 typedef enum {
-  AXIS_STATE_INITIAL,         ///< axis initial
-  AXIS_STATE_STANDBY,         ///< axis status is ok, waiting for command
-  AXIS_STATE_ENABLE,          ///< axis is enabled
-  AXIS_STATE_FAULT,           ///< axis fault
+    AXIS_STATE_INITIAL,  ///< axis initial
+    AXIS_STATE_STANDBY,  ///< axis status is ok, waiting for command
+    AXIS_STATE_ENABLE,   ///< axis is enabled
+    AXIS_STATE_FAULT,    ///< axis fault
 } axis_state_e;
 
 typedef enum {
@@ -45,10 +45,13 @@ typedef enum {
 /**
  * @brief 控制字
  */
-typedef struct {
-    uint32_t ServoOn : 1;
-    uint32_t _Resv   : 31;
-} ctrlword_t;
+typedef union {
+    struct {
+        uint32_t Enable : 1;
+        uint32_t _Resv  : 31;
+    } u32Bit;
+    uint32_t u32All;
+} ctrlword_u;
 
 /**
  * @brief 状态字

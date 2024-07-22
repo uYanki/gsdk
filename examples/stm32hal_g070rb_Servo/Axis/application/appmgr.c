@@ -25,12 +25,14 @@ void AppMgrCreat(app_mgr_t* pAppMgr, axis_e eAxisNo)
 {
     OpenLoopCreat(&pAppMgr->sOpenLoop, eAxisNo);
     FuncTestCreat(&pAppMgr->sFuncTest, eAxisNo);
+    EncIdentCreat(&pAppMgr->sEncIdent, eAxisNo);
 }
 
 void AppMgrInit(app_mgr_t* pAppMgr, axis_e eAxisNo)
 {
     OpenLoopInit(&pAppMgr->sOpenLoop, eAxisNo);
     FuncTestInit(&pAppMgr->sFuncTest, eAxisNo);
+    EncIdentInit(&pAppMgr->sEncIdent, eAxisNo);
 }
 
 void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
@@ -58,6 +60,12 @@ void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
                 break;
             }
 
+            case AXIS_APP_ENCIDENT:
+            {
+                EncIdentExit(&pAppMgr->sEncIdent, eAxisNo);
+                break;
+            }
+
             default:
             {
                 break;
@@ -80,6 +88,12 @@ void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
             case AXIS_APP_FUNCTEST:
             {
                 FuncTestEnter(&pAppMgr->sFuncTest, eAxisNo);
+                break;
+            }
+
+            case AXIS_APP_ENCIDENT:
+            {
+                EncIdentEnter(&pAppMgr->sEncIdent, eAxisNo);
                 break;
             }
 
@@ -112,6 +126,12 @@ void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
                 break;
             }
 
+            case AXIS_APP_ENCIDENT:
+            {
+                EncIdentCycle(&pAppMgr->sEncIdent, eAxisNo);
+                break;
+            }
+
             default:
             {
                 break;
@@ -138,6 +158,12 @@ void AppMgrIsr(app_mgr_t* pAppMgr, axis_e eAxisNo)
         case AXIS_APP_FUNCTEST:
         {
             FuncTestIsr(&pAppMgr->sFuncTest, eAxisNo);
+            break;
+        }
+
+        case AXIS_APP_ENCIDENT:
+        {
+            EncIdentIsr(&pAppMgr->sEncIdent, eAxisNo);
             break;
         }
 

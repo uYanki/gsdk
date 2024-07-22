@@ -45,9 +45,9 @@ void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
 
             if (pCmdCtrl->u32CommCmdPre ^ u32CommCmdCur)
             {
-                ctrlword_t* pCtrlWord = (ctrlword_t*)&u32CommCmdCur;
+                ctrlword_u* pCtrlWord = (ctrlword_u*)&u32CommCmdCur;
 
-                if (pCtrlWord->ServoOn)
+                if (pCtrlWord->u32Bit.Enable)
                 {
                     u16AxisFSM_i(eAxisNo) = AXIS_STATE_ENABLE;
                     PWM_Start(eAxisNo);
