@@ -3353,14 +3353,14 @@
               <FilePath>..\Axis\application\appmgr.c</FilePath>
             </File>
             <File>
-              <FileName>encident.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Axis\application\encident.c</FilePath>
-            </File>
-            <File>
               <FileName>openloop.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Axis\application\openloop.c</FilePath>
+            </File>
+            <File>
+              <FileName>motencident.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\application\motencident.c</FilePath>
             </File>
             <File>
               <FileName>functest.c</FileName>

@@ -27,6 +27,7 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
+
     // 电机旋转方向辨识
     uint16_t u16CycleTimes;
     uint16_t u16EncPosIncTimes;
@@ -42,18 +43,19 @@ typedef struct {
     uint32_t u32ZeroAngPos[32];
     uint16_t u16RotTimes;
     uint16_t u16CwRotTimes;
-} enc_ident_t;
+	
+} mot_enc_ident_t;
 
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void EncIdentCreat(enc_ident_t* pMotEncIdent, axis_e eAxisNo);
-void EncIdentInit(enc_ident_t* pMotEncIdent, axis_e eAxisNo);
-void EncIdentEnter(enc_ident_t* pMotEncIdent, axis_e eAxisNo);
-void EncIdentExit(enc_ident_t* pMotEncIdent, axis_e eAxisNo);
-void EncIdentCycle(enc_ident_t* pMotEncIdent, axis_e eAxisNo);
-void EncIdentIsr(enc_ident_t* pMotEncIdent, axis_e eAxisNo);
+void MotEncIdentCreat(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo);
+void MotEncIdentInit(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo);
+void MotEncIdentEnter(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo);
+void MotEncIdentExit(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo);
+void MotEncIdentCycle(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo);
+void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo);
 
 #ifdef __cplusplus
 }

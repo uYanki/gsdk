@@ -23,16 +23,18 @@
 
 void AppMgrCreat(app_mgr_t* pAppMgr, axis_e eAxisNo)
 {
+    pAppMgr->u16AppSelPre = AXIS_APP_INVAILD;
+
     OpenLoopCreat(&pAppMgr->sOpenLoop, eAxisNo);
     FuncTestCreat(&pAppMgr->sFuncTest, eAxisNo);
-    EncIdentCreat(&pAppMgr->sEncIdent, eAxisNo);
+    MotEncIdentCreat(&pAppMgr->sMotEncIdent, eAxisNo);
 }
 
 void AppMgrInit(app_mgr_t* pAppMgr, axis_e eAxisNo)
 {
     OpenLoopInit(&pAppMgr->sOpenLoop, eAxisNo);
     FuncTestInit(&pAppMgr->sFuncTest, eAxisNo);
-    EncIdentInit(&pAppMgr->sEncIdent, eAxisNo);
+    MotEncIdentInit(&pAppMgr->sMotEncIdent, eAxisNo);
 }
 
 void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
@@ -62,7 +64,7 @@ void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
 
             case AXIS_APP_ENCIDENT:
             {
-                EncIdentExit(&pAppMgr->sEncIdent, eAxisNo);
+                MotEncIdentExit(&pAppMgr->sMotEncIdent, eAxisNo);
                 break;
             }
 
@@ -93,7 +95,7 @@ void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
 
             case AXIS_APP_ENCIDENT:
             {
-                EncIdentEnter(&pAppMgr->sEncIdent, eAxisNo);
+                MotEncIdentEnter(&pAppMgr->sMotEncIdent, eAxisNo);
                 break;
             }
 
@@ -128,7 +130,7 @@ void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
 
             case AXIS_APP_ENCIDENT:
             {
-                EncIdentCycle(&pAppMgr->sEncIdent, eAxisNo);
+                MotEncIdentCycle(&pAppMgr->sMotEncIdent, eAxisNo);
                 break;
             }
 
@@ -163,7 +165,7 @@ void AppMgrIsr(app_mgr_t* pAppMgr, axis_e eAxisNo)
 
         case AXIS_APP_ENCIDENT:
         {
-            EncIdentIsr(&pAppMgr->sEncIdent, eAxisNo);
+            MotEncIdentIsr(&pAppMgr->sMotEncIdent, eAxisNo);
             break;
         }
 

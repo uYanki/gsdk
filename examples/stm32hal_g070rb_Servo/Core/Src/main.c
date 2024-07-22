@@ -327,6 +327,7 @@ static bool                 s_bPosInit = true;
 #include "spi_mt6701.h"
 
 spi_mst_t spi = {
+    .SPIx = &hspi1,
     .MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
     .MOSI = {GPIOB,             GPIO_PIN_4 },
     .SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
@@ -458,11 +459,11 @@ int main(void)
     P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
 #endif
 
-    // P(eAxisNo).u32EncPosOffset = 1092;
+    P(eAxisNo).u32EncPosOffset = 642;
 
 #if 1
 
-// P(eAxisNo).u16AppSel = 0;
+    P(eAxisNo).u16AppSel = 0;
 
 //	P(eAxisNo).u32CommCmd = 1;
 #endif

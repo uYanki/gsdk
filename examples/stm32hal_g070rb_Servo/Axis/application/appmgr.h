@@ -4,7 +4,7 @@
 #include "paratbl.h"
 
 #include "openloop.h"
-#include "encident.h"
+#include "motencident.h"
 #include "functest.h"
 
 #ifdef __cplusplus
@@ -16,10 +16,10 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    u16         u16AppSelPre;
-    open_loop_t sOpenLoop;
-    enc_ident_t sEncIdent;
-    func_test_t sFuncTest;
+    u16             u16AppSelPre;
+    open_loop_t     sOpenLoop;
+    mot_enc_ident_t sMotEncIdent;
+    func_test_t     sFuncTest;
 } app_mgr_t;
 
 //---------------------------------------------------------------------------

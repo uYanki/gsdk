@@ -370,7 +370,7 @@ const para_attr_t sAxisAttr[] = {
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0362 _Resv362
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0363 _Resv363
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0364 _Resv364
-    {            W(2),            W(0),            W(2), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0365 u16AppSel
+    {            W(0),            W(0),            W(2), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0365 u16AppSel
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0366 u16CtrlMethod
     {            W(1),            W(0),            W(3), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0367 u16CtrlMode
     {            W(0),            W(0),            W(0), B_RW_M2 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0368 u16CtrlCmdSrc
@@ -622,7 +622,7 @@ const para_attr_t sAxisAttr[] = {
     {         W(8000),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0614 s16OpenUqRef
     {            W(0),      W(S16_MIN),      W(S16_MAX), B_RW_M0 |    B_NR |  B_SYNC |  B_COV |  B_SIG }, // P0615 s16OpenUdRef
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0616 _Resv616
-    {            W(0),            W(0),            W(1), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0617 u16MotEncIdentEn
+    {            W(0),            W(0),            W(3), B_RW_M0 |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0617 u16MotEncIdentEn
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0618 u16MotEncIdentDirMatched
     {            W(0),            W(0),            W(0),    B_RO |    B_NR | B_NSYNC | B_NCOV |  B_SIG }, // P0619 u16MotEncIdentPolePairs
     {           WL(0),           WL(0),           WL(0),    B_RO |    B_NR | B_NSYNC | B_NCOV | B_DOB0 }, // P0620 u16MotEncIdentOffsetWL

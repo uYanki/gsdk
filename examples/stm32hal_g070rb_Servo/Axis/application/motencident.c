@@ -1,6 +1,5 @@
-#include "encident.h"
+#include "motencident.h"
 
-#define CONFIG_LOCK_AXIS      LOCK_AXIS_D
 #define CONFIG_ELEC_ANGL_STEP 64    // 电角度步进值，需为65536的整数因子
 #define CONFIG_LOCK_MAX_TIMES 1600  // 零电角度锁定计数，等待编码器位置反馈稳定 (1600*0.125us=0.1s)
 
@@ -10,12 +9,6 @@
 
 #define LOG_LOCAL_TAG   "encident"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
-
-/**
- * @brief CONFIG_LOCK_AXIS
- */
-#define LOCK_AXIS_Q 0
-#define LOCK_AXIS_D 1
 
 /**
  * @brief 辨识状态
@@ -37,6 +30,7 @@ typedef enum {
  * @brief 方向匹配
  */
 typedef enum {
+    MOT_ENC_ROT_DIR_NONE,
     MOT_ENC_ROT_DIR_SAME,  ///< 编码器位置递增方向和电角度递增方向相同
     MOT_ENC_ROT_DIR_DIFF,  ///< 编码器位置递增方向和电角度递增方向相反
 } mot_enc_ident_dir_e;
@@ -45,11 +39,24 @@ typedef enum {
  * @brief 报警类型
  */
 typedef enum {
-    MOT_ENC_IDENT_ERR_NONE,      ///< 无报警
-    MOT_ENC_IDENT_ERR_OT,        ///< 总时间超时
-    MOT_ENC_IDENT_ERR_PHASE_OC,  ///< 单相过流
-    MOT_ENC_IDENT_ERR_IDIQ_OC,   ///< ID/IQ 过流
+    MOT_ENC_IDENT_ERR_NONE,                 ///< 无报警
+    MOT_ENC_IDENT_ERR_PHASE_OC,             ///< 单相过流
+    MOT_ENC_IDENT_ERR_IDIQ_OC,              ///< ID/IQ 过流
+    MOT_ENC_IDNET_ERR_BREAK,                ///< 未完成辨识流程意外断使能
+    MOT_ENC_IDENT_ERR_POLE_PAIRS_TOO_MANY,  ///< 电机极对数过多
 } mot_enc_ident_err_e;
+
+/**
+ * @brief 控制字
+ */
+typedef union {
+    struct {
+        uint16_t Enable   : 1;
+        uint16_t AxisLock : 1;  ///< 0: d-axis, 1: q-axis
+        uint16_t _Resv    : 15;
+    } u16Bit;
+    uint16_t u16All;
+} app_ctrlword_u;
 
 //
 
@@ -82,30 +89,47 @@ typedef enum {
 // Variables
 //---------------------------------------------------------------------------
 
+static u16 s_u16CtrlCmdSrcBak;  // 控制模式
+
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-void EncIdentCreat(enc_ident_t* pMotEncIdent, axis_e eAxisNo) {}
+void MotEncIdentCreat(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo) {}
 
-void EncIdentInit(enc_ident_t* pMotEncIdent, axis_e eAxisNo) {}
+void MotEncIdentInit(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo) {}
 
-void EncIdentEnter(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
+void MotEncIdentEnter(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
 {
+    ctrlword_u*     pCommCmd  = (ctrlword_u*)&u32CommCmd_o(eAxisNo);
+    app_ctrlword_u* pIdentCmd = (app_ctrlword_u*)&u16IdentCmd_i(eAxisNo);
+
+    pCommCmd->u32Bit.Enable  = false;
+    pIdentCmd->u16Bit.Enable = false;
+
+    s_u16CtrlCmdSrcBak        = u16CtrlCmdSrc_io(eAxisNo);
     u16CtrlCmdSrc_io(eAxisNo) = CTRL_CMD_SRC_COMM;
-    u32CommCmd_o(eAxisNo) &= ~BV(0);
+
     u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_INIT;
 }
 
-void EncIdentExit(enc_ident_t* pMotEncIdent, axis_e eAxisNo) {}
-
-void EncIdentCycle(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
+void MotEncIdentExit(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
 {
-    ctrlword_u* pCmd = (ctrlword_u*)&u32CommCmd_o(eAxisNo);
+    ctrlword_u*     pCommCmd  = (ctrlword_u*)&u32CommCmd_o(eAxisNo);
+    app_ctrlword_u* pIdentCmd = (app_ctrlword_u*)&u16IdentCmd_i(eAxisNo);
 
-    pCmd->u32Bit.Enable = u16IdentCmd_i(eAxisNo) ? 1 : 0;
+    pCommCmd->u32Bit.Enable  = false;
+    pIdentCmd->u16Bit.Enable = false;
 
-    // 手动暂停
+    u16CtrlCmdSrc_io(eAxisNo) = s_u16CtrlCmdSrcBak;
+}
+
+void MotEncIdentCycle(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
+{
+    ctrlword_u*     pCommCmd  = (ctrlword_u*)&u32CommCmd_o(eAxisNo);
+    app_ctrlword_u* pIdentCmd = (app_ctrlword_u*)&u16IdentCmd_i(eAxisNo);
+
+    pCommCmd->u32Bit.Enable = pIdentCmd->u16Bit.Enable;
 
     switch (u32IdentFSM_o(eAxisNo))
     {
@@ -113,17 +137,33 @@ void EncIdentCycle(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
         {
             // 使能信号
 
-            if (u16AxisFSM_i(eAxisNo) == AXIS_STATE_ENABLE)
+            if (pIdentCmd->u16Bit.Enable)
             {
-                memset(pMotEncIdent, 0, sizeof(enc_ident_t));
+                if (u16AxisFSM_i(eAxisNo) == AXIS_STATE_ENABLE)  // 轴使能后再开始辨识
+                {
+#if 1
+                    memset(pMotEncIdent, 0, sizeof(mot_enc_ident_t));
+#else
+                    pMotEncIdent->u16CycleTimes     = 0;
+                    pMotEncIdent->u16EncPosIncTimes = 0;
+                    pMotEncIdent->u16EncPosDecTimes = 0;
+                    pMotEncIdent->u32EncPosMax      = 0;
+                    pMotEncIdent->u32EncPosPre      = 0;
+                    pMotEncIdent->u16LockTimes      = 0;
+                    pMotEncIdent->u32EncPosCcwInit  = 0;
+                    pMotEncIdent->u16RotTimes       = 0;
+                    pMotEncIdent->u16CwRotTimes     = 0;
+                    memset(pMotEncIdent->u32ZeroAngPos, 0, pMotEncIdent->u32ZeroAngPos);
+#endif
 
-                u16IdentDirMatched_o(eAxisNo)   = 0;
-                u32IdentEncRes_o(eAxisNo)       = 0;
-                u32IdentEncOffset_o(eAxisNo)    = 0;
-                u16IdentMotPolePairs_o(eAxisNo) = 0;
-                u16IdentErrType_o(eAxisNo)      = 0;
+                    u16IdentDirMatched_o(eAxisNo)   = 0;
+                    u32IdentEncRes_o(eAxisNo)       = 0;
+                    u32IdentEncOffset_o(eAxisNo)    = 0;
+                    u16IdentMotPolePairs_o(eAxisNo) = 0;
+                    u16IdentErrType_o(eAxisNo)      = MOT_ENC_IDENT_ERR_NONE;
 
-                u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_ADAPT_VOLT;
+                    u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_ADAPT_VOLT;
+                }
             }
 
             break;
@@ -131,7 +171,7 @@ void EncIdentCycle(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
 
         case MOT_ENC_IDENT_STATE_ANALYSE:  // 编码器安装偏置
         {
-            u16IdentCmd_i(eAxisNo) = 0;  // 退使能
+            pIdentCmd->u16Bit.Enable = false;  // 退使能
 
             uint32_t u32ElecAngOffset = 0;
 
@@ -142,14 +182,18 @@ void EncIdentCycle(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
 
             u32IdentEncOffset_o(eAxisNo) = u32ElecAngOffset / pMotEncIdent->u16RotTimes;
 
-            u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_FINISH;
+            u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_FINISH;  // 辨识完成
 
             break;
         }
+    }
 
-        case MOT_ENC_IDENT_STATE_FINISH:
+    switch (u32IdentFSM_o(eAxisNo))
+    {
+        case MOT_ENC_IDENT_STATE_ERR:     // 功能错误退使能
+        case MOT_ENC_IDENT_STATE_FINISH:  // 功能结束退使能
         {
-            if (u16IdentCmd_i(eAxisNo))  // 再次使能辨识
+            if (pIdentCmd->u16Bit.Enable)  // 退使能后再次辨识使能
             {
                 u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_INIT;
             }
@@ -157,20 +201,23 @@ void EncIdentCycle(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
             break;
         }
 
-        default:
+        default:  // 功能辨识阶段意外断使能时
         {
+            if (!pIdentCmd->u16Bit.Enable)
+            {
+                u32IdentFSM_o(eAxisNo)     = MOT_ENC_IDENT_STATE_ERR;
+                u16IdentErrType_o(eAxisNo) = MOT_ENC_IDNET_ERR_BREAK;
+            }
+
             break;
         }
     }
-
-    //	if( u16EncIdentCmd_i(eAxisNo)== 0 && (u32EncIdentFSM_o(eAxisNo)!=MOT_ENC_IDENT_STATE_INIT || u32EncIdentFSM_o(eAxisNo)!=MOT_ENC_IDENT_STATE_FINISH))
-    //	{
-    //	u32EncIdentFSM_o(eAxisNo)=MOT_ENC_IDENT_STATE_INIT;
-    //	}
 }
 
-void EncIdentIsr(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
+void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
 {
+    app_ctrlword_u* pIdentCmd = (app_ctrlword_u*)&u16IdentCmd_i(eAxisNo);
+
 #if 0  // TODO: 相电流超出限幅
 
     if (((s32)s16IaPu_i(eAxisNo) >= +pMotEncIdent->s16IphMax) &&
@@ -182,7 +229,7 @@ void EncIdentIsr(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
     {
         u32IdentFSM_o(eAxisNo)     = MOT_ENC_IDENT_STATE_ERR;
         u16IdentErrType_o(eAxisNo) = MOT_ENC_IDENT_ERR_PHASE_OC; 
-        AlmUpdate(ERR_SW_OC, eAxisNo);
+        AlmSet(ERR_SW_OC, eAxisNo);
         return;
     }
 
@@ -194,31 +241,26 @@ void EncIdentIsr(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
         {
             u16ElecAngRef_o(eAxisNo) = 0;
 
-#if CONFIG_LOCK_AXIS == LOCK_AXIS_Q  // lock q-axis
-
-            s16UqRef_o(eAxisNo) += 4;
-            s16UdRef_o(eAxisNo) = 0;
-
-            if (s16UqRef_o(eAxisNo) > 5000)  // TODO: Q轴电流反馈进入区间稳定后再切入下一步
+            if (pIdentCmd->u16Bit.AxisLock)  // lock q-axis
             {
-                u32EncIdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_DIR_CONFIRM;
+                s16UqRef_o(eAxisNo) += 4;
+                s16UdRef_o(eAxisNo) = 0;
+
+                if (s16UqRef_o(eAxisNo) > 5000)  // TODO: Q轴电流反馈进入区间稳定后再切入下一步
+                {
+                    u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_DIR_CONFIRM;
+                }
             }
-
-#elif CONFIG_LOCK_AXIS == LOCK_AXIS_D  // lock d-axis
-
-            s16UqRef_o(eAxisNo) = 0;
-            s16UdRef_o(eAxisNo) += 4;
-
-            if (s16UdRef_o(eAxisNo) > 5000)  // TODO: D轴电流反馈进入区间稳定后再切入下一步
+            else  // lock d-axis
             {
-                u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_DIR_CONFIRM;
+                s16UqRef_o(eAxisNo) = 0;
+                s16UdRef_o(eAxisNo) += 4;
+
+                if (s16UdRef_o(eAxisNo) > 5000)  // TODO: D轴电流反馈进入区间稳定后再切入下一步
+                {
+                    u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_DIR_CONFIRM;
+                }
             }
-
-#else
-
-#error "CONFIG_LOCK_AXIS: illegal value"
-
-#endif
 
             break;
         }
@@ -255,8 +297,10 @@ void EncIdentIsr(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                 else
                 {
                     // 编码器递增方向与电角度递增方向相反, 电机相序异常
-                    // TODO: 电机相序异常警告（解决方法: 调换任意两根相线）
                     u16IdentDirMatched_o(eAxisNo) = MOT_ENC_ROT_DIR_DIFF;
+
+                    // TODO: 电机相序异常警告（解决方法: 调换任意两根相线）
+                    // AlmSet(WRN_MOT_PHASE_WS, eAxisNo);
                 }
 
                 pMotEncIdent->u32EncPosPre = u32EncPos_i(eAxisNo);
@@ -332,7 +376,9 @@ void EncIdentIsr(enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                     if (pMotEncIdent->u16RotTimes == ARRAY_SIZE(pMotEncIdent->u32ZeroAngPos))
                     {
                         // TODO 报警：极对数过多, 位置缓存不足
-                        u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_ERR;
+                        u32IdentFSM_o(eAxisNo)     = MOT_ENC_IDENT_STATE_ERR;
+                        u16IdentErrType_o(eAxisNo) = MOT_ENC_IDENT_ERR_POLE_PAIRS_TOO_MANY;
+                        pIdentCmd->u16Bit.Enable   = false;
                         break;
                     }
 

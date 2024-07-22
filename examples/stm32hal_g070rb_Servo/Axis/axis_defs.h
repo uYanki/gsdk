@@ -22,6 +22,7 @@ typedef enum {
     AXIS_APP_OPENLOOP,  // 开环测试
     AXIS_APP_ENCIDENT,  // 编码器辨识
     AXIS_APP_FUNCTEST,  // 功能测试
+    AXIS_APP_INVAILD,
 } axis_app_e;
 
 /**
