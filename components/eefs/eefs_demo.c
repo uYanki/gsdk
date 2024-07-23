@@ -134,6 +134,8 @@ err_t EEFS_Test(void)
     LOGD("%s", szFileRdData);
 
     EEFS_Close(eefs_fd);
+		
+		return ERR_NONE;
 }
 
 #endif

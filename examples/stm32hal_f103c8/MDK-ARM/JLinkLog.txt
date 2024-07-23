@@ -1,0 +1,131 @@
+T21BC 484:187.709   SEGGER J-Link V7.92m Log File
+T21BC 484:187.771   DLL Compiled: Oct 26 2023 16:14:53
+T21BC 484:187.778   Logging started @ 2024-07-23 12:18
+T21BC 484:187.782   Process: C:\Keil_v5\UV4\UV4.exe
+T21BC 484:187.787 - 2.498ms
+T21BC 484:187.794 JLINK_SetWarnOutHandler(...)
+T21BC 484:187.798 - 0.004ms
+T21BC 484:187.804 JLINK_OpenEx(...)
+T21BC 484:190.852   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T21BC 484:191.347   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T21BC 484:194.507   Hardware: V7.00
+T21BC 484:194.521   S/N: 20090928
+T21BC 484:194.527   OEM: SEGGER
+T21BC 484:194.532   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T21BC 484:194.981   Bootloader: (Could not read)
+T21BC 484:195.964   TELNET listener socket opened on port 19021
+T21BC 484:200.365   WEBSRV WEBSRV_Init(): Starting webserver thread(s)
+T21BC 484:200.426   WEBSRV Webserver running on local port 19080
+T21BC 484:200.518   Looking for J-Link GUI Server exe at: C:\Keil_v5\ARM\Segger\JLinkGUIServer.exe
+T21BC 484:200.571   Looking for J-Link GUI Server exe at: C:\Program Files\SEGGER\JLink\JLinkGUIServer.exe
+T21BC 484:200.598   Forking J-Link GUI Server: C:\Program Files\SEGGER\JLink\JLinkGUIServer.exe
+T21BC 484:210.295   J-Link GUI Server info: "J-Link GUI server V7.92m "
+T21BC 484:210.413 - 22.608ms returns "O.K."
+T21BC 484:210.429 JLINK_GetEmuCaps()
+T21BC 484:210.434 - 0.005ms returns 0x88EA5833
+T21BC 484:210.441 JLINK_TIF_GetAvailable(...)
+T21BC 484:210.814 - 0.372ms
+T21BC 484:210.827 JLINK_SetErrorOutHandler(...)
+T21BC 484:210.832 - 0.005ms
+T21BC 484:210.844 JLINK_ExecCommand("ProjectFile = "F:\gsdk\examples\stm32hal_f103c8\MDK-ARM\JLinkSettings.ini"", ...). 
+T21BC 484:211.743 - 0.898ms returns 0x00
+T21BC 484:212.235 JLINK_ExecCommand("Device = CS32F103C8", ...). 
+T21BC 484:212.305   Device "CS32F103C8" selected.
+T21BC 484:212.424 - 0.182ms returns 0x00
+T21BC 484:212.428 JLINK_ExecCommand("DisableConnectionTimeout", ...). 
+T21BC 484:212.432 - 0.001ms returns 0x01
+T21BC 484:212.436 JLINK_GetHardwareVersion()
+T21BC 484:212.439 - 0.002ms returns 70000
+T21BC 484:212.442 JLINK_GetDLLVersion()
+T21BC 484:212.444 - 0.002ms returns 79213
+T21BC 484:212.447 JLINK_GetOEMString(...)
+T21BC 484:212.450 JLINK_GetFirmwareString(...)
+T21BC 484:212.453 - 0.002ms
+T21BC 484:212.457 JLINK_GetDLLVersion()
+T21BC 484:212.460 - 0.002ms returns 79213
+T21BC 484:212.463 JLINK_GetCompileDateTime()
+T21BC 484:212.465 - 0.002ms
+T21BC 484:212.469 JLINK_GetFirmwareString(...)
+T21BC 484:212.472 - 0.002ms
+T21BC 484:212.475 JLINK_GetHardwareVersion()
+T21BC 484:212.478 - 0.002ms returns 70000
+T21BC 484:212.481 JLINK_GetSN()
+T21BC 484:212.484 - 0.002ms returns 20090928
+T21BC 484:212.487 JLINK_GetOEMString(...)
+T21BC 484:212.492 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T21BC 484:213.414 - 0.921ms returns 0x00
+T21BC 484:213.427 JLINK_HasError()
+T21BC 484:213.437 JLINK_SetSpeed(2000)
+T21BC 484:213.695 - 0.258ms
+T21BC 484:213.877 JLINK_HasError()
+T21BC 484:213.882 JLINK_SetResetType(JLINKARM_RESET_TYPE_NORMAL)
+T21BC 484:213.884 - 0.002ms returns JLINKARM_RESET_TYPE_NORMAL
+T21BC 484:213.887 JLINK_Reset()
+T21BC 484:214.283   InitTarget() start
+T21BC 484:214.287    J-Link Script File: Executing InitTarget()
+T21BC 484:214.650   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:217.810   Error: Failed to initialized DAP.
+T21BC 484:217.815   Can not attach to CPU. Trying connect under reset.
+T21BC 484:268.948   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:272.508   Error: Failed to initialized DAP.
+T21BC 484:272.522   Connecting to CPU via connect under reset failed.
+T21BC 484:323.460   InitTarget() end - Took 109ms
+T21BC 484:323.476   Connect fallback: Reset via Reset pin & Connect.
+T21BC 484:381.508   InitTarget() start
+T21BC 484:381.520    J-Link Script File: Executing InitTarget()
+T21BC 484:381.914   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:385.102   Error: Failed to initialized DAP.
+T21BC 484:385.115   Can not attach to CPU. Trying connect under reset.
+T21BC 484:436.361   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:439.831   Error: Failed to initialized DAP.
+T21BC 484:439.844   Connecting to CPU via connect under reset failed.
+T21BC 484:490.868   InitTarget() end - Took 109ms
+T21BC 484:490.882 - 276.994ms
+T21BC 484:490.893 JLINK_GetId()
+T21BC 484:491.290   InitTarget() start
+T21BC 484:491.300    J-Link Script File: Executing InitTarget()
+T21BC 484:491.802   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:495.102   Error: Failed to initialized DAP.
+T21BC 484:495.115   Can not attach to CPU. Trying connect under reset.
+T21BC 484:546.355   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:550.019   Error: Failed to initialized DAP.
+T21BC 484:550.033   Connecting to CPU via connect under reset failed.
+T21BC 484:600.852   InitTarget() end - Took 109ms
+T21BC 484:600.871   Connect fallback: Reset via Reset pin & Connect.
+T21BC 484:659.141   InitTarget() start
+T21BC 484:659.154    J-Link Script File: Executing InitTarget()
+T21BC 484:659.529   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:662.709   Error: Failed to initialized DAP.
+T21BC 484:662.724   Can not attach to CPU. Trying connect under reset.
+T21BC 484:713.762   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:717.555   Error: Failed to initialized DAP.
+T21BC 484:717.571   Connecting to CPU via connect under reset failed.
+T21BC 484:768.267   InitTarget() end - Took 109ms
+T21BC 484:768.283 - 277.389ms returns 0x00000000
+T21BC 484:768.294 JLINK_GetId()
+T21BC 484:768.744   InitTarget() start
+T21BC 484:768.757    J-Link Script File: Executing InitTarget()
+T21BC 484:769.275   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:772.733   Error: Failed to initialized DAP.
+T21BC 484:772.746   Can not attach to CPU. Trying connect under reset.
+T21BC 484:823.745   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:827.156   Error: Failed to initialized DAP.
+T21BC 484:827.171   Connecting to CPU via connect under reset failed.
+T21BC 484:878.256   InitTarget() end - Took 109ms
+T21BC 484:878.271   Connect fallback: Reset via Reset pin & Connect.
+T21BC 484:936.533   InitTarget() start
+T21BC 484:936.546    J-Link Script File: Executing InitTarget()
+T21BC 484:936.967   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:940.154   Error: Failed to initialized DAP.
+T21BC 484:940.165   Can not attach to CPU. Trying connect under reset.
+T21BC 484:991.162   SWD selected. Executing JTAG -> SWD switching sequence.
+T21BC 484:994.857   Error: Failed to initialized DAP.
+T21BC 484:994.871   Connecting to CPU via connect under reset failed.
+T21BC 485:045.662   InitTarget() end - Took 109ms
+T21BC 485:045.678 - 277.383ms returns 0x00000000
+T21BC 485:047.115 JLINK_GetFirmwareString(...)
+T21BC 485:047.127 - 0.011ms
+T21BC 953:994.238 JLINK_Close()
+T21BC 953:995.028 - 0.790ms
+T21BC 953:995.035   
+T21BC 953:995.037   Closed

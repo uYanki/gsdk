@@ -1,7 +1,7 @@
-#ifndef __PLATFORM_H__
-#define __PLATFORM_H__
+#ifndef __ARM_SWO_H__
+#define __ARM_SWO_H__
 
-#include "stm32f4xx_hal.h"
+#include "gsdk.h"
 
 #ifdef __cplusplus
 extern "C" {

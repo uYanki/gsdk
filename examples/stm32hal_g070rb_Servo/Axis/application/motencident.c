@@ -1,7 +1,7 @@
 #include "motencident.h"
 
-#define CONFIG_ELEC_ANGL_STEP 64    // 电角度步进值，需为65536的整数因子
-#define CONFIG_LOCK_MAX_TIMES 1600  // 零电角度锁定计数，等待编码器位置反馈稳定 (1600*0.125us=0.1s)
+#define CONFIG_ELEC_ANGLE_STEP 64    // 电角度步进值，需为65536的整数因子
+#define CONFIG_LOCK_MAX_TIMES  1600  // 零电角度锁定计数，等待编码器位置反馈稳定 (1600*0.125us=0.1s)
 
 //---------------------------------------------------------------------------
 // Definitions
@@ -31,8 +31,8 @@ typedef enum {
  */
 typedef enum {
     MOT_ENC_ROT_DIR_NONE,
-    MOT_ENC_ROT_DIR_SAME,  ///< 编码器位置递增方向和电角度递增方向相同
-    MOT_ENC_ROT_DIR_DIFF,  ///< 编码器位置递增方向和电角度递增方向相反
+    MOT_ENC_ROT_DIR_SAME,  ///< 编码器单圈位置反馈递增方向和电角度递增方向相同
+    MOT_ENC_ROT_DIR_DIFF,  ///< 编码器单圈位置反馈递增方向和电角度递增方向相反
 } mot_enc_ident_dir_e;
 
 /**
@@ -51,9 +51,9 @@ typedef enum {
  */
 typedef union {
     struct {
-        uint16_t Enable   : 1;
-        uint16_t AxisLock : 1;  ///< 0: d-axis, 1: q-axis
-        uint16_t _Resv    : 15;
+        uint16_t Enable   : 1;  ///< 0: disable; 1: enable;
+        uint16_t AxisLock : 1;  ///< 0: d-axis; 1: q-axis;
+        uint16_t _Resv    : 14;
     } u16Bit;
     uint16_t u16All;
 } app_ctrlword_u;
@@ -156,7 +156,7 @@ void MotEncIdentCycle(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                     memset(pMotEncIdent->u32ZeroAngPos, 0, pMotEncIdent->u32ZeroAngPos);
 #endif
 
-                    u16IdentDirMatched_o(eAxisNo)   = 0;
+                    u16IdentDirMatched_o(eAxisNo)   = MOT_ENC_ROT_DIR_NONE;
                     u32IdentEncRes_o(eAxisNo)       = 0;
                     u32IdentEncOffset_o(eAxisNo)    = 0;
                     u16IdentMotPolePairs_o(eAxisNo) = 0;
@@ -285,7 +285,7 @@ void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                     pMotEncIdent->u32EncPosPre = u32EncPos;
                 }
 
-                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGL_STEP;
+                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGLE_STEP;
             }
             else
             {
@@ -336,7 +336,7 @@ void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
             else
             {
                 pMotEncIdent->u32EncPosPre = u32EncPos;
-                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGL_STEP;
+                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGLE_STEP;
             }
 
             break;
@@ -351,13 +351,13 @@ void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                     pMotEncIdent->u16LockTimes = 0;
 
                     pMotEncIdent->u32EncPosCcwInit = u32EncPos_i(eAxisNo);  // 正转起始位置
-                    u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGL_STEP;      // 正转离开零电角度
+                    u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGLE_STEP;     // 正转离开零电角度
                     u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_CCW;
                 }
             }
             else
             {
-                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGL_STEP;
+                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGLE_STEP;
             }
 
             break;
@@ -375,7 +375,7 @@ void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
 
                     if (pMotEncIdent->u16RotTimes == ARRAY_SIZE(pMotEncIdent->u32ZeroAngPos))
                     {
-                        // TODO 报警：极对数过多, 位置缓存不足
+                        // 极对数过多, 缓冲数组过小
                         u32IdentFSM_o(eAxisNo)     = MOT_ENC_IDENT_STATE_ERR;
                         u16IdentErrType_o(eAxisNo) = MOT_ENC_IDENT_ERR_POLE_PAIRS_TOO_MANY;
                         pIdentCmd->u16Bit.Enable   = false;
@@ -400,19 +400,19 @@ void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                         else
                         {
                             pMotEncIdent->u16CwRotTimes = pMotEncIdent->u16RotTimes;  // 设定反转次数
-                            u16ElecAngRef_o(eAxisNo) -= CONFIG_ELEC_ANGL_STEP;        // 反转离开零电角度
+                            u16ElecAngRef_o(eAxisNo) -= CONFIG_ELEC_ANGLE_STEP;       // 反转离开零电角度
                             u32IdentFSM_o(eAxisNo) = MOT_ENC_IDENT_STATE_CW;
                         }
                     }
                     else
                     {
-                        u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGL_STEP;  // 正转离开零电角度
+                        u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGLE_STEP;  // 正转离开零电角度
                     }
                 }
             }
             else
             {
-                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGL_STEP;
+                u16ElecAngRef_o(eAxisNo) += CONFIG_ELEC_ANGLE_STEP;
             }
 
             break;
@@ -434,13 +434,13 @@ void MotEncIdentIsr(mot_enc_ident_t* pMotEncIdent, axis_e eAxisNo)
                     }
                     else
                     {
-                        u16ElecAngRef_o(eAxisNo) -= CONFIG_ELEC_ANGL_STEP;  // 反转离开零电角度
+                        u16ElecAngRef_o(eAxisNo) -= CONFIG_ELEC_ANGLE_STEP;  // 反转离开零电角度
                     }
                 }
             }
             else
             {
-                u16ElecAngRef_o(eAxisNo) -= CONFIG_ELEC_ANGL_STEP;
+                u16ElecAngRef_o(eAxisNo) -= CONFIG_ELEC_ANGLE_STEP;
             }
         }
 

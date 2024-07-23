@@ -207,9 +207,14 @@ int phase_current_from_adcval(uint32_t ADCValue)
     return current;
 }
 
+static arm_pid_instance_q15 s_sSpdPi;
+static arm_pid_instance_f32 s_sPosPi;
+static bool                 s_bSpdInit = true;
+static bool                 s_bPosInit = true;
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-    return;
+  //  return;
     tick_t t = GetTick100ns();
 
     s16 _Resv100Pre = D._Resv100;
@@ -272,6 +277,137 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
         D._Resv113++;  // 中断次数
         DrvScheIsr();
         P(0).s32SpdDigRef04 = GetTick100ns() - t;
+				
+				axis_e eAxisNo = AXIS_0;
+				
+				void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo);
+				
+    switch (P(eAxisNo).u16AppSel)
+        {
+            case AXIS_APP_GENERIC:
+            {
+                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
+                {
+                    PeriodicTask(125 * UNIT_US, {
+                        mc_t foc = {0};
+
+                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
+                        // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
+
+                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngleFb;
+
+                        P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
+
+                        switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
+                        {
+                            case CTRL_MODE_POS:
+                            {
+                                static PID_t pid = {0};
+
+                                pid.Kp = P(eAxisNo).u16PosLoopKp / 1000.f;
+                                pid.Ki = P(eAxisNo).u16PosLoopKi / 1000.f;
+                                pid.Kd = P(eAxisNo).u16PosLoopKd / 1000.f;
+                                // arm_pid_init_f32(&s_sPosPi, s_bPosInit);
+
+                                s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
+                                s_sSpdPi.Ki = P(eAxisNo).u16SpdLoopKi;
+                                s_sSpdPi.Kd = P(eAxisNo).u16SpdLoopKd;
+                                arm_pid_init_q15(&s_sSpdPi, s_bSpdInit);
+
+                                s_bSpdInit = s_bPosInit = false;
+
+                                //    q31_t q = arm_pid_f32(&s_sPosPi, -(P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).s64EncMultPos));  // to 0.1rpm
+
+                                pid.ref = P(eAxisNo).s32SpdDigRef00;
+                                pid.fbk = P(eAxisNo).s64EncMultPos;
+                                pid.Ts  = 125.f / 1e6;
+                                PID_Handler_Tustin(&pid);
+
+                                s32 q = pid.out;
+
+                                P(eAxisNo).s32SpdDigRef02 = pid.out;
+
+                                q      = q * 60 * 10 / P(eAxisNo).u32EncRes;
+                                foc.Uq = arm_pid_q15(&s_sSpdPi, q - P(eAxisNo).s32DrvSpdFb);
+
+                                foc.Uq = CLAMP(foc.Uq, -10000, 10000);
+
+                                break;
+                            }
+
+                            case CTRL_MODE_SPD:
+                            {
+                                // qdAxis.pdf
+                                foc.Uq = P(eAxisNo).s32DrvSpdRef;
+                                break;
+                            }
+
+                            case CTRL_MODE_TRQ:
+                            {
+                                break;
+                            }
+
+                            default:
+                            case CTRL_MODE_DS402:  // Get ElecAngle Offset
+                            {
+                                break;
+                            }
+                        }
+
+                        MotDrv_Isr(&foc, eAxisNo);
+                    });
+                }
+
+                break;
+            }
+
+            case AXIS_APP_ENCIDENT:
+            {
+                PeriodicTask(125 * UNIT_US, {
+                    mc_t foc;
+                    foc.Uq           = P(eAxisNo).s16Uq;
+                    foc.Ud           = P(eAxisNo).s16Ud;
+                    foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
+                    foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef;
+
+                    MotDrv_Isr(&foc, eAxisNo);
+                });
+                break;
+            }
+            case AXIS_APP_OPENLOOP:
+            {
+                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
+                {
+                    // P(eAxisNo).u16ElecAngle = P(eAxisNo).s16OpenElecAngInit;
+
+                    PeriodicTask(P(eAxisNo).u16OpenPeriod * UNIT_US, {
+                        mc_t foc;
+
+                        foc.Uq = P(eAxisNo).s16OpenUqRef;
+                        foc.Ud = P(eAxisNo).s16OpenUdRef;
+
+                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
+
+                        P(eAxisNo).s16OpenElecAngInc = 20;
+                        foc.u16ElecAngle             = P(eAxisNo).u16ElecAngleRef + P(eAxisNo).s16OpenElecAngInc;
+
+                        MotDrv_Isr(&foc, eAxisNo);
+
+                    });
+                }
+
+                break;
+            }
+
+            default:
+            {
+                // AlmUpdate()
+                break;
+            }
+        }
+
+     
+
     }
 }
 
@@ -316,10 +452,7 @@ void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
     P(eAxisNo).u16PwmcComp = pMotDrv->Tc;
 }
 
-static arm_pid_instance_q15 s_sSpdPi;
-static arm_pid_instance_f32 s_sPosPi;
-static bool                 s_bSpdInit = true;
-static bool                 s_bPosInit = true;
+
 
 #include "axis.h"
 #include "axis_defs.h"
@@ -356,15 +489,15 @@ int main(void)
     HAL_Init();
 
     /* USER CODE BEGIN Init */
-    SEGGER_RTT_Init();
+   // SEGGER_RTT_Init();
     //  cm_backtrace_init("demo", "stm32", "V0.01");
     /* USER CODE END Init */
 
     /* Configure the system clock */
     SystemClock_Config();
-
+	
     /* USER CODE BEGIN SysInit */
-
+	HAL_NVIC_DisableIRQ(SysTick_IRQn);
     /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
@@ -480,9 +613,7 @@ int main(void)
         // modbus
         eMBPoll();
 
-        //    HallEnc_Isr(&sHallEnc);
-
-        axis_e eAxisNo = AXIS_0;
+        // HallEnc_Isr(&sHallEnc);
 
         // P(eAxisNo).u16HallState  = sHallEnc.eHallState;
         // P(eAxisNo).u32EncRes     = sHallEnc.u16EncRes;
@@ -495,163 +626,10 @@ int main(void)
 
         P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
 
-        PeriodicTask(125 * UNIT_US, DrvScheIsr());
+      //  PeriodicTask(125 * UNIT_US, DrvScheIsr());
 
-        switch (P(eAxisNo).u16AppSel)
-        {
-            case AXIS_APP_GENERIC:
-            {
-                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
-                {
-                    PeriodicTask(125 * UNIT_US, {
-                        mc_t foc = {0};
-
-                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
-                        // foc.u16ElecAngle = sHallEnc.u16ElecAngle;  // hall
-
-                        foc.u16ElecAngle = P(eAxisNo).u16ElecAngleFb;
-
-                        P(eAxisNo).u16CtrlMode = CTRL_MODE_SPD;
-
-                        switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
-                        {
-                            case CTRL_MODE_POS:
-                            {
-                                static PID_t pid = {0};
-
-                                pid.Kp = P(eAxisNo).u16PosLoopKp / 1000.f;
-                                pid.Ki = P(eAxisNo).u16PosLoopKi / 1000.f;
-                                pid.Kd = P(eAxisNo).u16PosLoopKd / 1000.f;
-                                // arm_pid_init_f32(&s_sPosPi, s_bPosInit);
-
-                                s_sSpdPi.Kp = P(eAxisNo).u16SpdLoopKp;
-                                s_sSpdPi.Ki = P(eAxisNo).u16SpdLoopKi;
-                                s_sSpdPi.Kd = P(eAxisNo).u16SpdLoopKd;
-                                arm_pid_init_q15(&s_sSpdPi, s_bSpdInit);
-
-                                s_bSpdInit = s_bPosInit = false;
-
-                                //    q31_t q = arm_pid_f32(&s_sPosPi, -(P(eAxisNo).s32SpdDigRef00 - P(eAxisNo).s64EncMultPos));  // to 0.1rpm
-
-                                pid.ref = P(eAxisNo).s32SpdDigRef00;
-                                pid.fbk = P(eAxisNo).s64EncMultPos;
-                                pid.Ts  = 125.f / 1e6;
-                                PID_Handler_Tustin(&pid);
-
-                                s32 q = pid.out;
-
-                                P(eAxisNo).s32SpdDigRef02 = pid.out;
-
-                                q      = q * 60 * 10 / P(eAxisNo).u32EncRes;
-                                foc.Uq = arm_pid_q15(&s_sSpdPi, q - P(eAxisNo).s32DrvSpdFb);
-
-                                foc.Uq = CLAMP(foc.Uq, -10000, 10000);
-
-                                break;
-                            }
-
-                            case CTRL_MODE_SPD:
-                            {
-                                // qdAxis.pdf
-                                foc.Uq = P(eAxisNo).s32DrvSpdRef;
-                                break;
-                            }
-
-                            case CTRL_MODE_TRQ:
-                            {
-                                break;
-                            }
-
-                            default:
-                            case CTRL_MODE_DS402:  // Get ElecAngle Offset
-                            {
-                                break;
-                            }
-                        }
-
-                        MotDrv_Isr(&foc, eAxisNo);
-                    });
-                }
-
-                break;
-            }
-
-            case AXIS_APP_ENCIDENT:
-            {
-                PeriodicTask(125 * UNIT_US, {
-                    mc_t foc;
-                    foc.Uq           = P(eAxisNo).s16Uq;
-                    foc.Ud           = P(eAxisNo).s16Ud;
-                    foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
-                    foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef;
-
-                    MotDrv_Isr(&foc, eAxisNo);
-                });
-                break;
-            }
-            case AXIS_APP_OPENLOOP:
-            {
-                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
-                {
-                    // P(eAxisNo).u16ElecAngle = P(eAxisNo).s16OpenElecAngInit;
-
-                    PeriodicTask(P(eAxisNo).u16OpenPeriod * UNIT_US, {
-                        mc_t foc;
-
-                        foc.Uq = P(eAxisNo).s16OpenUqRef;
-                        foc.Ud = P(eAxisNo).s16OpenUdRef;
-
-                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
-
-                        P(eAxisNo).s16OpenElecAngInc = 20;
-                        foc.u16ElecAngle             = P(eAxisNo).u16ElecAngleRef + P(eAxisNo).s16OpenElecAngInc;
-
-                        MotDrv_Isr(&foc, eAxisNo);
-
-#if 1  // 电角度偏置辨识
-
-                        //  P(eAxisNo)._Resv358 = foc.u16ElecAngle;
-                        //   P(eAxisNo)._Resv359 = u16EncPos;
-                        //  P(eAxisNo)._Resv360 = u16ElecAng;
-
-                        //  P(eAxisNo)._Resv343 是机械角偏置
-                        //  P(eAxisNo)._Resv344 是电角度反馈
-                        P(eAxisNo)._Resv361 = P(eAxisNo).u16ElecAngleFb - foc.u16ElecAngle;  // 差值为 65536/u16MotPolePairs 的倍数
-
-                        static uint16_t u16Times = 0;
-
-                        if (P(eAxisNo)._Resv361 > 7000)  // 阈值是手动调整的
-                        {
-                            P(eAxisNo).u32EncPosOffset += 1;
-                            u16Times = 0;
-
-                            if (P(eAxisNo).u32EncPosOffset > P(eAxisNo).u32EncRes)
-                            {
-                                // 出错 !!
-                                P(eAxisNo).u32CommCmd &= ~BV(0);
-                            }
-                        }
-                        else if (++u16Times > 500)
-                        {
-                            u16Times = 0;  // 已稳定
-                            P(eAxisNo).u32CommCmd &= ~BV(0);
-                        }
-
-#endif
-                    });
-                }
-
-                break;
-            }
-
-            default:
-            {
-                // AlmUpdate()
-                break;
-            }
-        }
-
-        /* USER CODE END WHILE */
+    
+				/* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
     }

@@ -62,44 +62,14 @@ static void AbsEncInit(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 
 static void AbsEncCycle(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 {
-    PeriodicTask(250 * UNIT_US, {
-        // 1. 位置采样
-
-        AbsEncSyncSamp(eAxisNo);
-
-        // 2. 计算电角度
-
-        u32 u32EncPosOffset = u32EncPosOffset_i(eAxisNo);  // 机械角偏置
-        u32 u32EncPos       = u32EncPos_io(eAxisNo);
-
-        if (u32EncPos >= u32EncPosOffset)
-        {
-            u32EncPos -= u32EncPosOffset;
-        }
-        else
-        {
-            u32EncPos = u32EncRes_i(eAxisNo) - u32EncPosOffset + u32EncPos;
-        }
-
-        // 电角度标幺 [0,u32EncRes) => [0,65536)
-        u32 u32ElecAng = u32EncPos * u16MotPolePairs_i(eAxisNo);
-
-        if (u32EncRes_i(eAxisNo) <= 65536)
-        {
-            u32ElecAng *= 65536 / u32EncRes_i(eAxisNo);
-        }
-        else
-        {
-            u32ElecAng /= u32EncRes_i(eAxisNo) / 65536;
-        }
-
-        u16ElecAngleFb_o(eAxisNo) = (u16)u32ElecAng;
-    });
+   
 }
 
 // 正方向定义: 编码器递增方向和电角度递增方向相同。若方向相反，则任意调换电机的两根相线
 static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 {
+	AbsEncSyncSamp(eAxisNo);
+	
     // 1. 单圈值
 
     s32 s32PosPreCur = u32EncPos_io(eAxisNo);
@@ -130,6 +100,40 @@ static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
         P(eAxisNo).s32DrvSpdFb = P(eAxisNo).s32DrvSpdFb * 0.15 + Spd * 0.85;
 
         PosPre = s64EncMultPos_o(eAxisNo);
+    });
+		
+ PeriodicTask(250 * UNIT_US, {
+        // 1. 位置采样
+
+        
+
+        // 2. 计算电角度
+
+        u32 u32EncPosOffset = u32EncPosOffset_i(eAxisNo);  // 机械角偏置
+        u32 u32EncPos       = u32EncPos_io(eAxisNo);
+
+        if (u32EncPos >= u32EncPosOffset)
+        {
+            u32EncPos -= u32EncPosOffset;
+        }
+        else
+        {
+            u32EncPos = u32EncRes_i(eAxisNo) - u32EncPosOffset + u32EncPos;
+        }
+
+        // 电角度标幺 [0,u32EncRes) => [0,65536)
+        u32 u32ElecAng = u32EncPos * u16MotPolePairs_i(eAxisNo);
+
+        if (u32EncRes_i(eAxisNo) <= 65536)
+        {
+            u32ElecAng *= 65536 / u32EncRes_i(eAxisNo);
+        }
+        else
+        {
+            u32ElecAng /= u32EncRes_i(eAxisNo) / 65536;
+        }
+
+        u16ElecAngleFb_o(eAxisNo) = (u16)u32ElecAng;
     });
 }
 

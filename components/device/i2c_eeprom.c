@@ -30,6 +30,7 @@ err_t EEPROM_Init(i2c_eeprom_t* pHandle)
 
 static bool EEPROM_WaitReady(i2c_eeprom_t* pHandle, uint16_t u16SlvAddr, uint8_t u8TimeoutMs)
 {
+	
     while (u8TimeoutMs > 0)
     {
         if (I2C_Master_IsDeviceReady(pHandle->hI2C, u16SlvAddr, I2C_FLAG_7BIT_SLVADDR) == true)

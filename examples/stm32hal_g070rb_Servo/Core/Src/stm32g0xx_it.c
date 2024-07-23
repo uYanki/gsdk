@@ -137,7 +137,7 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
   /* USER CODE END SysTick_IRQn 0 */
-  HAL_IncTick();
+  
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
@@ -204,7 +204,7 @@ void ADC1_IRQHandler(void)
   /* USER CODE END ADC1_IRQn 0 */
   HAL_ADC_IRQHandler(&hadc1);
   /* USER CODE BEGIN ADC1_IRQn 1 */
-
+ 
   /* USER CODE END ADC1_IRQn 1 */
 }
 
@@ -214,11 +214,11 @@ void ADC1_IRQHandler(void)
 void TIM14_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM14_IRQn 0 */
-
+  HAL_IncTick(); // disable SysTick IRQ
   /* USER CODE END TIM14_IRQn 0 */
   HAL_TIM_IRQHandler(&htim14);
   /* USER CODE BEGIN TIM14_IRQn 1 */
-
+ 
   /* USER CODE END TIM14_IRQn 1 */
 }
 
