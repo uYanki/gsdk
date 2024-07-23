@@ -40,10 +40,10 @@ tick_t GetTickUs(void)
      */
 
     tick_t TimeUs   = 0;
-    tick_t PeriodUs = 1000 / uwTickFreq;
+//    tick_t PeriodUs = 1000 / uwTickFreq;
 
-    TimeUs += PeriodUs * HAL_GetTick();
-    TimeUs += PeriodUs * (SysTick->LOAD - SysTick->VAL) / SysTick->LOAD;
+//    TimeUs += PeriodUs * HAL_GetTick();
+//    TimeUs += PeriodUs * (SysTick->LOAD - SysTick->VAL) / SysTick->LOAD;
 
     return TimeUs;
 }

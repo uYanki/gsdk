@@ -1,5 +1,5 @@
 #include "pinctrl.h"
-#include "gpio.h"
+// #include "gpio.h"
 
 //---------------------------------------------------------------------------
 // Definitions
