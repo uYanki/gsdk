@@ -439,31 +439,31 @@ void ST7735_StopDraw(spi_st7735_t* pHandle)
 
 void ST7735_Test(void)
 {
-		
 #ifdef BOARD_CS2F103C8T6_QG
-		spi_mst_t spi = {
+    spi_mst_t spi = {
         .MISO = {LCD_SDA_PIN}, /*SDA*/
         .MOSI = {LCD_SDA_PIN},
         .SCLK = {LCD_SCL_PIN}, /*SCL*/
-        .CS   = {LCD_CS_PIN}, /*CS*/
+        .CS   = {LCD_CS_PIN},  /*CS*/
     };
 
     spi_st7735_t st7735 = {
         .hSPI = &spi,
-        .DC   = { LCD_DC_PIN}, /*DC*/
+        .DC   = {LCD_DC_PIN}, /*DC*/
 #if CONFIG_ST7735_RST_CONTROL_SW
         .RST = {LCD_RES_PIN}, /*RST*/
 #endif
 #if CONFIG_ST7735_BL_CONTROL_SW
-        .BL = {LCD_BL_PIN, /*BL*/
+        .BL = {
+            LCD_BL_PIN, /*BL*/
 #endif
-        .u16ScreenW = ST7735_WIDTH,
-        .u16ScreenH = ST7735_HEIGHT,
-        .u16OffsetX = 1,
-        .u16OffsetY = 2,
-    };
+            .u16ScreenW = ST7735_WIDTH,
+            .u16ScreenH = ST7735_HEIGHT,
+            .u16OffsetX = 1,
+            .u16OffsetY = 2,
+        };
 #else
-		spi_mst_t spi = {
+    spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5}, /*SDA*/
         .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6}, /*SCL*/

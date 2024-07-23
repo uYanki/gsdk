@@ -22,7 +22,7 @@
 // Variables
 //---------------------------------------------------------------------------
 
-static uint8_t m_au8FileSystemBuffer[2048] = {0}; // RAW
+static uint8_t m_au8FileSystemBuffer[2048] = {0};  // RAW
 
 //---------------------------------------------------------------------------
 // Functions
@@ -134,8 +134,8 @@ err_t EEFS_Test(void)
     LOGD("%s", szFileRdData);
 
     EEFS_Close(eefs_fd);
-		
-		return ERR_NONE;
+
+    return ERR_NONE;
 }
 
 #endif
