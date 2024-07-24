@@ -88,13 +88,13 @@ static inline bool HWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16Slv
 
 static inline err_t HWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
-    uint16_t u16MemAddrSize = ((u16Flags & I2C_FLAG_MEMADDR_SIZE_Msk) == I2C_FLAG_16BIT_MEMADDR) ? I2C_MEMADD_SIZE_16BIT : I2C_MEMADD_SIZE_8BIT;
+    uint16_t u16MemAddrSize =CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEMADD_SIZE_16BIT : I2C_MEMADD_SIZE_8BIT;
     ThrowError_(HAL_I2C_Mem_Read(pHandle->I2Cx, u16SlvAddr << 1, u16MemAddr, u16MemAddrSize, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
-    uint16_t u16MemAddrSize = ((u16Flags & I2C_FLAG_MEMADDR_SIZE_Msk) == I2C_FLAG_16BIT_MEMADDR) ? I2C_MEMADD_SIZE_16BIT : I2C_MEMADD_SIZE_8BIT;
+    uint16_t u16MemAddrSize =CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEMADD_SIZE_16BIT : I2C_MEMADD_SIZE_8BIT;
     ThrowError_(HAL_I2C_Mem_Write(pHandle->I2Cx, u16SlvAddr << 1, u16MemAddr, u16MemAddrSize, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 

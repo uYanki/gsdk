@@ -1,134 +1,139 @@
-/**
-  **************************************************************************
-  * @file     main.c
-  * @brief    main program
-  **************************************************************************
-  *                       Copyright notice & Disclaimer
-  *
-  * The software Board Support Package (BSP) that is made available to
-  * download from Artery official website is the copyrighted work of Artery.
-  * Artery authorizes customers to use, copy, and distribute the BSP
-  * software and its related documentation for the purpose of design and
-  * development in conjunction with Artery microcontrollers. Use of the
-  * software is governed by this copyright notice and the following disclaimer.
-  *
-  * THIS SOFTWARE IS PROVIDED ON "AS IS" BASIS WITHOUT WARRANTIES,
-  * GUARANTEES OR REPRESENTATIONS OF ANY KIND. ARTERY EXPRESSLY DISCLAIMS,
-  * TO THE FULLEST EXTENT PERMITTED BY LAW, ALL EXPRESS, IMPLIED OR
-  * STATUTORY OR OTHER WARRANTIES, GUARANTEES OR REPRESENTATIONS,
-  * INCLUDING BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
-  * FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
-  *
-  **************************************************************************
-  */
+#include "gsdk.h"
+#include "hwif.h"
+#include "i2c_eeprom.h"
+#include "platform.h"
 
-#include "at32f415_board.h"
-#include "at32f415_clock.h"
+//---------------------------------------------------------------------------
+// Definitions
+//---------------------------------------------------------------------------
 
-/** @addtogroup AT32F415_periph_template
-  * @{
-  */
+#define LOG_LOCAL_TAG   "main"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
-/** @addtogroup 415_LED_toggle LED_toggle
-  * @{
-  */
+#define I2C_TIMEOUT                      0xFFFFFFFF
 
-#define DELAY                            1000
-#define FAST                             1
-#define SLOW                             4
+#define I2Cx_SPEED                       100000
+#define I2Cx_ADDRESS                     0xA0
 
-uint8_t g_speed = FAST;
+#define I2Cx_PORT                        I2C1
+#define I2Cx_CLK                         CRM_I2C1_PERIPH_CLOCK
 
-void button_exint_init(void);
-void button_isr(void);
+#define I2Cx_SCL_PIN                     GPIO_PINS_6
+#define I2Cx_SCL_GPIO_PORT               GPIOB
+#define I2Cx_SCL_GPIO_CLK                CRM_GPIOB_PERIPH_CLOCK
 
-/**
-  * @brief  configure button exint
-  * @param  none
-  * @retval none
-  */
-void button_exint_init(void)
-{
-  exint_init_type exint_init_struct;
+#define I2Cx_SDA_PIN                     GPIO_PINS_7
+#define I2Cx_SDA_GPIO_PORT               GPIOB
+#define I2Cx_SDA_GPIO_CLK                CRM_GPIOB_PERIPH_CLOCK
 
-  crm_periph_clock_enable(CRM_IOMUX_PERIPH_CLOCK, TRUE);
-  gpio_exint_line_config(GPIO_PORT_SOURCE_GPIOA, GPIO_PINS_SOURCE0);
+//---------------------------------------------------------------------------
+// Prototypes
+//---------------------------------------------------------------------------
 
-  exint_default_para_init(&exint_init_struct);
-  exint_init_struct.line_enable = TRUE;
-  exint_init_struct.line_mode = EXINT_LINE_INTERRUPUT;
-  exint_init_struct.line_select = EXINT_LINE_0;
-  exint_init_struct.line_polarity = EXINT_TRIGGER_RISING_EDGE;
-  exint_init(&exint_init_struct);
+extern void DbgUartInit(uint32_t u32Baudrate);
 
-  nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
-  nvic_irq_enable(EXINT0_IRQn, 0, 0);
-}
+//---------------------------------------------------------------------------
+// Variables
+//---------------------------------------------------------------------------
 
-/**
-  * @brief  button handler function
-  * @param  none
-  * @retval none
-  */
-void button_isr(void)
-{
-  /* delay 5ms */
-  delay_ms(5);
+static const pin_t led1 = {LED1_PIN};
+static const pin_t led2 = {LED2_PIN};
+static const pin_t btn  = {BUTTON_PIN};
 
-  /* clear interrupt pending bit */
-  exint_flag_clear(EXINT_LINE_0);
+//---------------------------------------------------------------------------
+// Functions
+//---------------------------------------------------------------------------
 
-  /* check input pin state */
-  if(SET == gpio_input_data_bit_read(USER_BUTTON_PORT, USER_BUTTON_PIN))
-  {
-    if(g_speed == SLOW)
-      g_speed = FAST;
-    else
-      g_speed = SLOW;
-  }
-}
+#include "i2c_application.h"
 
-/**
-  * @brief  exint0 interrupt handler
-  * @param  none
-  * @retval none
-  */
-void EXINT0_IRQHandler(void)
-{
-  button_isr();
-}
+i2c_handle_type hi2cx;
 
-/**
-  * @brief  main function.
-  * @param  none
-  * @retval none
-  */
 int main(void)
 {
-  system_clock_config();
+    system_clock_config();
 
-  at32_board_init();
-	uart_print_init(115200);
+    cm_backtrace_init("demo", "at32", "V0.01");
+    SEGGER_RTT_Init();
 
-  button_exint_init();
-	printf("hello\r\n");
-  while(1)
-  {
-    at32_led_toggle(LED2);
-    delay_ms(g_speed * DELAY);
-    at32_led_toggle(LED3);
-    delay_ms(g_speed * DELAY);
-    at32_led_toggle(LED4);
-    delay_ms(g_speed * DELAY);
-		
+    crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
+    crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
+    crm_periph_clock_enable(CRM_GPIOC_PERIPH_CLOCK, TRUE);
+    crm_periph_clock_enable(CRM_GPIOD_PERIPH_CLOCK, TRUE);
+    crm_periph_clock_enable(CRM_GPIOF_PERIPH_CLOCK, TRUE);
+
+    PIN_SetMode(&led1, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_NONE);
+    PIN_SetMode(&led2, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_NONE);
+    PIN_SetMode(&btn, PIN_MODE_INPUT_FLOATING, PIN_PULL_NONE);
+
+    DbgUartInit(115200);
+    DelayInit();
 	
+	  hi2cx.i2cx = I2Cx_PORT;
+    i2c_config(&hi2cx);
+
+#if 1  // eeprom demo
+
+    i2c_mst_t i2c = {
+        .SDA = {EEPROM_SDA_PIN},
+        .SCL = {EEPROM_SCL_PIN},
+#if 0
+        .I2Cx = nullptr,
+#else
+        .I2Cx = &hi2cx,
+#endif
+    };
+
+    I2C_Master_Init(&i2c, 1e5, I2C_DUTYCYCLE_50_50);
+    I2C_Master_ScanAddress(&i2c);
+
+    EEPROM_Test(&i2c);
+
+#endif
+
+    while (1)
+    {
+        DelayBlockMs(1000);
+        PIN_ToggleLevel(&led1);
+        DelayBlockMs(1000);
+        PIN_ToggleLevel(&led2);
+        printf("hello\r\n");
+    }
+}
+
+
+/**
+  * @brief  initializes peripherals used by the i2c.
+  * @param  none
+  * @retval none
+  */
+void i2c_lowlevel_init(i2c_handle_type* hi2c)
+{
+  gpio_init_type gpio_initstructure;
+
+  if(hi2c->i2cx == I2Cx_PORT)
+  {
+    /* i2c periph clock enable */
+    crm_periph_clock_enable(I2Cx_CLK, TRUE);
+    crm_periph_clock_enable(I2Cx_SCL_GPIO_CLK, TRUE);
+    crm_periph_clock_enable(I2Cx_SDA_GPIO_CLK, TRUE);
+
+    /* gpio configuration */
+    gpio_initstructure.gpio_out_type       = GPIO_OUTPUT_OPEN_DRAIN;
+    gpio_initstructure.gpio_pull           = GPIO_PULL_UP;
+    gpio_initstructure.gpio_mode           = GPIO_MODE_MUX;
+    gpio_initstructure.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
+
+    /* configure i2c pins: scl */
+    gpio_initstructure.gpio_pins = I2Cx_SCL_PIN;
+    gpio_init(I2Cx_SCL_GPIO_PORT, &gpio_initstructure);
+
+    /* configure i2c pins: sda */
+    gpio_initstructure.gpio_pins = I2Cx_SDA_PIN;
+    gpio_init(I2Cx_SDA_GPIO_PORT, &gpio_initstructure);
+
+    i2c_init(hi2c->i2cx, I2C_FSMODE_DUTY_2_1, I2Cx_SPEED);
+
+    i2c_own_address1_set(hi2c->i2cx, I2C_ADDRESS_MODE_7BIT, I2Cx_ADDRESS);
   }
 }
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */

@@ -131,6 +131,19 @@ void SysTick_Handler(void)
 }
 
 /**
+  * @brief  this function handles systick handler.
+  * @param  none
+  * @retval none
+  */
+void TMR1_OVF_TMR10_IRQHandler(void)
+{
+    if (tmr_interrupt_flag_get(TMR1, TMR_OVF_FLAG) != RESET)
+    {
+        tmr_flag_clear(TMR1, TMR_OVF_FLAG);
+    }
+}
+
+/**
   * @}
   */
 

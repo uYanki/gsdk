@@ -118,8 +118,8 @@ extern "C" {
   #ifdef _RTE_
     #include "RTE_Components.h"
     #ifdef RTE_DEVICE_STDPERIPH_FRAMEWORK
-      #define USE_STDPERIPH_DRIVER
     #endif
+      #define USE_STDPERIPH_DRIVER
   #endif
 #endif
 

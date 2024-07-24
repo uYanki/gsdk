@@ -17,7 +17,7 @@
         <TargetCommonOption>
           <Device>-AT32F415CBT7</Device>
           <Vendor>ArteryTek</Vendor>
-          <PackID>ArteryTek.AT32F415_DFP.2.1.2</PackID>
+          <PackID>ArteryTek.AT32F415_DFP.2.1.4</PackID>
           <Cpu>IRAM(0x20000000,0x8000) IROM(0x08000000,0x20000) CPUTYPE("Cortex-M4") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>./Object/\</OutputDirectory>
-          <OutputName></OutputName>
+          <OutputName>demo</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -313,7 +313,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>AT32F415RCT7,USE_STDPERIPH_DRIVER,AT_START_F415_V1</Define>
+              <Define>AT32F415RCT7,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
               <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../platform/at32f415_std/boards/at32f415cb_dev;../../../platform/at32f415_std/adapter;../../../components/eefs;../../../components/CmBacktrace;../../../components/SEGGER_RTT;../../../platform/at32f415_std/fwlib/drivers/inc;../../../platform/at32f415_std/fwlib/cmsis/cm4/core_support;../../../platform/at32f415_std/fwlib/cmsis/cm4/device_support</IncludePath>
             </VariousControls>
@@ -387,11 +387,6 @@
               <FileName>at32f415_clock.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/at32f415_clock.c</FilePath>
-            </File>
-            <File>
-              <FileName>at32f415_board.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/at32f415_board.c</FilePath>
             </File>
             <File>
               <FileName>at32f415_int.c</FileName>
@@ -604,44 +599,44 @@
           <GroupName>platform/adapter</GroupName>
           <Files>
             <File>
-              <FileName>arm_dwt.c</FileName>
+              <FileName>i2c_application.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/arm_dwt.c</FilePath>
+              <FilePath>..\..\..\platform\at32f415_std\adapter\i2c_application.c</FilePath>
             </File>
             <File>
-              <FileName>arm_swo.c</FileName>
+              <FileName>arm_dwt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/arm_swo.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/arm_dwt.c</FilePath>
             </File>
             <File>
               <FileName>drv_hwi2cmst.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/drv_hwi2cmst.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/drv_hwi2cmst.c</FilePath>
             </File>
             <File>
               <FileName>drv_hwspimst.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/drv_hwspimst.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/drv_hwspimst.c</FilePath>
             </File>
             <File>
               <FileName>drv_hwuart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/drv_hwuart.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/drv_hwuart.c</FilePath>
             </File>
             <File>
               <FileName>drv_pinctrl.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/drv_pinctrl.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/drv_pinctrl.c</FilePath>
             </File>
             <File>
               <FileName>drv_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/drv_timer.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/drv_timer.c</FilePath>
             </File>
             <File>
               <FileName>syscall.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../platform/stm32f1_hal/adapter/syscall.c</FilePath>
+              <FilePath>../../../platform/at32f415_std/adapter/syscall.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -703,16 +698,6 @@
               <FileName>i2c_eeprom.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../components/device/i2c_eeprom.c</FilePath>
-            </File>
-            <File>
-              <FileName>i2c_ssd1306.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../components/device/i2c_ssd1306.c</FilePath>
-            </File>
-            <File>
-              <FileName>spi_st7735.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../components/device/spi_st7735.c</FilePath>
             </File>
           </Files>
         </Group>

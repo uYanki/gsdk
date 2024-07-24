@@ -236,6 +236,11 @@ typedef enum {
 #define CLRBITS64(DAT, STB, LEN) ((DAT) &= ~(MASK64(LEN) << (STB))) /*!< clear bits (bit-32) */
 #define GETBITS64(DAT, STB, LEN) (((DAT) >> (STB)) & MASK64(LEN))   /*!< get bits (bit-32) */
 
+#define CHKMSK8(DAT, MSK, VAL)   (((u8)(DAT) & (u8)(MSK)) == (u8)(VAL))
+#define CHKMSK16(DAT, MSK, VAL)  (((u16)(DAT) & (u16)(MSK)) == (u16)(VAL))
+#define CHKMSK32(DAT, MSK, VAL)  (((u32)(DAT) & (u32)(MSK)) == (u32)(VAL))
+#define CHKMSK64(DAT, MSK, VAL)  (((u64)(DAT) & (u64)(MSK)) == (u64)(VAL))
+
 #define LOBYTE(DAT)              (u8)(0xFF & (DAT))
 #define HIBYTE(DAT)              (u8)(0xFF & ((DAT) >> 8))
 #define LOWORD(DAT)              (u16)(0xFFFF & (DAT))
@@ -288,7 +293,7 @@ typedef enum {
  */
 #define MapTo(inVal, inMin, inMax, outMin, outMax) ((((outMax) - (outMin)) / (f32)((inMax) - (inMin))) * ((inVal) - (inMin)) + (outMin))
 
-#define AbsDelta(lhs, rhs) ((lhs) > (rhs)) ? ((lhs) - (rhs)) : ((rhs) - (lhs))
+#define AbsDelta(lhs, rhs)                         ((lhs) > (rhs)) ? ((lhs) - (rhs)) : ((rhs) - (lhs))
 
 /**
  * @}

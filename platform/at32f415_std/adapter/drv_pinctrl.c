@@ -34,43 +34,53 @@ const pin_ops_t g_hwPinOps = {
 
 static err_t PIN_SetMode(const pin_t* pHandle, pin_mode_e eMode, pin_pull_e ePull)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
+    gpio_init_type gpio_init_struct;
 
     switch (eMode)
     {
-        case PIN_MODE_INPUT_FLOATING: GPIO_InitStruct.Mode = GPIO_MODE_INPUT; break;
-        case PIN_MODE_OUTPUT_OPEN_DRAIN: GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD; break;
-        case PIN_MODE_OUTPUT_PUSH_PULL: GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; break;
-        case PIN_MODE_HIGH_RESISTANCE: HAL_GPIO_DeInit(pHandle->Port, pHandle->Pin); return ERR_NONE;
+        case PIN_MODE_INPUT_FLOATING: gpio_init_struct.gpio_mode = GPIO_MODE_INPUT; break;
+        case PIN_MODE_OUTPUT_OPEN_DRAIN: gpio_init_struct.gpio_mode = GPIO_MODE_OUTPUT, gpio_init_struct.gpio_out_type = GPIO_OUTPUT_OPEN_DRAIN; break;
+        case PIN_MODE_OUTPUT_PUSH_PULL: gpio_init_struct.gpio_mode = GPIO_MODE_OUTPUT, gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL; break;
+        case PIN_MODE_HIGH_RESISTANCE: return ThrowError(ERR_NOT_SUPPORTED, "unsupported mode");
         default: return ThrowError(ERR_INVALID_VALUE, "invaild in/out mode");
     }
 
     switch (ePull)
     {
-        case PIN_PULL_NONE: GPIO_InitStruct.Pull = GPIO_NOPULL; break;
-        case PIN_PULL_DOWN: GPIO_InitStruct.Pull = GPIO_PULLDOWN; break;
-        case PIN_PULL_UP: GPIO_InitStruct.Pull = GPIO_PULLUP; break;
+        case PIN_PULL_NONE: gpio_init_struct.gpio_pull = GPIO_PULL_NONE; break;
+        case PIN_PULL_DOWN: gpio_init_struct.gpio_pull = GPIO_PULL_DOWN; break;
+        case PIN_PULL_UP: gpio_init_struct.gpio_pull = GPIO_PULL_UP; break;
         default: return ThrowError(ERR_INVALID_VALUE, "invaild pull mode");
     }
 
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Pin   = pHandle->Pin;
-    HAL_GPIO_Init(pHandle->Port, &GPIO_InitStruct);
+    gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER;
+    gpio_init_struct.gpio_pins           = pHandle->Pin;
+
+    gpio_init(pHandle->Port, &gpio_init_struct);
 
     return ERR_NONE;
 }
 
 static void PIN_WriteLevel(const pin_t* pHandle, pin_level_e eLevel)
 {
-    HAL_GPIO_WritePin(pHandle->Port, pHandle->Pin, (eLevel == PIN_LEVEL_LOW) ? GPIO_PIN_RESET : GPIO_PIN_SET);
+    gpio_type* gpio = (gpio_type*)(pHandle->Port);
+    uint16_t   pin  = pHandle->Pin;
+
+    (eLevel == PIN_LEVEL_LOW) ? (gpio->clr = pin) : (gpio->scr = pin);
 }
 
 static pin_level_e PIN_ReadLevel(const pin_t* pHandle)
 {
-    return (HAL_GPIO_ReadPin(pHandle->Port, pHandle->Pin) == GPIO_PIN_RESET) ? PIN_LEVEL_LOW : PIN_LEVEL_HIGH;
+    gpio_type* gpio = (gpio_type*)(pHandle->Port);
+    uint16_t   pin  = pHandle->Pin;
+
+    return (pin != (pin & gpio->idt)) ? PIN_LEVEL_LOW : PIN_LEVEL_HIGH;
 }
 
 static void PIN_ToggleLevel(const pin_t* pHandle)
 {
-    HAL_GPIO_TogglePin(pHandle->Port, pHandle->Pin);
+    gpio_type* gpio = (gpio_type*)(pHandle->Port);
+    uint16_t   pin  = pHandle->Pin;
+
+    gpio->odt ^= pin;
 }

@@ -3,28 +3,11 @@
 
 #define BOARD_AT32F415CB_DEV
 
-// #define AT24C02_SCL_PIN  GPIOB, GPIO_PIN_4
-// #define AT24C02_SDA_PIN  GPIOB, GPIO_PIN_6
+#define LED1_PIN       GPIOF, GPIO_PINS_6
+#define LED2_PIN       GPIOF, GPIO_PINS_7
+#define BUTTON_PIN     GPIOA, GPIO_PINS_0
 
-// #define LED_PIN          GPIOA, GPIO_PIN_1
-// #define KEY_PIN          GPIOA, GPIO_PIN_8
-
-// #define NRF24L01_IRQ_PIN GPIOA, GPIO_PIN_15
-// #define NRF24L01_CS_PIN  GPIOB, GPIO_PIN_2
-// #define NRF24L01_CE_PIN  GPIOB, GPIO_PIN_0
-
-// #define FLASH_CS_PIN     GPIOC, GPIO_PIN_13
-// #define TFCARD_CS_PIN    GPIOA, GPIO_PIN_4
-
-// #define LCD_SCL_PIN      GPIOB, GPIO_PIN_1
-// #define LCD_SDA_PIN      GPIOB, GPIO_PIN_3
-// #define LCD_RES_PIN      GPIOB, GPIO_PIN_5
-// #define LCD_DC_PIN       GPIOB, GPIO_PIN_7
-// #define LCD_CS_PIN       GPIOB, GPIO_PIN_9
-// #define LCD_BL_PIN       GPIOB, GPIO_PIN_11
-
-// #define SPI_NSS          GPIOA, GPIO_PIN_5
-// #define SPI_MOSI         GPIOA, GPIO_PIN_7
-// #define SPI_MISO         GPIOA, GPIO_PIN_6
+#define EEPROM_SCL_PIN GPIOB, GPIO_PINS_6
+#define EEPROM_SDA_PIN GPIOB, GPIO_PINS_7
 
 #endif

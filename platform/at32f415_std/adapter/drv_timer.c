@@ -50,13 +50,9 @@ tick_t GetTickUs(void)
 
 #elif (CONFIG_TIMEBASE_SOURCE == TIMEBASE_TIM_UP)
 
-#include "tim.h"
-
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
-
-#define htimx htim4
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -79,31 +75,32 @@ void $Sub$$DelayInit()
 {
     $Super$$DelayInit();
 
-    // clkin = 72MHz
-    // psc = 6 => tick = 12MHz = 1/12 us
+    // clkin = 144MHz
+    // psc = 12 => tick = 12MHz = 1/12 us
     // arr = 12000 => irq freq = arr * psc = 1KHz;
-    // GetTick100ns(){ n * tick * 12 / 10 }
+    // GetTick100ns(){ n * tick * 12 /10 }
 
-    MX_TIM4_Init();
+    /* enable tmr1 clock */
+    crm_periph_clock_enable(CRM_TMR1_PERIPH_CLOCK, TRUE);  // 启用外设时钟
 
-    htimx.Instance               = TIM4;  // APB2 64MHz
-    htimx.Init.Prescaler         = 6 - 1;
-    htimx.Init.CounterMode       = TIM_COUNTERMODE_UP;
-    htimx.Init.Period            = 12000 - 1;
-    htimx.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
-    htimx.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+    /* time base configuration */
+    tmr_base_init(TMR1, 12000 - 1, 12 - 1);
+    tmr_cnt_dir_set(TMR1, TMR_COUNT_UP);
 
-    HAL_TIM_Base_Init(&htimx);
+    /* overflow interrupt enable */
+    tmr_interrupt_enable(TMR1, TMR_OVF_INT, TRUE);
 
-    HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(TIM4_IRQn);
+    /* tmr overflow interrupt nvic init */
+    nvic_priority_group_config(NVIC_PRIORITY_GROUP_4);
+    nvic_irq_enable(TMR1_OVF_TMR10_IRQn, 0, 0);  // 启用定时器中断
 
-    HAL_TIM_Base_Start_IT(&htimx);
+    /* enable tmr */
+    tmr_counter_enable(TMR1, TRUE);
 }
 
 tick_t GetTick100ns(void)
 {
-    return (tick_t)(m_Tick) * (tick_t)(10000) + (tick_t)(htimx.Instance->CNT * 12 / 10);
+    return (tick_t)(m_Tick) * (tick_t)(10000) + (tick_t)(TMR1->cval) * 12 / 10;
 }
 
 tick_t GetTickUs(void)
@@ -112,18 +109,18 @@ tick_t GetTickUs(void)
 }
 
 /**
- * @brief redirect HAL_TIM_PeriodElapsedCallback()
+ * @brief redirect TMR1_OVF_TMR10_IRQHandler()
  */
-void $Sub$$HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
+void $Sub$$TMR1_OVF_TMR10_IRQHandler(void)
 {
-    extern void $Super$$HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim);
+    extern void $Super$$TMR1_OVF_TMR10_IRQHandler(void);
 
-    if (htim == &htimx)  // period = 1ms
+    if (tmr_interrupt_flag_get(TMR1, TMR_OVF_FLAG) != RESET)
     {
-        m_Tick++;  // IncTick()
+        m_Tick++;  // timer overflow handler. period = 1ms.
     }
 
-    $Super$$HAL_TIM_PeriodElapsedCallback(htim);
+    $Super$$TMR1_OVF_TMR10_IRQHandler();
 }
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
+#include "at32f415_conf.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
