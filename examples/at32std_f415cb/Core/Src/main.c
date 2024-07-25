@@ -66,8 +66,10 @@ int main(void)
     EEPROM_Test(&i2c);
 
 #endif
-		
+
+#if 1  // lcd demo
 		ST7735_Test();
+#endif
 
     while (1)
     {
@@ -75,6 +77,6 @@ int main(void)
         PIN_ToggleLevel(&led1);
         DelayBlockMs(1000);
         PIN_ToggleLevel(&led2);
-       // printf("hello\r\n");
+        // printf("hello\r\n");
     }
 }

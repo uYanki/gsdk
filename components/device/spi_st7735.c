@@ -491,7 +491,7 @@ void ST7735_Test(void)
 #elif defined(BOARD_AT32F415CB_DEV)
 
     spi_mst_t spi = {
-#if 1
+#if 0
         .MISO = {GPIOA, GPIO_PINS_7}, /*SDA*/
         .MOSI = {GPIOA, GPIO_PINS_7},
         .SCLK = {GPIOA, GPIO_PINS_5}, /*SCL*/

@@ -1,5 +1,9 @@
 #include "spimst.h"
 
+/**
+ * @test 全双工收发，半双工接收 待测试
+ */
+
 #if CONFIG_HWSPI_MODULE_SW
 
 //---------------------------------------------------------------------------
@@ -67,11 +71,22 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
         .gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER,
     };
 
-    spi_init_type spi_init_struct = {
-        .mclk_freq_division = SPI_MCLK_DIV_2,
-    };
+    spi_init_type spi_init_struct;
 
     spi_init_struct.master_slave_mode = SPI_MODE_MASTER;
+
+    if (u32ClockSpeedHz >= 50000000)
+    {
+        spi_init_struct.mclk_freq_division = SPI_MCLK_DIV_2;  // 50M
+    }
+    else if (u32ClockSpeedHz >= 25000000)
+    {
+        spi_init_struct.mclk_freq_division = SPI_MCLK_DIV_4;  // 25M
+    }
+    else
+    {
+        spi_init_struct.mclk_freq_division = SPI_MCLK_DIV_8;  // 12.5M
+    }
 
     switch (u16Flags & SPI_FLAG_FIRSTBIT_Msk)
     {
