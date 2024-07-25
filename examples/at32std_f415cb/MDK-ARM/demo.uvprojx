@@ -699,6 +699,11 @@
               <FileType>1</FileType>
               <FilePath>../../../components/device/i2c_eeprom.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_st7735.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\spi_st7735.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

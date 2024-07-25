@@ -439,7 +439,8 @@ void ST7735_StopDraw(spi_st7735_t* pHandle)
 
 void ST7735_Test(void)
 {
-#ifdef BOARD_CS2F103C8T6_QG
+#ifdef defined(BOARD_CS2F103C8T6_QG)
+
     spi_mst_t spi = {
         .MISO = {LCD_SDA_PIN}, /*SDA*/
         .MOSI = {LCD_SDA_PIN},
@@ -462,7 +463,9 @@ void ST7735_Test(void)
             .u16OffsetX = 1,
             .u16OffsetY = 2,
         };
-#else
+
+#elif defined(BOARD_STM32F407VET6_XWS)
+
     spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5}, /*SDA*/
         .MOSI = {GPIOA, GPIO_PIN_5},
@@ -474,7 +477,7 @@ void ST7735_Test(void)
         .hSPI = &spi,
         .DC   = {GPIOC, GPIO_PIN_0 }, /*DC*/
 #if CONFIG_ST7735_RST_CONTROL_SW
-        .RST = {GPIOA, GPIO_PIN_0 }, /*RST*/
+        .RST = {GPIOA, GPIO_PIN_1 }, /*RST*/
 #endif
 #if CONFIG_ST7735_BL_CONTROL_SW
         .BL = {GPIOC, GPIO_PIN_13}, /*BL*/
@@ -484,6 +487,40 @@ void ST7735_Test(void)
         .u16OffsetX = 1,
         .u16OffsetY = 2,
     };
+
+#elif defined(BOARD_AT32F415CB_DEV)
+
+    spi_mst_t spi = {
+#if 1
+        .MISO = {GPIOA, GPIO_PINS_7}, /*SDA*/
+        .MOSI = {GPIOA, GPIO_PINS_7},
+        .SCLK = {GPIOA, GPIO_PINS_5}, /*SCL*/
+        .CS   = {GPIOB, GPIO_PINS_7}, /*CS*/
+        .SPIx = SPI1,
+#else
+        .MISO = {GPIOB, GPIO_PINS_15}, /*SDA*/
+        .MOSI = {GPIOB, GPIO_PINS_15},
+        .SCLK = {GPIOB, GPIO_PINS_13}, /*SCL*/
+        .CS   = {GPIOB, GPIO_PINS_7},  /*CS*/
+        .SPIx = SPI2,
+#endif
+    };
+
+    spi_st7735_t st7735 = {
+        .hSPI = &spi,
+        .DC   = {GPIOB, GPIO_PINS_6 }, /*DC*/
+#if CONFIG_ST7735_RST_CONTROL_SW
+        .RST = {GPIOB, GPIO_PINS_5 }, /*RST*/
+#endif
+#if CONFIG_ST7735_BL_CONTROL_SW
+        .BL = {GPIOC, GPIO_PINS_13}, /*BL*/
+#endif
+        .u16ScreenW = ST7735_WIDTH,
+        .u16ScreenH = ST7735_HEIGHT,
+        .u16OffsetX = 1,
+        .u16OffsetY = 2,
+    };
+
 #endif
 
     SPI_Master_Init(&spi, 1000000, SPI_DUTYCYCLE_50_50, ST7735_SPI_TIMING | SPI_FLAG_SOFT_CS);

@@ -2,27 +2,12 @@
 
 #if CONFIG_HWSPI_MODULE_SW
 
-#include "spi.h"
-
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
 
 #define LOG_LOCAL_TAG   "drv_hwspi"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_QUIET
-
-#define SPI_TIMEOUT     0xFF
-
-#define ThrowError_(eStatus)                                             \
-    do {                                                                 \
-        switch (eStatus)                                                 \
-        {                                                                \
-            case HAL_OK: return ERR_NONE;                                \
-            case HAL_BUSY: return ThrowError(ERR_BUSY, "busy");          \
-            case HAL_TIMEOUT: return ThrowError(ERR_TIMEOUT, "timeout"); \
-            default: return ThrowError(ERR_FAIL, "generic error");       \
-        }                                                                \
-    } while (0)
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -54,49 +39,195 @@ const spimst_ops_t g_hwSpiOps = {
 
 static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
 {
-    SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
+    spi_type* hwspi = (spi_type*)(pHandle->SPIx);
 
-    if (
-#ifdef SPI1
-        hwspi->Instance == SPI1 ||
-#endif
-#ifdef SPI2
-        hwspi->Instance == SPI2 ||
-#endif
-#ifdef SPI3
-        hwspi->Instance == SPI3 ||
-#endif
-#ifdef SPI4
-        hwspi->Instance == SPI4 ||
-#endif
-#ifdef SPI5
-        hwspi->Instance == SPI5 ||
-#endif
-        0)
+    // 暂不支持 GPIO REMAP !!!
+
+    if (hwspi == SPI1)
     {
-        return ERR_NONE;
+        /* SPI1: PA4/CS, PA5/SCLK, PA6/MISO, PA7/MOSI */
+        crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
+        crm_periph_clock_enable(CRM_SPI1_PERIPH_CLOCK, TRUE);
+    }
+    else if (hwspi == SPI2)
+    {
+        /* SPI2: PB12/CS, PB13/SCLK, PB14/MISO, PB15/MOSI */
+        crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
+        crm_periph_clock_enable(CRM_SPI2_PERIPH_CLOCK, TRUE);
+    }
+    else
+    {
+        return ThrowError(ERR_INVALID_VALUE, "unknown instance");
     }
 
-    // invalid instance
-    return ThrowError(ERR_INVALID_VALUE, "unknown instance");
+    gpio_init_type gpio_init_struct = {
+        .gpio_out_type       = GPIO_OUTPUT_PUSH_PULL,
+        .gpio_pull           = GPIO_PULL_DOWN,
+        .gpio_mode           = GPIO_MODE_MUX,
+        .gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER,
+    };
+
+    spi_init_type spi_init_struct = {
+        .mclk_freq_division = SPI_MCLK_DIV_2,
+    };
+
+    spi_init_struct.master_slave_mode = SPI_MODE_MASTER;
+
+    switch (u16Flags & SPI_FLAG_FIRSTBIT_Msk)
+    {
+        case SPI_FLAG_LSBFIRST: spi_init_struct.first_bit_transmission = SPI_FIRST_BIT_LSB; break;
+        case SPI_FLAG_MSBFIRST: spi_init_struct.first_bit_transmission = SPI_FIRST_BIT_MSB; break;
+    }
+
+    switch (u16Flags & SPI_FLAG_CPOL_Msk)
+    {
+        case SPI_FLAG_CPOL_LOW: spi_init_struct.clock_polarity = SPI_CLOCK_POLARITY_LOW; break;
+        case SPI_FLAG_CPOL_HIGH: spi_init_struct.clock_polarity = SPI_CLOCK_POLARITY_HIGH; break;
+    }
+
+    switch (u16Flags & SPI_FLAG_CPHA_Msk)
+    {
+        case SPI_FLAG_CPHA_1EDGE: spi_init_struct.clock_phase = SPI_CLOCK_PHASE_1EDGE; break;
+        case SPI_FLAG_CPHA_2EDGE: spi_init_struct.clock_phase = SPI_CLOCK_PHASE_2EDGE; break;
+    }
+
+    switch (u16Flags & SPI_FLAG_DATAWIDTH_Msk)
+    {
+        case SPI_FLAG_DATAWIDTH_8B: spi_init_struct.frame_bit_num = SPI_FRAME_8BIT; break;
+        case SPI_FLAG_DATAWIDTH_16B: spi_init_struct.frame_bit_num = SPI_FRAME_16BIT; break;
+        case SPI_FLAG_DATAWIDTH_32B: return ThrowError(ERR_NOT_SUPPORTED, "unsupported datawidth");
+    }
+
+    switch (u16Flags & SPI_FLAG_CS_MODE_Msk)
+    {
+        case SPI_FLAG_NONE_CS:
+        case SPI_FLAG_SOFT_CS:
+        {
+            spi_init_struct.cs_mode_selection = SPI_CS_SOFTWARE_MODE;
+            break;
+        }
+        case SPI_FLAG_HADR_CS:
+        {
+            spi_init_struct.cs_mode_selection = SPI_CS_HARDWARE_MODE;
+
+            gpio_init_struct.gpio_pins = pHandle->CS.Pin;
+            gpio_init(pHandle->CS.Pin, &gpio_init_struct);
+
+            break;
+        }
+    }
+
+    switch (u16Flags & SPI_FLAG_WIRE_Msk)
+    {
+        case SPI_FLAG_3WIRE:
+        {
+            if (pHandle->MOSI.Port != NULL)
+            {
+                gpio_init_struct.gpio_pins = pHandle->MOSI.Pin;
+                gpio_init(pHandle->MOSI.Pin, &gpio_init_struct);
+            }
+
+            if (pHandle->MISO.Port != NULL)
+            {
+                gpio_init_struct.gpio_pins = pHandle->MISO.Pin;
+                gpio_init(pHandle->MISO.Port, &gpio_init_struct);
+            }
+
+            spi_init_struct.transmission_mode = SPI_TRANSMIT_HALF_DUPLEX_TX;
+            pHandle->u16TimingConfig |= SPI_FLAG_3WIRE;
+
+            break;
+        }
+
+        case SPI_FLAG_4WIRE:
+        {
+            spi_init_struct.transmission_mode = SPI_MODE_MASTER;
+
+            gpio_init_struct.gpio_pins = pHandle->MOSI.Pin;
+            gpio_init(pHandle->MOSI.Pin, &gpio_init_struct);
+
+            gpio_init_struct.gpio_pins = pHandle->MISO.Pin;
+            gpio_init(pHandle->MISO.Port, &gpio_init_struct);
+
+            break;
+        }
+    }
+
+    gpio_init_struct.gpio_pins = pHandle->SCLK.Pin;
+    gpio_init(pHandle->SCLK.Port, &gpio_init_struct);
+
+    spi_init(hwspi, &spi_init_struct);
+    spi_enable(hwspi, TRUE);
+
+    return ERR_NONE;
 }
 
 static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
 {
-    SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
-    ThrowError_(HAL_SPI_Transmit(hwspi, (uint8_t*)cpu8TxData, u16Size, SPI_TIMEOUT));
+    spi_type* hwspi = (spi_type*)(pHandle->SPIx);
+
+    if (CHKMSK16(pHandle->u16TimingConfig, SPI_FLAG_WIRE_Msk, SPI_FLAG_3WIRE))
+    {
+        spi_half_duplex_direction_set(hwspi, SPI_TRANSMIT_HALF_DUPLEX_TX);
+    }
+
+    while (u16Size--)
+    {
+        spi_i2s_data_transmit(hwspi, *cpu8TxData++);
+        while (spi_i2s_flag_get(hwspi, SPI_I2S_TDBE_FLAG) == RESET);
+    }
+
+    return ERR_NONE;
 }
 
 static err_t HWSPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
 {
-    SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
-    ThrowError_(HAL_SPI_Receive(hwspi, pu8RxData, u16Size, SPI_TIMEOUT));
+    spi_type* hwspi = (spi_type*)(pHandle->SPIx);
+
+    if (CHKMSK16(pHandle->u16TimingConfig, SPI_FLAG_WIRE_Msk, SPI_FLAG_3WIRE))
+    {
+        spi_half_duplex_direction_set(hwspi, SPI_TRANSMIT_HALF_DUPLEX_RX);
+    }
+
+    while (u16Size--)
+    {
+        while (spi_i2s_flag_get(hwspi, SPI_I2S_RDBF_FLAG) == RESET);
+        *pu8RxData++ = spi_i2s_data_receive(hwspi);
+    }
+
+    return ERR_NONE;
 }
 
 static err_t HWSPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
 {
-    SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
-    ThrowError_(HAL_SPI_TransmitReceive(hwspi, (uint8_t*)cpu8TxData, pu8RxData, u16Size, SPI_TIMEOUT));
+    spi_type* hwspi = (spi_type*)(pHandle->SPIx);
+
+    if (CHKMSK16(pHandle->u16TimingConfig, SPI_FLAG_WIRE_Msk, SPI_FLAG_3WIRE))
+    {
+        while (u16Size--)
+        {
+            spi_half_duplex_direction_set(hwspi, SPI_TRANSMIT_HALF_DUPLEX_TX);
+            spi_i2s_data_transmit(hwspi, *cpu8TxData++);
+            while (spi_i2s_flag_get(hwspi, SPI_I2S_TDBE_FLAG) == RESET);
+
+            spi_half_duplex_direction_set(hwspi, SPI_TRANSMIT_HALF_DUPLEX_RX);
+            while (spi_i2s_flag_get(hwspi, SPI_I2S_RDBF_FLAG) == RESET);
+            *pu8RxData++ = spi_i2s_data_receive(hwspi);
+        }
+    }
+    else
+    {
+        while (u16Size--)
+        {
+            spi_i2s_data_transmit(hwspi, *cpu8TxData++);
+            while (spi_i2s_flag_get(hwspi, SPI_I2S_TDBE_FLAG) == RESET);
+
+            while (spi_i2s_flag_get(hwspi, SPI_I2S_RDBF_FLAG) == RESET);
+            *pu8RxData++ = spi_i2s_data_receive(hwspi);
+        }
+    }
+
+    return ERR_NONE;
 }
 
 #endif

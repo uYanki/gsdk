@@ -13,14 +13,14 @@
 
 #define I2C_TIMEOUT     0xFF
 
-#define ThrowError_(eStatus)                                          \
-    do {                                                              \
-        switch (eStatus)                                              \
-        {                                                             \
-            case I2C_OK: return ERR_NONE;                             \
-            case I2C_ERR_STEP_1: return ThrowError(ERR_BUSY, "busy"); \
-            default: return ThrowError(ERR_TIMEOUT, "timeout");       \
-        }                                                             \
+#define ThrowError_(eStatus)                                        \
+    do {                                                            \
+        switch (eStatus)                                            \
+        {                                                           \
+            case I2C_OK: return ERR_NONE;                           \
+            case I2C_ERR_BUSY: return ThrowError(ERR_BUSY, "busy"); \
+            default: return ThrowError(ERR_TIMEOUT, "timeout");     \
+        }                                                           \
     } while (0)
 
 //---------------------------------------------------------------------------
@@ -53,11 +53,11 @@ const i2cmst_ops_t g_hwI2cOps = {
 
 static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycle_e eDutyCycle)
 {
-    i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
+    i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
 
 #ifdef I2C1
 
-    if (hwi2c->i2cx == I2C1)
+    if (hwi2c == I2C1)
     {
         LOGI("i2c1 init");
 
@@ -79,17 +79,6 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
         }
 
         {
-            i2c_fsmode_duty_cycle_type eDutyCycle_;
-
-            if (eDutyCycle == I2C_DUTYCYCLE_64_36)
-            {
-                eDutyCycle_ = I2C_FSMODE_DUTY_2_1;
-            }
-            else  // (eDutyCycle == I2C_DUTYCYCLE_67_33)
-            {
-                eDutyCycle_ = I2C_FSMODE_DUTY_16_9;
-            }
-
             if (u32ClockFreqHz == 0)
             {
                 u32ClockFreqHz = 100000;  // 100k
@@ -97,10 +86,10 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
 
             crm_periph_clock_enable(CRM_I2C1_PERIPH_CLOCK, TRUE);
 
-            i2c_reset(hwi2c->i2cx);
-            i2c_init(hwi2c->i2cx, eDutyCycle_, u32ClockFreqHz);
-            i2c_own_address1_set(hwi2c->i2cx, I2C_ADDRESS_MODE_7BIT, 0xA0);
-            i2c_enable(hwi2c->i2cx, TRUE);
+            i2c_reset(hwi2c);
+            i2c_init(hwi2c, I2C_FSMODE_DUTY_2_1, u32ClockFreqHz);
+            i2c_own_address1_set(hwi2c, I2C_ADDRESS_MODE_7BIT, 0xA0);
+            i2c_enable(hwi2c, TRUE);
         }
 
         return ERR_NONE;
@@ -110,7 +99,7 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
 
 #ifdef I2C2
 
-    if (hwi2c->i2cx == I2C2)
+    if (hwi2c == I2C2)
     {
         return ThrowError(ERR_NOT_SUPPORTED, "unsupported");
     }
@@ -123,9 +112,7 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
 
 static inline bool HWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
 {
-    i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
-
-    hwi2c->error_code = I2C_OK;
+    i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
 
     /* wait for the busy flag to be reset */
     if (i2c_wait_flag(hwi2c, I2C_BUSYF_FLAG, I2C_EVENT_CHECK_NONE, I2C_TIMEOUT) != I2C_OK)
@@ -134,49 +121,49 @@ static inline bool HWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16Slv
     }
 
     /* ack acts on the current byte */
-    i2c_master_receive_ack_set(hwi2c->i2cx, I2C_MASTER_ACK_CURRENT);
+    i2c_master_receive_ack_set(hwi2c, I2C_MASTER_ACK_CURRENT);
 
     /* send slave address */
     if (i2c_master_write_addr(hwi2c, u16SlvAddr << 1, I2C_TIMEOUT) != I2C_OK)
     {
         /* generate stop condtion */
-        i2c_stop_generate(hwi2c->i2cx);
+        i2c_stop_generate(hwi2c);
 
         return false;
     }
 
     /* clear addr flag */
-    i2c_flag_clear(hwi2c->i2cx, I2C_ADDR7F_FLAG);
+    i2c_flag_clear(hwi2c, I2C_ADDR7F_FLAG);
 
     /* generate stop condtion */
-    i2c_stop_generate(hwi2c->i2cx);
+    i2c_stop_generate(hwi2c);
 
     return true;
 }
 
 static inline err_t HWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
-    i2c_handle_type*           hwi2c        = (i2c_handle_type*)(pHandle->I2Cx);
+    i2c_type*                  hwi2c        = (i2c_type*)(pHandle->I2Cx);
     i2c_mem_address_width_type eMemAddrSize = CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEM_ADDR_WIDIH_16 : I2C_MEM_ADDR_WIDIH_8;
     ThrowError_(i2c_memory_read(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
-    i2c_handle_type*           hwi2c        = (i2c_handle_type*)(pHandle->I2Cx);
+    i2c_type*                  hwi2c        = (i2c_type*)(pHandle->I2Cx);
     i2c_mem_address_width_type eMemAddrSize = CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEM_ADDR_WIDIH_16 : I2C_MEM_ADDR_WIDIH_8;
     ThrowError_(i2c_memory_write(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_ReceiveBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
-    i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
+    i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
     ThrowError_(i2c_master_receive(hwi2c, u16SlvAddr << 1, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_TransmitBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
-    i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
+    i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
     ThrowError_(i2c_master_transmit(hwi2c, u16SlvAddr << 1, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 

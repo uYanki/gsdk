@@ -24,8 +24,6 @@ static const pin_t led1 = {LED1_PIN};
 static const pin_t led2 = {LED2_PIN};
 static const pin_t btn  = {BUTTON_PIN};
 
-static i2c_handle_type hi2c1 = { .i2cx = I2C1 };
-
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
@@ -50,7 +48,7 @@ int main(void)
     DbgUartInit(115200);
     DelayInit();
 
-#if 1  // eeprom demo
+#if 0  // eeprom demo
 
     i2c_mst_t i2c = {
         .SDA = {EEPROM_SDA_PIN},
@@ -58,16 +56,18 @@ int main(void)
 #if 0
         .I2Cx = nullptr,
 #else
-        .I2Cx = &hi2c1,
+        .I2Cx = I2C1,
 #endif
     };
 
-    I2C_Master_Init(&i2c, 1e5, I2C_DUTYCYCLE_50_50);
+    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_67_33);
     I2C_Master_ScanAddress(&i2c);
 
     EEPROM_Test(&i2c);
 
 #endif
+		
+		ST7735_Test();
 
     while (1)
     {
@@ -75,6 +75,6 @@ int main(void)
         PIN_ToggleLevel(&led1);
         DelayBlockMs(1000);
         PIN_ToggleLevel(&led2);
-        printf("hello\r\n");
+       // printf("hello\r\n");
     }
 }
