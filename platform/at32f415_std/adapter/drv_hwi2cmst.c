@@ -9,9 +9,9 @@
 //---------------------------------------------------------------------------
 
 #define LOG_LOCAL_TAG   "drv_i2cmst"
-#define LOG_LOCAL_LEVEL LOG_LEVEL_QUIET
+#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
-#define I2C_TIMEOUT     0xFFFF
+#define I2C_TIMEOUT     0xFF
 
 #define ThrowError_(eStatus)                                          \
     do {                                                              \
@@ -55,26 +55,67 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
 {
     i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
 
-    if (
 #ifdef I2C1
-        hwi2c->i2cx == I2C1 ||
-#endif
-#ifdef I2C2
-        hwi2c->i2cx == I2C2 ||
-#endif
-#ifdef I2C3
-        hwi2c->i2cx == I2C3 ||
-#endif
-#ifdef I2C4
-        hwi2c->i2cx == I2C4 ||
-#endif
-#ifdef I2C5
-        hwi2c->i2cx == I2C5 ||
-#endif
-        0)
+
+    if (hwi2c->i2cx == I2C1)
     {
+        LOGI("i2c1 init");
+
+        {
+            gpio_init_type gpio_initstructure = {
+                .gpio_out_type       = GPIO_OUTPUT_OPEN_DRAIN,
+                .gpio_pull           = GPIO_PULL_UP,
+                .gpio_mode           = GPIO_MODE_MUX,
+                .gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE,
+            };
+
+            crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
+
+            gpio_initstructure.gpio_pins = pHandle->SDA.Pin,
+            gpio_init(pHandle->SDA.Port, &gpio_initstructure);
+
+            gpio_initstructure.gpio_pins = pHandle->SCL.Pin,
+            gpio_init(pHandle->SCL.Port, &gpio_initstructure);
+        }
+
+        {
+            i2c_fsmode_duty_cycle_type eDutyCycle_;
+
+            if (eDutyCycle == I2C_DUTYCYCLE_64_36)
+            {
+                eDutyCycle_ = I2C_FSMODE_DUTY_2_1;
+            }
+            else  // (eDutyCycle == I2C_DUTYCYCLE_67_33)
+            {
+                eDutyCycle_ = I2C_FSMODE_DUTY_16_9;
+            }
+
+            if (u32ClockFreqHz == 0)
+            {
+                u32ClockFreqHz = 100000;  // 100k
+            }
+
+            crm_periph_clock_enable(CRM_I2C1_PERIPH_CLOCK, TRUE);
+
+            i2c_reset(hwi2c->i2cx);
+            i2c_init(hwi2c->i2cx, eDutyCycle_, u32ClockFreqHz);
+            i2c_own_address1_set(hwi2c->i2cx, I2C_ADDRESS_MODE_7BIT, 0xA0);
+            i2c_enable(hwi2c->i2cx, TRUE);
+        }
+
         return ERR_NONE;
     }
+
+#endif
+
+#ifdef I2C2
+
+    if (hwi2c->i2cx == I2C2)
+    {
+        return ThrowError(ERR_NOT_SUPPORTED, "unsupported");
+    }
+
+#endif
 
     // invalid instance
     return ThrowError(ERR_INVALID_VALUE, "unknown instance");
@@ -82,33 +123,33 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
 
 static inline bool HWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)
 {
-    i2c_handle_type* hi2c = (i2c_handle_type*)(pHandle->I2Cx);
+    i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
 
-    hi2c->error_code = I2C_OK;
+    hwi2c->error_code = I2C_OK;
 
     /* wait for the busy flag to be reset */
-    if (i2c_wait_flag(hi2c, I2C_BUSYF_FLAG, I2C_EVENT_CHECK_NONE, I2C_TIMEOUT) != I2C_OK)
+    if (i2c_wait_flag(hwi2c, I2C_BUSYF_FLAG, I2C_EVENT_CHECK_NONE, I2C_TIMEOUT) != I2C_OK)
     {
         return false;
     }
 
     /* ack acts on the current byte */
-    i2c_master_receive_ack_set(hi2c->i2cx, I2C_MASTER_ACK_CURRENT);
+    i2c_master_receive_ack_set(hwi2c->i2cx, I2C_MASTER_ACK_CURRENT);
 
     /* send slave address */
-    if (i2c_master_write_addr(hi2c, u16SlvAddr << 1, I2C_TIMEOUT) != I2C_OK)
+    if (i2c_master_write_addr(hwi2c, u16SlvAddr << 1, I2C_TIMEOUT) != I2C_OK)
     {
         /* generate stop condtion */
-        i2c_stop_generate(hi2c->i2cx);
+        i2c_stop_generate(hwi2c->i2cx);
 
         return false;
     }
 
     /* clear addr flag */
-    i2c_flag_clear(hi2c->i2cx, I2C_ADDR7F_FLAG);
+    i2c_flag_clear(hwi2c->i2cx, I2C_ADDR7F_FLAG);
 
     /* generate stop condtion */
-    i2c_stop_generate(hi2c->i2cx);
+    i2c_stop_generate(hwi2c->i2cx);
 
     return true;
 }
@@ -117,7 +158,6 @@ static inline err_t HWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAd
 {
     i2c_handle_type*           hwi2c        = (i2c_handle_type*)(pHandle->I2Cx);
     i2c_mem_address_width_type eMemAddrSize = CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEM_ADDR_WIDIH_16 : I2C_MEM_ADDR_WIDIH_8;
-
     ThrowError_(i2c_memory_read(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
@@ -125,21 +165,18 @@ static inline err_t HWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvA
 {
     i2c_handle_type*           hwi2c        = (i2c_handle_type*)(pHandle->I2Cx);
     i2c_mem_address_width_type eMemAddrSize = CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEM_ADDR_WIDIH_16 : I2C_MEM_ADDR_WIDIH_8;
-
     ThrowError_(i2c_memory_write(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_ReceiveBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
-
-    ThrowError_(i2c_master_receive(hwi2c, u16SlvAddr << 1, (uint8_t*)pu8Data, u16Size, I2C_TIMEOUT));
+    ThrowError_(i2c_master_receive(hwi2c, u16SlvAddr << 1, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_TransmitBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     i2c_handle_type* hwi2c = (i2c_handle_type*)(pHandle->I2Cx);
-
     ThrowError_(i2c_master_transmit(hwi2c, u16SlvAddr << 1, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 
