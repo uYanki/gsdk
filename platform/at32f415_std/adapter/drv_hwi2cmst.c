@@ -55,59 +55,52 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
 {
     i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
 
-#ifdef I2C1
-
     if (hwi2c == I2C1)
     {
-        LOGI("i2c1 init");
-
-        {
-            gpio_init_type gpio_initstructure = {
-                .gpio_out_type       = GPIO_OUTPUT_OPEN_DRAIN,
-                .gpio_pull           = GPIO_PULL_UP,
-                .gpio_mode           = GPIO_MODE_MUX,
-                .gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE,
-            };
-
-            crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
-
-            gpio_initstructure.gpio_pins = pHandle->SDA.Pin,
-            gpio_init(pHandle->SDA.Port, &gpio_initstructure);
-
-            gpio_initstructure.gpio_pins = pHandle->SCL.Pin,
-            gpio_init(pHandle->SCL.Port, &gpio_initstructure);
-        }
-
-        {
-            if (u32ClockFreqHz == 0)
-            {
-                u32ClockFreqHz = 100000;  // 100k
-            }
-
-            crm_periph_clock_enable(CRM_I2C1_PERIPH_CLOCK, TRUE);
-
-            i2c_reset(hwi2c);
-            i2c_init(hwi2c, I2C_FSMODE_DUTY_2_1, u32ClockFreqHz);
-            i2c_own_address1_set(hwi2c, I2C_ADDRESS_MODE_7BIT, 0xA0);
-            i2c_enable(hwi2c, TRUE);
-        }
-
-        return ERR_NONE;
+        crm_periph_clock_enable(CRM_I2C1_PERIPH_CLOCK, TRUE);
     }
-
-#endif
-
-#ifdef I2C2
-
-    if (hwi2c == I2C2)
+    else if (hwi2c == I2C2)
     {
-        return ThrowError(ERR_NOT_SUPPORTED, "unsupported");
+        crm_periph_clock_enable(CRM_I2C2_PERIPH_CLOCK, TRUE);
+    }
+    else
+    {
+        return ThrowError(ERR_INVALID_VALUE, "unknown instance");
     }
 
-#endif
+    if (pHandle->SDA.Port == GPIOA || pHandle->SCL.Port == GPIOA)
+    {
+        crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
+    }
+    else if (pHandle->SDA.Port == GPIOB || pHandle->SCL.Port == GPIOB)
+    {
+        crm_periph_clock_enable(CRM_GPIOB_PERIPH_CLOCK, TRUE);
+    }
 
-    // invalid instance
-    return ThrowError(ERR_INVALID_VALUE, "unknown instance");
+    gpio_init_type gpio_initstructure = {
+        .gpio_out_type       = GPIO_OUTPUT_OPEN_DRAIN,
+        .gpio_pull           = GPIO_PULL_UP,
+        .gpio_mode           = GPIO_MODE_MUX,
+        .gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE,
+    };
+
+    gpio_initstructure.gpio_pins = pHandle->SDA.Pin,
+    gpio_init(pHandle->SDA.Port, &gpio_initstructure);
+
+    gpio_initstructure.gpio_pins = pHandle->SCL.Pin,
+    gpio_init(pHandle->SCL.Port, &gpio_initstructure);
+
+    if (u32ClockFreqHz == 0)
+    {
+        u32ClockFreqHz = 100000;  // 100k
+    }
+
+    i2c_reset(hwi2c);
+    i2c_init(hwi2c, I2C_FSMODE_DUTY_2_1, u32ClockFreqHz);
+    i2c_own_address1_set(hwi2c, I2C_ADDRESS_MODE_7BIT, 0xA0);
+    i2c_enable(hwi2c, TRUE);
+
+    return ERR_NONE;
 }
 
 static inline bool HWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)

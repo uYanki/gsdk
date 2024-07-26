@@ -487,99 +487,170 @@ typedef struct __packed {
     u16 u16EncErrCode;       // P0633 编码器错误代码
     u16 u16EncComErrSum;     // P0634 编码器通信错误次数
     u16 _Resv635;            // P0635 
-    u16 _Resv636;            // P0636 
-    u16 u16AxisFSM;          // P0637 轴状态机
-    u16 _Resv638;            // P0638 
-    u16 _Resv639;            // P0639 
-    u16 _Resv640;            // P0640 
-    u16 _Resv641;            // P0641 
-    u16 _Resv642;            // P0642 
-    u16 _Resv643;            // P0643 
-    u16 _Resv644;            // P0644 
-    u16 _Resv645;            // P0645 
-    u16 u16ElecAngleRef;     // P0646 驱动层电角度指令
-    u16 u16ElecAngleFb;      // P0647 驱动层电角度反馈
-    u32 u32EncPosOffset;     // P0648 机械角度偏置
-    u16 _Resv650;            // P0650 
-    u16 _Resv651;            // P0651 
-    s16 s16Ud;               // P0652 驱动层D轴电压输出
-    s16 s16Uq;               // P0653 驱动层Q轴电压输出
-    s16 s16Ualpha;           // P0654 驱动层Alpha轴电压输出
-    s16 s16Ubeta;            // P0655 驱动层Beta轴电压输出
-    u16 u16Sector;           // P0656 驱动层SVPWM矢量扇区
-    u16 u16PwmaComp;         // P0657 驱动层A相PWM比较值
-    u16 u16PwmbComp;         // P0658 驱动层B相PWM比较值
-    u16 u16PwmcComp;         // P0659 驱动层C相PWM比较值
-    u16 _Resv660;            // P0660 
-    u16 u16StopCmd;          // P0661 停机指令
-    u16 u16StopMode;         // P0662 停机模式
-    u16 u16StopPlanMode;     // P0663 停机模式
-    u16 u16EmStopTrqDigRef;  // P0664 紧急停机转矩
-    u16 _Resv665;            // P0665 
-    u16 _Resv666;            // P0666 
-    u16 _Resv667;            // P0667 
-    u16 _Resv668;            // P0668 
-    u16 _Resv669;            // P0669 
-    u16 _Resv670;            // P0670 
-    s32 s32LogicSpdRef;      // P0671 逻辑层速度指令
-    u16 u16LogicSpdAccTime;  // P0673 逻辑层加速度时间
-    u16 u16LogicSpdDecTime;  // P0674 逻辑层减速度时间
-    u16 u16LogicSpdPlanMode; // P0675 逻辑层速度规划模式
-    s32 s32LogicSpdLimFwd;   // P0676 逻辑层正向速度限制
-    s32 s32LogicSpdLimRev;   // P0678 逻辑层反向速度限制
-    u16 _Resv680;            // P0680 
-    s16 s16LogicTrqRef;      // P0681 逻辑层转矩指令
-    s16 s16LogicTrqLimFwd;   // P0682 逻辑层正向转矩限制
-    s16 s16LogicTrqLimRev;   // P0683 逻辑层反向转矩限制
-    u16 _Resv684;            // P0684 
-    u16 _Resv685;            // P0685 
-    s64 s64PlanPosRef;       // P0686 规划层位置指令
-    s32 s32PlanSpdRef;       // P0690 规划层速度指令
-    s16 s16PlanTrqRef;       // P0692 规划层转矩指令
-    u16 _Resv693;            // P0693 
-    u16 _Resv694;            // P0694 
-    s64 s64DrvPosRef;        // P0695 驱动层位置指令
-    s64 s64DrvPosFb;         // P0699 驱动层位置反馈
-    s32 s32DrvSpdRef;        // P0703 驱动层速度指令
-    s32 s32DrvSpdFb;         // P0705 驱动层速度反馈
-    s32 s32DrvTrqRef;        // P0707 驱动层转矩指令
-    s32 s32DrvTrqFb;         // P0709 驱动层转矩反馈
-    u16 _Resv711;            // P0711 
-    u16 _Resv712;            // P0712 
-    u16 _Resv713;            // P0713 
-    u16 _Resv714;            // P0714 
-    u16 _Resv715;            // P0715 
-    u16 u16JogCmd;           // P0716 点动指令使能信号
-    u16 u16JogSpdRef;        // P0717 点动速度指令
-    u16 _Resv718;            // P0718 
-    u16 u16SpdAccTime;       // P0719 
-    u16 u16SpdDecTime;       // P0720 
-    u16 _Resv721;            // P0721 
-    u16 u16MultMotionEn;     // P0722 多段模式启动
-    u16 _Resv723;            // P0723 
-    u16 u16SpdPlanMode;      // P0724 速度规划模式
-    u16 _Resv725;            // P0725 
-    u16 u16SpdMulRefSel;     // P0726 多段速度选择
-    u16 _Resv727;            // P0727 
-    u16 _Resv728;            // P0728 
-    u16 _Resv729;            // P0729 
-    u16 _Resv730;            // P0730 
-    u16 _Resv731;            // P0731 
-    u16 _Resv732;            // P0732 
-    u16 _Resv733;            // P0733 
-    s16 s16IaFbSi;           // P0734 A相反馈电流物理值
-    s16 s16IbFbSi;           // P0735 B相反馈电流物理值
-    s16 s16IcFbSi;           // P0736 C相反馈电流物理值
-    u16 _Resv737;            // P0737 
-    s64 s64UserPosRef;       // P0738 用户位置指令
-    s64 s64UserPosFb;        // P0742 用户位置反馈
-    s32 s32UserSpdRef;       // P0746 用户速度指令
-    s32 s32UserSpdFb;        // P0748 用户速度反馈
-    s16 s16UserTrqRef;       // P0750 用户转矩指令
-    s16 s16UserTrqFb;        // P0751 用户转矩反馈
+    u16 uwErrorCode_603F;    // P0636 
+    u16 uwControlword_6040;  // P0637 
+    u16 uwStatusWord_6041;   // P0638 
+    s16 swQuickStopOptionCode_605A; // P0639 
+    s16 swShutdownOptionCode_605B; // P0640 
+    s16 swDisableOperaOptionCode_605C; // P0641 
+    s16 swHaltOptionCode_605D; // P0642 
+    s16 swFaultReactionCode_605E; // P0643 
+    s16 sbModesOpera_6060;   // P0644 
+    s16 sbModesOperaDisp_6061; // P0645 
+    s32 slPosDemandValue_6062; // P0646 
+    s32 slPosActualInternalValue_6063; // P0648 
+    s32 slUserPosActualValue_6064; // P0650 
+    u32 ulFollowErrorWindow_6065; // P0652 
+    u32 ulFollowErrorTimeOut_6066; // P0654 
+    u32 ulPositionWindow_6067; // P0656 
+    u16 uwPositionWindowTime_6068; // P0658 
+    u32 ulVelocityDemandValue_606B; // P0659 
+    u32 ulVelocityActualValue_606C; // P0661 
+    u16 uwVelocityWindow_606D; // P0663 
+    u16 uwVelocityWindowTime_606E; // P0664 
+    u16 uwVelocityThreshold_606F; // P0665 
+    u16 uwVelocityThresholdTime_6070; // P0666 
+    s16 swTargetTorque_6071; // P0667 
+    u16 uwMaxTorque_6072;    // P0668 
+    u16 uwMaxCurrent_6073;   // P0669 
+    s16 swTorqueDemand_6074; // P0670 
+    u32 ulMotorRatedCurrent_6075; // P0671 
+    u32 ulMotorRatedTorque_6076; // P0673 
+    s16 swTorqueActualValue_6077; // P0675 
+    s16 swCurrentActualValue_6078; // P0676 
+    u32 ulDCLinkCircuitVoltage_6079; // P0677 
+    s32 slTargetPosition_607A; // P0679 
+    s32 slHomeOffset_607C;   // P0681 
+    s32 slSoftPositionLimit_607D_0; // P0683 
+    s32 slSoftPositionLimit_607D_1; // P0685 
+    u16 ubPolarity_607E;     // P0687 
+    u32 ulMaxProfileVelocity_607F; // P0688 
+    u32 ulMaxMotorSpeed_6080; // P0690 
+    u32 ulProfileVelocity_6081; // P0692 
+    u32 ulProfileAcceleration_6083; // P0694 
+    u32 ulProfileDeceleration_6084; // P0696 
+    u32 ulQuickStopDeceleration_6085; // P0698 
+    s16 swMotionProfileType_6086; // P0700 
+    s16 swTargetSlope_6087;  // P0701 
+    s16 swTorqueProfileType_6088; // P0702 
+    s16 sbHomingMethod_6098; // P0703 
+    u16 uwHomingSpeeds_6099_0; // P0704 
+    u16 uwHomingSpeeds_6099_1; // P0705 
+    u32 ulHomingAcceleration_609A; // P0706 
+    s32 slPostionOffset_60B0; // P0708 
+    s32 slVelocityOffset_60B1; // P0710 
+    s32 slTorqueOffset_60B2; // P0712 
+    u16 uwTouchProbeFunction_60B8; // P0714 
+    u16 uwTouchProbeStatus_60B9; // P0715 
+    s32 slTouchProbe1Pos1PosValue_60BA; // P0716 
+    s32 slTouchProbe1Neg1PosValue_60BB; // P0718 
+    s32 slTouchProbe2Pos1PosValue_60BC; // P0720 
+    s32 slTouchProbe2Neg1PosValue_60BD; // P0722 
+    u16 ubInterpTimePeriod_60C2_0; // P0724 
+    u16 ubInterpTimePeriod_60C2_1; // P0725 
+    u32 ulMaxProfileAcceleration_60C5; // P0726 
+    u32 ulMaxProfileDeceleration_60C6; // P0728 
+    s32 slFollowErrorActualValue_60F4; // P0730 
+    s32 slPositionDemandValue_60FC; // P0732 
+    u32 ulDigitalInput_60FD; // P0734 
+    u16 uwDigitalOutput_60FE_0; // P0736 
+    u16 uwDigitalOutput_60FE_1; // P0737 
+    s32 slTargetVelocity_60FF; // P0738 
+    u32 ulSupportedDriveModes_6502; // P0740 
+    u16 _Resv742;            // P0742 
+    u16 _Resv743;            // P0743 
+    u16 u16AxisFSM;          // P0744 轴状态机
+    u16 _Resv745;            // P0745 
+    u16 _Resv746;            // P0746 
+    u16 _Resv747;            // P0747 
+    u16 _Resv748;            // P0748 
+    u16 _Resv749;            // P0749 
+    u16 _Resv750;            // P0750 
+    u16 _Resv751;            // P0751 
     u16 _Resv752;            // P0752 
-    u16 _Resv753;            // P0753 
-    u16 _Resv754;            // P0754 
+    u16 u16ElecAngleRef;     // P0753 驱动层电角度指令
+    u16 u16ElecAngleFb;      // P0754 驱动层电角度反馈
+    u32 u32EncPosOffset;     // P0755 机械角度偏置
+    u16 _Resv757;            // P0757 
+    u16 _Resv758;            // P0758 
+    s16 s16Ud;               // P0759 驱动层D轴电压输出
+    s16 s16Uq;               // P0760 驱动层Q轴电压输出
+    s16 s16Ualpha;           // P0761 驱动层Alpha轴电压输出
+    s16 s16Ubeta;            // P0762 驱动层Beta轴电压输出
+    u16 u16Sector;           // P0763 驱动层SVPWM矢量扇区
+    u16 u16PwmaComp;         // P0764 驱动层A相PWM比较值
+    u16 u16PwmbComp;         // P0765 驱动层B相PWM比较值
+    u16 u16PwmcComp;         // P0766 驱动层C相PWM比较值
+    u16 _Resv767;            // P0767 
+    u16 u16StopCmd;          // P0768 停机指令
+    u16 u16StopMode;         // P0769 停机模式
+    u16 u16StopPlanMode;     // P0770 停机模式
+    u16 u16EmStopTrqDigRef;  // P0771 紧急停机转矩
+    u16 _Resv772;            // P0772 
+    u16 _Resv773;            // P0773 
+    u16 _Resv774;            // P0774 
+    u16 _Resv775;            // P0775 
+    u16 _Resv776;            // P0776 
+    u16 _Resv777;            // P0777 
+    s32 s32LogicSpdRef;      // P0778 逻辑层速度指令
+    u16 u16LogicSpdAccTime;  // P0780 逻辑层加速度时间
+    u16 u16LogicSpdDecTime;  // P0781 逻辑层减速度时间
+    u16 u16LogicSpdPlanMode; // P0782 逻辑层速度规划模式
+    s32 s32LogicSpdLimFwd;   // P0783 逻辑层正向速度限制
+    s32 s32LogicSpdLimRev;   // P0785 逻辑层反向速度限制
+    u16 _Resv787;            // P0787 
+    s16 s16LogicTrqRef;      // P0788 逻辑层转矩指令
+    s16 s16LogicTrqLimFwd;   // P0789 逻辑层正向转矩限制
+    s16 s16LogicTrqLimRev;   // P0790 逻辑层反向转矩限制
+    u16 _Resv791;            // P0791 
+    u16 _Resv792;            // P0792 
+    s64 s64PlanPosRef;       // P0793 规划层位置指令
+    s32 s32PlanSpdRef;       // P0797 规划层速度指令
+    s16 s16PlanTrqRef;       // P0799 规划层转矩指令
+    u16 _Resv800;            // P0800 
+    u16 _Resv801;            // P0801 
+    s64 s64DrvPosRef;        // P0802 驱动层位置指令
+    s64 s64DrvPosFb;         // P0806 驱动层位置反馈
+    s32 s32DrvSpdRef;        // P0810 驱动层速度指令
+    s32 s32DrvSpdFb;         // P0812 驱动层速度反馈
+    s32 s32DrvTrqRef;        // P0814 驱动层转矩指令
+    s32 s32DrvTrqFb;         // P0816 驱动层转矩反馈
+    u16 _Resv818;            // P0818 
+    u16 _Resv819;            // P0819 
+    u16 _Resv820;            // P0820 
+    u16 _Resv821;            // P0821 
+    u16 _Resv822;            // P0822 
+    u16 u16JogCmd;           // P0823 点动指令使能信号
+    u16 u16JogSpdRef;        // P0824 点动速度指令
+    u16 _Resv825;            // P0825 
+    u16 u16SpdAccTime;       // P0826 
+    u16 u16SpdDecTime;       // P0827 
+    u16 _Resv828;            // P0828 
+    u16 u16MultMotionEn;     // P0829 多段模式启动
+    u16 _Resv830;            // P0830 
+    u16 u16SpdPlanMode;      // P0831 速度规划模式
+    u16 _Resv832;            // P0832 
+    u16 u16SpdMulRefSel;     // P0833 多段速度选择
+    u16 _Resv834;            // P0834 
+    u16 _Resv835;            // P0835 
+    u16 _Resv836;            // P0836 
+    u16 _Resv837;            // P0837 
+    u16 _Resv838;            // P0838 
+    u16 _Resv839;            // P0839 
+    u16 _Resv840;            // P0840 
+    s16 s16IaFbSi;           // P0841 A相反馈电流物理值
+    s16 s16IbFbSi;           // P0842 B相反馈电流物理值
+    s16 s16IcFbSi;           // P0843 C相反馈电流物理值
+    u16 _Resv844;            // P0844 
+    s64 s64UserPosRef;       // P0845 用户位置指令
+    s64 s64UserPosFb;        // P0849 用户位置反馈
+    s32 s32UserSpdRef;       // P0853 用户速度指令
+    s32 s32UserSpdFb;        // P0855 用户速度反馈
+    s16 s16UserTrqRef;       // P0857 用户转矩指令
+    s16 s16UserTrqFb;        // P0858 用户转矩反馈
+    u16 _Resv859;            // P0859 
+    u16 _Resv860;            // P0860 
+    u16 _Resv861;            // P0861 
 } axis_para_t;
 
 // clang-format on

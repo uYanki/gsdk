@@ -510,10 +510,10 @@ void ST7735_Test(void)
         .hSPI = &spi,
         .DC   = {GPIOB, GPIO_PINS_6 }, /*DC*/
 #if CONFIG_ST7735_RST_CONTROL_SW
-        .RST = {GPIOB, GPIO_PINS_5 }, /*RST*/
+        .RST  = {GPIOB, GPIO_PINS_5 }, /*RST*/
 #endif
 #if CONFIG_ST7735_BL_CONTROL_SW
-        .BL = {GPIOC, GPIO_PINS_13}, /*BL*/
+        .BL   = {GPIOC, GPIO_PINS_13}, /*BL*/
 #endif
         .u16ScreenW = ST7735_WIDTH,
         .u16ScreenH = ST7735_HEIGHT,

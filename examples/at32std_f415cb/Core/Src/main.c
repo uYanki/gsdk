@@ -1,7 +1,7 @@
 #include "gsdk.h"
 #include "hwif.h"
 #include "i2c_eeprom.h"
-#include "i2c_application.h"
+#include "spi_st7735.h"
 
 //---------------------------------------------------------------------------
 // Definitions
@@ -53,11 +53,7 @@ int main(void)
     i2c_mst_t i2c = {
         .SDA = {EEPROM_SDA_PIN},
         .SCL = {EEPROM_SCL_PIN},
-#if 0
-        .I2Cx = nullptr,
-#else
         .I2Cx = I2C1,
-#endif
     };
 
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_67_33);
