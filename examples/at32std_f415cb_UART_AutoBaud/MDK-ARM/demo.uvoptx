@@ -157,9 +157,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>370</LineNumber>
+          <LineNumber>364</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134230362</Address>
+          <Address>134230326</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -168,12 +168,28 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\demo\../Core/Src/main.c\370</Expression>
+          <Expression>\\demo\../Core/Src/main.c\364</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>355</LineNumber>
+          <LineNumber>371</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134230370</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../Core/Src/main.c\371</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>366</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -187,9 +203,9 @@
           <Expression></Expression>
         </Bp>
         <Bp>
-          <Number>2</Number>
+          <Number>3</Number>
           <Type>0</Type>
-          <LineNumber>371</LineNumber>
+          <LineNumber>373</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>

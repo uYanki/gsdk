@@ -130,8 +130,8 @@ void au_usart_auto_baudrate_init(void)
     tmr_counter_enable(AU_TMR, TRUE);
 
     /* exti config */
-    crm_periph_clock_enable(CRM_IOMUX_PERIPH_CLOCK, TRUE);
-    crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
+   crm_periph_clock_enable(CRM_IOMUX_PERIPH_CLOCK, TRUE);
+   crm_periph_clock_enable(CRM_GPIOA_PERIPH_CLOCK, TRUE);
 
     exint_init_type exint_init_struct = {0};
     exint_init_struct.line_enable     = TRUE;
@@ -140,21 +140,17 @@ void au_usart_auto_baudrate_init(void)
     exint_init_struct.line_polarity   = EXINT_TRIGGER_BOTH_EDGE;
     gpio_exint_line_config(EXINT_SCFG_GPIO_PORT_SRC, EXINT_SCFG_PINS_SRC);
     exint_init(&exint_init_struct);
-   // nvic_irq_enable(EXINT_IRQN, 0, 0);
+    nvic_irq_enable(EXINT_IRQN, 0, 0);
 };
 
 void au_usart_auto_baudrate_deinit(void)
 {
     //    gpio_exint_line_deconfig(EXINT_SCFG_GPIO_PORT_SRC, EXINT_SCFG_PINS_SRC);
 
-    //    exint_init_type exint_init_struct;
-    //    exint_init_struct.line_enable   = FALSE;
-    //    exint_init_struct.line_mode     = EXINT_LINE_INTERRUPUT;
-    //    exint_init_struct.line_select   = EXINT_LINE_PORT;
-    //    exint_init_struct.line_polarity = EXINT_TRIGGER_BOTH_EDGE;
-    //    exint_init(&exint_init_struct);
 
-    exint_reset();
+	exint_reset();
+	crm_periph_clock_enable(AU_TMR_CRM_CLK, FALSE);
+	tmr_counter_enable(AU_TMR, FALSE);
 }
 
 /**
@@ -309,7 +305,7 @@ uint8_t au_usart_init(void)
         usart_receiver_enable(AU_UART, TRUE);
 
         /*config uart baudrate*/
-       // AU_UART->baudr_bit.div = au_baudrate.usart_baudr_div;
+    //    AU_UART->baudr_bit.div = au_baudrate.usart_baudr_div;
 
         /* enable usart */
         usart_enable(AU_UART, TRUE);
@@ -336,16 +332,16 @@ int main(void)
     uint8_t rx_flag = 0;
 
     /* auto baudrate init */
-  //  au_usart_auto_baudrate_init();
+   au_usart_auto_baudrate_init();
 
     /* wait auto baud rate detection complete
      *  note: the detection character must starting with a bit at '1'
      *  example data: 0xx1, 0xx3, 0xx5, 0xx7...
      */
- //   while ((data = au_baud_rate_detection()) == 0);
+//  while ((data = au_baud_rate_detection()) == 0);
 		
 		/* auto baudrate deinit */
-   // au_usart_auto_baudrate_deinit();
+    au_usart_auto_baudrate_deinit();
 
     au_usart_init();
 
