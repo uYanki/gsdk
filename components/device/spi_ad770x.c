@@ -191,14 +191,14 @@ void AD7705_Test(void)
         .CS   = {GPIOA, GPIO_PIN_3},
     };
 
-#endif
-
     spi_ad770x_t ad770x = {
         .hSPI = &spi,
-        .RST  = {GPIOA, GPIO_PIN_4},
+        .RST  = {GPIOA, GPIO_PIN_0},
     };
 
-    SPI_Master_Init(&spi, 100000, SPI_DUTYCYCLE_50_50, AD770X_SPI_TIMING | SPI_FLAG_SOFT_CS);
+#endif
+
+    SPI_Master_Init(&spi, 10000, SPI_DUTYCYCLE_50_50, AD770X_SPI_TIMING | SPI_FLAG_SOFT_CS);
 
     AD770x_Init(&ad770x);
 

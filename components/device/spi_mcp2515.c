@@ -766,8 +766,28 @@ void MCP2515_Test(void)
         .CS   = {GPIOA, GPIO_PIN_3},
     };
 
-#endif
+#elif defined(BOARD_AT32F415CB_DEV)
+    /* SPI2: PB12/CS, PB13/SCLK, PB14/MISO, PB15/MOSI */
 
+    spi_mst_t spi = {
+        .MOSI = {GPIOB, GPIO_PINS_15}, /*MOSI*/
+        .MISO = {GPIOB, GPIO_PINS_14}, /*MISO*/
+        .SCLK = {GPIOB, GPIO_PINS_13}, /*SCLK*/
+        .CS   = {GPIOB, GPIO_PINS_12}, /*CS*/
+        .SPIx = SPI2,
+    };
+
+#elif defined(BOARD_CS32F103C8T6_QG)
+    /* SPI2: PB12/CS, PB13/SCLK, PB14/MISO, PB15/MOSI */
+
+    spi_mst_t spi = {
+        .MOSI = {GPIOA, GPIO_PIN_7 }, /*MOSI*/
+        .MISO = {GPIOA, GPIO_PIN_6 }, /*MISO*/
+        .SCLK = {GPIOA, GPIO_PIN_5 }, /*SCLK*/
+        .CS   = {GPIOB, GPIO_PIN_13}, /*CS*/
+    };
+
+#endif
     spi_mcp2515_t mcp2515 = {
         .hSPI = &spi,
     };
