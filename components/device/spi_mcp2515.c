@@ -386,13 +386,13 @@ struct RXBn_REGS {
 // Prototypes
 //---------------------------------------------------------------------------
 
-static uint8_t MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr);
-static void    MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, uint8_t pu8Data[], const uint8_t u8Count);
-static void    MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Data);
-static void    MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t cpu8Data[], const uint8_t u8Count);
-static void    MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Mask, const uint8_t u8Data);
+static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr);
+static void    _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, uint8_t pu8Data[], const uint8_t u8Count);
+static void    _MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Data);
+static void    _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t cpu8Data[], const uint8_t u8Count);
+static void    _MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Mask, const uint8_t u8Data);
 
-static void MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool ext, const uint32_t id);
+static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool ext, const uint32_t id);
 
 //---------------------------------------------------------------------------
 // Variables
@@ -422,31 +422,36 @@ mcp2515_error_e MCP2515_Reset(spi_mcp2515_t* pHandle)
 
     DelayBlockMs(10);
 
-    uint8_t zeros[14];
-    memset(zeros, 0, sizeof(zeros));
-    MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB0CTRL, zeros, 14);
-    MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB1CTRL, zeros, 14);
-    MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB2CTRL, zeros, 14);
+    uint8_t zeros[14] = {0};
+    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB0CTRL, zeros, 14);
+    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB1CTRL, zeros, 14);
+    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB2CTRL, zeros, 14);
 
-    MCP2515_SetRegister(pHandle, MCP2515_REG_RXB0CTRL, 0);
-    MCP2515_SetRegister(pHandle, MCP2515_REG_RXB1CTRL, 0);
+    _MCP2515_SetRegister(pHandle, MCP2515_REG_RXB0CTRL, 0);
+    _MCP2515_SetRegister(pHandle, MCP2515_REG_RXB1CTRL, 0);
 
-    MCP2515_SetRegister(pHandle, MCP2515_REG_CANINTE, CANINTF_RX0IF | CANINTF_RX1IF | CANINTF_ERRIF | CANINTF_MERRF);
+    _MCP2515_SetRegister(pHandle, MCP2515_REG_CANINTE, CANINTF_RX0IF | CANINTF_RX1IF | CANINTF_ERRIF | CANINTF_MERRF);
 
     // receives all valid messages using either Standard or Extended Identifiers that
     // meet filter criteria. RXF0 is applied for RXB0, RXF1 is applied for RXB1
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_RXB0CTRL,
-                           RXBnCTRL_RXM_MASK | RXB0CTRL_BUKT | RXB0CTRL_FILHIT_MASK,
-                           RXBnCTRL_RXM_STDEXT | RXB0CTRL_BUKT | RXB0CTRL_FILHIT);
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_RXB1CTRL,
-                           RXBnCTRL_RXM_MASK | RXB1CTRL_FILHIT_MASK,
-                           RXBnCTRL_RXM_STDEXT | RXB1CTRL_FILHIT);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_RXB0CTRL,
+                            RXBnCTRL_RXM_MASK | RXB0CTRL_BUKT | RXB0CTRL_FILHIT_MASK,
+                            RXBnCTRL_RXM_STDEXT | RXB0CTRL_BUKT | RXB0CTRL_FILHIT);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_RXB1CTRL,
+                            RXBnCTRL_RXM_MASK | RXB1CTRL_FILHIT_MASK,
+                            RXBnCTRL_RXM_STDEXT | RXB1CTRL_FILHIT);
 
     // clear filters and masks
     // do not filter any standard frames for RXF0 used by RXB0
     // do not filter any extended frames for RXF1 used by RXB1
-    RXF filters[] = {RXF0, RXF1, RXF2, RXF3, RXF4, RXF5};
-    for (int i = 0; i < 6; i++)
+    mcp2515_filter_e filters[] = {
+        MCP2515_FILTER_0,
+        MCP2515_FILTER_1,
+        MCP2515_FILTER_2,
+        MCP2515_FILTER_3,
+        MCP2515_FILTER_4,
+        MCP2515_FILTER_5};
+    for (int i = 0; i < ARRAY_SIZE(filters); i++)
     {
         bool            bExt   = (i == 1);
         mcp2515_error_e result = MCP2515_SetFilter(pHandle, filters[i], bExt, 0);
@@ -456,9 +461,9 @@ mcp2515_error_e MCP2515_Reset(spi_mcp2515_t* pHandle)
         }
     }
 
-    MASK masks[] = {MASK0, MASK1};
+    mcp2515_filter_mask_e masks[] = {MCP2515_FILTER_MASK_0, MCP2515_FILTER_MASK_1};
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < ARRAY_SIZE(masks); i++)
     {
         mcp2515_error_e result = MCP2515_SetFilterMask(pHandle, masks[i], true, 0);
 
@@ -471,7 +476,7 @@ mcp2515_error_e MCP2515_Reset(spi_mcp2515_t* pHandle)
     return ERR_NONE;
 }
 
-static uint8_t MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr)
+static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr)
 {
     uint8_t u8Data;
 
@@ -484,7 +489,7 @@ static uint8_t MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr
     return u8Data;
 }
 
-static void MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, uint8_t pu8Data[], const uint8_t u8Count)
+static void _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, uint8_t pu8Data[], const uint8_t u8Count)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_READ);
@@ -493,7 +498,7 @@ static void MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, 
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-static void MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Data)
+static void _MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Data)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_WRITE);
@@ -502,7 +507,7 @@ static void MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, co
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-static void MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t cpu8Data[], const uint8_t u8Count)
+static void _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t cpu8Data[], const uint8_t u8Count)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_WRITE);
@@ -511,7 +516,7 @@ static void MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, c
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-static void MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Mask, const uint8_t u8Data)
+static void _MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Mask, const uint8_t u8Data)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_BITMOD);
@@ -533,14 +538,14 @@ uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle)
 
 mcp2515_error_e MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e eMode)
 {
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_REQOP, eMode);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_REQOP, eMode);
 
     unsigned long endTime   = GetTickMs() + 10;
     bool          modeMatch = false;
 
     while (GetTickMs() < endTime)
     {
-        uint8_t newmode = MCP2515_ReadRegister(pHandle, MCP2515_REG_CANSTAT);
+        uint8_t newmode = _MCP2515_ReadRegister(pHandle, MCP2515_REG_CANSTAT);
         newmode &= CANSTAT_OPMOD;
 
         modeMatch = newmode == eMode;
@@ -643,9 +648,9 @@ mcp2515_error_e MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitr
 
     if (bMatched)
     {
-        MCP2515_SetRegister(pHandle, MCP2515_REG_CNF1, CFG[0]);
-        MCP2515_SetRegister(pHandle, MCP2515_REG_CNF2, CFG[1]);
-        MCP2515_SetRegister(pHandle, MCP2515_REG_CNF3, CFG[2]);
+        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF1, CFG[0]);
+        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF2, CFG[1]);
+        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF3, CFG[2]);
         return ERR_NONE;
     }
 
@@ -657,26 +662,26 @@ mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e
     if (eDivisor == CLKOUT_DISABLE)
     {
         /* Turn off CLKEN */
-        MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_CLKEN, 0x00);
+        _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_CLKEN, 0x00);
 
         /* Turn on CLKOUT for SOF */
-        MCP2515_ModifyRegister(pHandle, MCP2515_REG_CNF3, CNF3_SOF, CNF3_SOF);
+        _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CNF3, CNF3_SOF, CNF3_SOF);
         return ERR_NONE;
     }
 
     /* Set the MCP2515_Prescaler (pHandle,CLKPRE) */
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_CLKPRE, eDivisor);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_CLKPRE, eDivisor);
 
     /* Turn on CLKEN */
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_CLKEN, CANCTRL_CLKEN);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_CLKEN, CANCTRL_CLKEN);
 
     /* Turn off CLKOUT for SOF */
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CNF3, CNF3_SOF, 0x00);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CNF3, CNF3_SOF, 0x00);
 
     return ERR_NONE;
 }
 
-void MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool bExt, const uint32_t id)
+static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool bExt, const uint32_t id)
 {
     uint16_t canid = (uint16_t)(id & 0x0FFFF);
 
@@ -699,7 +704,7 @@ void MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool bExt,
     }
 }
 
-mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const MASK mask, const bool bExt, const uint32_t u32Data)
+mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const mcp2515_filter_mask_e eMask, const bool bExt, const uint32_t u32Data)
 {
     mcp2515_error_e res = MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG);
 
@@ -709,22 +714,22 @@ mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const MASK mask, c
     }
 
     uint8_t tbufdata[4];
-    MCP2515_PrepareId(pHandle, tbufdata, bExt, u32Data);
+    _MCP2515_PrepareId(pHandle, tbufdata, bExt, u32Data);
 
     uint8_t u8Addr;
-    switch (mask)
+    switch (eMask)
     {
-        case MASK0: u8Addr = MCP2515_REG_RXM0SIDH; break;
-        case MASK1: u8Addr = MCP2515_REG_RXM1SIDH; break;
+        case MCP2515_FILTER_MASK_0: u8Addr = MCP2515_REG_RXM0SIDH; break;
+        case MCP2515_FILTER_MASK_1: u8Addr = MCP2515_REG_RXM1SIDH; break;
         default: return MCP2515_ERROR_FAIL;
     }
 
-    MCP2515_SetRegisters(pHandle, u8Addr, tbufdata, 4);
+    _MCP2515_SetRegisters(pHandle, u8Addr, tbufdata, 4);
 
     return ERR_NONE;
 }
 
-mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const RXF num, const bool bExt, const uint32_t u32Data)
+mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, const bool bExt, const uint32_t u32Data)
 {
     mcp2515_error_e res = MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG);
     if (res != ERR_NONE)
@@ -734,25 +739,25 @@ mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const RXF num, const b
 
     uint8_t u8Addr;
 
-    switch (num)
+    switch (eFliter)
     {
-        case RXF0: u8Addr = MCP2515_REG_RXF0SIDH; break;
-        case RXF1: u8Addr = MCP2515_REG_RXF1SIDH; break;
-        case RXF2: u8Addr = MCP2515_REG_RXF2SIDH; break;
-        case RXF3: u8Addr = MCP2515_REG_RXF3SIDH; break;
-        case RXF4: u8Addr = MCP2515_REG_RXF4SIDH; break;
-        case RXF5: u8Addr = MCP2515_REG_RXF5SIDH; break;
+        case MCP2515_FILTER_0: u8Addr = MCP2515_REG_RXF0SIDH; break;
+        case MCP2515_FILTER_1: u8Addr = MCP2515_REG_RXF1SIDH; break;
+        case MCP2515_FILTER_2: u8Addr = MCP2515_REG_RXF2SIDH; break;
+        case MCP2515_FILTER_3: u8Addr = MCP2515_REG_RXF3SIDH; break;
+        case MCP2515_FILTER_4: u8Addr = MCP2515_REG_RXF4SIDH; break;
+        case MCP2515_FILTER_5: u8Addr = MCP2515_REG_RXF5SIDH; break;
         default: return MCP2515_ERROR_FAIL;
     }
 
     uint8_t tbufdata[4];
-    MCP2515_PrepareId(pHandle, tbufdata, bExt, u32Data);
-    MCP2515_SetRegisters(pHandle, u8Addr, tbufdata, 4);
+    _MCP2515_PrepareId(pHandle, tbufdata, bExt, u32Data);
+    _MCP2515_SetRegisters(pHandle, u8Addr, tbufdata, 4);
 
     return ERR_NONE;
 }
 
-mcp2515_error_e _MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, const can_frame_t* pFrame)
+static mcp2515_error_e _MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, const can_frame_t* pFrame)
 {
     if (pFrame->u8DLC > CAN_MAX_DLEN)
     {
@@ -767,17 +772,17 @@ mcp2515_error_e _MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, co
     bool     rtr  = (pFrame->u32ID & CAN_RTR_FLAG);
     uint32_t id   = (pFrame->u32ID & (bExt ? CAN_EFF_MASK : CAN_SFF_MASK));
 
-    MCP2515_PrepareId(pHandle, data, bExt, id);
+    _MCP2515_PrepareId(pHandle, data, bExt, id);
 
     data[MCP2515_DLC] = rtr ? (pFrame->u8DLC | RTR_MASK) : pFrame->u8DLC;
 
     memcpy(&data[MCP2515_DATA], pFrame->au8Data, pFrame->u8DLC);
 
-    MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + pFrame->u8DLC);
+    _MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + pFrame->u8DLC);
 
-    MCP2515_ModifyRegister(pHandle, txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
+    _MCP2515_ModifyRegister(pHandle, txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
 
-    uint8_t ctrl = MCP2515_ReadRegister(pHandle, txbuf->CTRL);
+    uint8_t ctrl = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
     if ((ctrl & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0)
     {
         return MCP2515_ERROR_FAILTX;
@@ -797,7 +802,7 @@ mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* p
     for (int i = 0; i < N_TXBUFFERS; i++)
     {
         const struct TXBn_REGS* txbuf   = &TXB[txBuffers[i]];
-        uint8_t                 ctrlval = MCP2515_ReadRegister(pHandle, txbuf->CTRL);
+        uint8_t                 ctrlval = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
         if ((ctrlval & TXB_TXREQ) == 0)
         {
             return _MCP2515_SendMessage(pHandle, txBuffers[i], pFrame);
@@ -807,7 +812,7 @@ mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* p
     return MCP2515_ERROR_ALLTXBUSY;
 }
 
-mcp2515_error_e _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, can_frame_t* pFrame)
+static mcp2515_error_e _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, can_frame_t* pFrame)
 {
     const struct RXBn_REGS rxb[N_RXBUFFERS] = {
         {MCP2515_REG_RXB0CTRL, MCP2515_REG_RXB0SIDH, MCP2515_REG_RXB0DATA, CANINTF_RX0IF},
@@ -816,7 +821,7 @@ mcp2515_error_e _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, ca
 
     uint8_t tbufdata[5];
 
-    MCP2515_ReadRegisters(pHandle, rxb->SIDH, tbufdata, 5);
+    _MCP2515_ReadRegisters(pHandle, rxb->SIDH, tbufdata, 5);
 
     uint32_t id = (tbufdata[MCP2515_SIDH] << 3) + (tbufdata[MCP2515_SIDL] >> 5);
 
@@ -834,18 +839,18 @@ mcp2515_error_e _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, ca
         return MCP2515_ERROR_FAIL;
     }
 
-    uint8_t ctrl = MCP2515_ReadRegister(pHandle, rxb->CTRL);
+    uint8_t ctrl = _MCP2515_ReadRegister(pHandle, rxb->CTRL);
     if (ctrl & RXBnCTRL_RTR)
     {
         id |= CAN_RTR_FLAG;
     }
 
-    pFrame->u32ID  = id;
+    pFrame->u32ID = id;
     pFrame->u8DLC = dlc;
 
-    MCP2515_ReadRegisters(pHandle, rxb->DATA, pFrame->au8Data, dlc);
+    _MCP2515_ReadRegisters(pHandle, rxb->DATA, pFrame->au8Data, dlc);
 
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, rxb->CANINTF_RXnIF, 0);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, rxb->CANINTF_RXnIF, 0);
 
     return ERR_NONE;
 }
@@ -883,32 +888,32 @@ bool MCP2515_CheckError(spi_mcp2515_t* pHandle)
 
 uint8_t MCP2515_GetErrorFlags(spi_mcp2515_t* pHandle)
 {
-    return MCP2515_ReadRegister(pHandle, MCP2515_REG_MCP2515_ERROR_FLAG);
+    return _MCP2515_ReadRegister(pHandle, MCP2515_REG_MCP2515_ERROR_FLAG);
 }
 
 void MCP2515_ClearRXnOVRFlags(spi_mcp2515_t* pHandle)
 {
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_MCP2515_ERROR_FLAG, MCP2515_ERROR_FLAG_RX0OVR | MCP2515_ERROR_FLAG_RX1OVR, 0);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_MCP2515_ERROR_FLAG, MCP2515_ERROR_FLAG_RX0OVR | MCP2515_ERROR_FLAG_RX1OVR, 0);
 }
 
 uint8_t MCP2515_GetInterrupts(spi_mcp2515_t* pHandle)
 {
-    return MCP2515_ReadRegister(pHandle, MCP2515_REG_CANINTF);
+    return _MCP2515_ReadRegister(pHandle, MCP2515_REG_CANINTF);
 }
 
 void MCP2515_ClearInterrupts(spi_mcp2515_t* pHandle)
 {
-    MCP2515_SetRegister(pHandle, MCP2515_REG_CANINTF, 0);
+    _MCP2515_SetRegister(pHandle, MCP2515_REG_CANINTF, 0);
 }
 
 uint8_t MCP2515_GetInterruptMask(spi_mcp2515_t* pHandle)
 {
-    return MCP2515_ReadRegister(pHandle, MCP2515_REG_CANINTE);
+    return _MCP2515_ReadRegister(pHandle, MCP2515_REG_CANINTE);
 }
 
 void MCP2515_ClearTXInterrupts(spi_mcp2515_t* pHandle)
 {
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, (CANINTF_TX0IF | CANINTF_TX1IF | CANINTF_TX2IF), 0);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, (CANINTF_TX0IF | CANINTF_TX1IF | CANINTF_TX2IF), 0);
 }
 
 void MCP2515_ClearRXnOVR(spi_mcp2515_t* pHandle)
@@ -919,32 +924,32 @@ void MCP2515_ClearRXnOVR(spi_mcp2515_t* pHandle)
     {
         MCP2515_ClearRXnOVRFlags(pHandle);
         MCP2515_ClearInterrupts(pHandle);
-        // MCP2515_ModifyRegister(pHandle,MCP2515_REG_CANINTF, CANINTF_ERRIF, 0);
+        // _MCP2515_ModifyRegister(pHandle,MCP2515_REG_CANINTF, CANINTF_ERRIF, 0);
     }
 }
 
 void MCP2515_ClearMERR(spi_mcp2515_t* pHandle)
 {
-    // MCP2515_ModifyRegister(pHandle,MCP2515_MCP2515_ERROR_FLAG, MCP2515_ERROR_FLAG_RX0OVR | MCP2515_ERROR_FLAG_RX1OVR, 0);
+    // _MCP2515_ModifyRegister(pHandle,MCP2515_MCP2515_ERROR_FLAG, MCP2515_ERROR_FLAG_RX0OVR | MCP2515_ERROR_FLAG_RX1OVR, 0);
     // MCP2515_ClearInterrupts(pHandle);
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, CANINTF_MERRF, 0);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, CANINTF_MERRF, 0);
 }
 
 void MCP2515_ClearERRIF(spi_mcp2515_t* pHandle)
 {
-    // MCP2515_ModifyRegister(pHandle,MCP2515_MCP2515_ERROR_FLAG, MCP2515_ERROR_FLAG_RX0OVR | MCP2515_ERROR_FLAG_RX1OVR, 0);
+    // _MCP2515_ModifyRegister(pHandle,MCP2515_MCP2515_ERROR_FLAG, MCP2515_ERROR_FLAG_RX0OVR | MCP2515_ERROR_FLAG_RX1OVR, 0);
     // MCP2515_ClearInterrupts(pHandle);
-    MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, CANINTF_ERRIF, 0);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, CANINTF_ERRIF, 0);
 }
 
 uint8_t MCP2515_ErrorCountRX(spi_mcp2515_t* pHandle)
 {
-    return MCP2515_ReadRegister(pHandle, MCP2515_REG_REC);
+    return _MCP2515_ReadRegister(pHandle, MCP2515_REG_REC);
 }
 
 uint8_t MCP2515_ErrorCountTX(spi_mcp2515_t* pHandle)
 {
-    return MCP2515_ReadRegister(pHandle, MCP2515_REG_TEC);
+    return _MCP2515_ReadRegister(pHandle, MCP2515_REG_TEC);
 }
 
 //---------------------------------------------------------------------------
@@ -992,14 +997,14 @@ void MCP2515_Test(void)
     };
 
     can_frame_t canMsg1 = {
-        .u32ID  = 0x0F6,
-        .u8DLC = 8,
-        .au8Data    = {0x8E, 0x87, 0x32, 0xFA, 0x26, 0x8E, 0xBE, 0x86},
+        .u32ID   = 0x0F6,
+        .u8DLC   = 8,
+        .au8Data = {0x8E, 0x87, 0x32, 0xFA, 0x26, 0x8E, 0xBE, 0x86},
     };
 
     can_frame_t canMsg2 = {
-        .u32ID  = 0x036,
-        .u8DLC = 8,
+        .u32ID   = 0x036,
+        .u8DLC   = 8,
         .au8Data = {0x0E, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00, 0xA0},
     };
 

@@ -53,19 +53,25 @@ typedef enum {
     MCP2515_MODE_POWERUP    = 0xE0
 } mcp2515_mode_e;
 
+/**
+ * @brief rx filter index
+ */
 typedef enum {
-    MASK0,
-    MASK1
-} MASK;
+    MCP2515_FILTER_0 = 0,
+    MCP2515_FILTER_1 = 1,
+    MCP2515_FILTER_2 = 2,
+    MCP2515_FILTER_3 = 3,
+    MCP2515_FILTER_4 = 4,
+    MCP2515_FILTER_5 = 5,
+} mcp2515_filter_e;
 
+/**
+ * @brief  filter mask
+ */
 typedef enum {
-    RXF0 = 0,
-    RXF1 = 1,
-    RXF2 = 2,
-    RXF3 = 3,
-    RXF4 = 4,
-    RXF5 = 5
-} RXF;
+    MCP2515_FILTER_MASK_0,
+    MCP2515_FILTER_MASK_1,
+} mcp2515_filter_mask_e;
 
 //---------------------------------------------------------------------------
 // Functions
@@ -73,34 +79,34 @@ typedef enum {
 
 void MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
 
+void            MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
 mcp2515_error_e MCP2515_Reset(spi_mcp2515_t* pHandle);
-mcp2515_error_e MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e mode);
-mcp2515_error_e MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e canSpeed, const mcp2515_clkin_e canClock);
+mcp2515_error_e MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e eMode);
+mcp2515_error_e MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
 
-mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e divisor);
+uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle);
 
-mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const MASK num, const bool ext, const uint32_t ulData);
-mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const RXF num, const bool ext, const uint32_t ulData);
+mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e eDivisor);
+
+mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const mcp2515_filter_mask_e eMask, const bool bExt, const uint32_t u32Data);
+mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, const bool bExt, const uint32_t u32Data);
 
 mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame);
 mcp2515_error_e MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame);
+bool            MCP2515_CheckReceive(spi_mcp2515_t* pHandle);  // 检测是否接收到帧
 
-bool MCP2515_CheckReceive(spi_mcp2515_t* pHandle);
-bool MCP2515_CheckError(spi_mcp2515_t* pHandle);
-
+bool    MCP2515_CheckError(spi_mcp2515_t* pHandle);
 uint8_t MCP2515_GetErrorFlags(spi_mcp2515_t* pHandle);
 void    MCP2515_ClearRXnOVRFlags(spi_mcp2515_t* pHandle);
 
 uint8_t MCP2515_GetInterrupts(spi_mcp2515_t* pHandle);
-uint8_t MCP2515_GetInterruptMask(spi_mcp2515_t* pHandle);
 void    MCP2515_ClearInterrupts(spi_mcp2515_t* pHandle);
+uint8_t MCP2515_GetInterruptMask(spi_mcp2515_t* pHandle);
 void    MCP2515_ClearTXInterrupts(spi_mcp2515_t* pHandle);
 
-uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle);
 void    MCP2515_ClearRXnOVR(spi_mcp2515_t* pHandle);
 void    MCP2515_ClearMERR(spi_mcp2515_t* pHandle);
 void    MCP2515_ClearERRIF(spi_mcp2515_t* pHandle);
-
 uint8_t MCP2515_ErrorCountRX(spi_mcp2515_t* pHandle);
 uint8_t MCP2515_ErrorCountTX(spi_mcp2515_t* pHandle);
 
