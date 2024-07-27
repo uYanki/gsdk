@@ -439,7 +439,7 @@ void ST7735_StopDraw(spi_st7735_t* pHandle)
 
 void ST7735_Test(void)
 {
-#ifdef defined(BOARD_CS2F103C8T6_QG)
+#if defined(BOARD_CS32F103C8T6_QG)
 
     spi_mst_t spi = {
         .MISO = {LCD_SDA_PIN}, /*SDA*/
