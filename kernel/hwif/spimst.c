@@ -84,15 +84,14 @@ void SPI_Master_Deselect(spi_mst_t* pHandle)
 
 err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
 {
-    pHandle->u16TimingConfig |= u16Flags & (SPI_FLAG_CS_MODE_Msk | SPI_FLAG_CS_ACTIVE_LEVEL_Msk);
+    pHandle->u16TimingConfig |= u16Flags & (SPI_FLAG_CS_MODE_Msk | SPI_FLAG_CS_ACTIVE_LEVEL_Msk | SPI_FLAG_WIRE_Msk);
 
-    if (memcmp(&pHandle->MOSI, &pHandle->MISO, sizeof(pin_t)) == 0)
+    if ((pHandle->u16TimingConfig & SPI_FLAG_WIRE_Msk) == SPI_FLAG_4WIRE)
     {
-        pHandle->u16TimingConfig |= SPI_FLAG_3WIRE;
-    }
-    else
-    {
-        pHandle->u16TimingConfig |= SPI_FLAG_4WIRE;
+        if (memcmp(&pHandle->MOSI, &pHandle->MISO, sizeof(pin_t)) == 0)  // same
+        {
+            return ThrowError(ERR_NOT_ALLOWED, "MOSI must be different from MISO");
+        }
     }
 
     if (pHandle->SPIx == nullptr)

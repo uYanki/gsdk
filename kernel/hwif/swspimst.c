@@ -366,7 +366,7 @@ static uint8_t SWSPI_Master_ShiftInOut4Wire(spi_mst_t* pHandle, uint8_t u8TxData
 
 static err_t SWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cycle_e eDutyCycle, uint16_t u16Flags)
 {
-    pHandle->u16TimingConfig |= u16Flags & (SPI_FLAG_CPOL_Msk | SPI_FLAG_CPHA_Msk | SPI_FLAG_FIRSTBIT_Msk | SPI_FLAG_DATAWIDTH_Msk | SPI_FLAG_FAST_CLOCK_Msk);
+    pHandle->u16TimingConfig |= u16Flags & (SPI_FLAG_CPOL_Msk | SPI_FLAG_WIRE_Msk | SPI_FLAG_CPHA_Msk | SPI_FLAG_FIRSTBIT_Msk | SPI_FLAG_DATAWIDTH_Msk | SPI_FLAG_FAST_CLOCK_Msk);
 
     switch (pHandle->u16TimingConfig & SPI_FLAG_WIRE_Msk)
     {

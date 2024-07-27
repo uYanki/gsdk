@@ -8,3 +8,5 @@ components/shell/cmdline_parser.exe
 .vscode
 *.lst
 *.dbgconf
+examples/stm32hal_f407ve_serial2can/Tool/espcantool/CAN调试器配置信息_WeChat_TC4300_QQ_43058655.ini
+examples/stm32hal_f407ve_serial2can/Tool/espcantool/CAN调试器配置信息_WeChat_TC4300_QQ_43058655.ini

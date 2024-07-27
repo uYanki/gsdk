@@ -47,6 +47,8 @@ int main(void)
 
     DbgUartInit(115200);
     DelayInit();
+	
+	MCP2515_Test();
 
 #if 0  // eeprom demo
 
@@ -58,7 +60,7 @@ int main(void)
 
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_67_33);
     I2C_Master_ScanAddress(&i2c);
-
+		
     EEPROM_Test(&i2c);
 
 #endif

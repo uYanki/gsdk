@@ -71,7 +71,7 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
         .gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER,
     };
 
-    spi_init_type spi_init_struct;
+    spi_init_type spi_init_struct = {0};
 
     spi_init_struct.master_slave_mode = SPI_MODE_MASTER;
 
@@ -149,14 +149,13 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
             }
 
             spi_init_struct.transmission_mode = SPI_TRANSMIT_HALF_DUPLEX_TX;
-            pHandle->u16TimingConfig |= SPI_FLAG_3WIRE;
 
             break;
         }
 
         case SPI_FLAG_4WIRE:
         {
-            spi_init_struct.transmission_mode = SPI_MODE_MASTER;
+            spi_init_struct.transmission_mode = SPI_TRANSMIT_FULL_DUPLEX;
 
             gpio_init_struct.gpio_pins = pHandle->MOSI.Pin;
             gpio_init(pHandle->MOSI.Pin, &gpio_init_struct);
