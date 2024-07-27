@@ -19,27 +19,24 @@ typedef struct {
 } spi_mcp2515_t;
 
 typedef enum {
-    MCP2515_20MHZ,
-    MCP2515_16MHZ,
-    MCP2515_8MHZ
+    MCP2515_CLKIN_20MHZ,
+    MCP2515_CLKIN_16MHZ,
+    MCP2515_CLKIN_8MHZ
 } mcp2515_clkin_e;
 
 typedef enum {
-    CLKOUT_DISABLE = -1,
-    CLKOUT_DIV1    = 0x0,
-    CLKOUT_DIV2    = 0x1,
-    CLKOUT_DIV4    = 0x2,
-    CLKOUT_DIV8    = 0x3,
+    MCP2515_CLKOUT_DISABLE = -1,
+    MCP2515_CLKOUT_DIV1    = 0x0,
+    MCP2515_CLKOUT_DIV2    = 0x1,
+    MCP2515_CLKOUT_DIV4    = 0x2,
+    MCP2515_CLKOUT_DIV8    = 0x3,
 } mcp2515_clkout_e;
 
-typedef enum {
-    MCP2515_ERROR_OK        = 0,
-    MCP2515_ERROR_FAIL      = 1,
-    MCP2515_ERROR_ALLTXBUSY = 2,
-    MCP2515_ERROR_FAILINIT  = 3,
-    MCP2515_ERROR_FAILTX    = 4,
-    MCP2515_ERROR_NOMSG     = 5
-} mcp2515_error_e;
+#define MCP2515_ERROR_FAIL      1
+#define MCP2515_ERROR_ALLTXBUSY 2
+#define MCP2515_ERROR_FAILINIT  3
+#define MCP2515_ERROR_FAILTX    4
+#define MCP2515_ERROR_NOMSG     5
 
 /**
  * @brief request operation mode @ CANCTRL bit[7,5]
@@ -50,7 +47,7 @@ typedef enum {
     MCP2515_MODE_LOOPBACK   = 0x40,
     MCP2515_MODE_LISTENONLY = 0x60,
     MCP2515_MODE_CONFIG     = 0x80,
-    MCP2515_MODE_POWERUP    = 0xE0
+    MCP2515_MODE_POWERUP    = 0xE0,
 } mcp2515_mode_e;
 
 /**
@@ -79,21 +76,21 @@ typedef enum {
 
 void MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
 
-void            MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
-mcp2515_error_e MCP2515_Reset(spi_mcp2515_t* pHandle);
-mcp2515_error_e MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e eMode);
-mcp2515_error_e MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
+void  MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
+err_t MCP2515_Reset(spi_mcp2515_t* pHandle);
+err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e eMode);
+err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
 
 uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle);
 
-mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e eDivisor);
+err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e eDivisor);
 
-mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const mcp2515_filter_mask_e eMask, const bool bExt, const uint32_t u32Data);
-mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, const bool bExt, const uint32_t u32Data);
+err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const mcp2515_filter_mask_e eMask, const bool bExt, const uint32_t u32Data);
+err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, const bool bExt, const uint32_t u32Data);
 
-mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame);
-mcp2515_error_e MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame);
-bool            MCP2515_CheckReceive(spi_mcp2515_t* pHandle);  // 检测是否接收到帧
+err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame);
+err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame);
+bool  MCP2515_CheckReceive(spi_mcp2515_t* pHandle);  // 检测接收状态
 
 bool    MCP2515_CheckError(spi_mcp2515_t* pHandle);
 uint8_t MCP2515_GetErrorFlags(spi_mcp2515_t* pHandle);
