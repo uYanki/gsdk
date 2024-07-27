@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>3</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -2232,6 +2232,11 @@
               <FileName>spi_ad770x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\spi_ad770x.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi_mcp2515.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\spi_mcp2515.c</FilePath>
             </File>
             <File>
               <FileName>gpio_hcsr04.c</FileName>

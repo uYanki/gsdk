@@ -30,7 +30,7 @@ static inline err_t AD770x_WriteByte(spi_ad770x_t* pHandle, uint8_t u8Data)
 static inline err_t AD770x_ReadByte(spi_ad770x_t* pHandle, uint8_t* pu8Data)
 {
     SPI_Master_Select(pHandle->hSPI);
-    ERROR_CHECK_RETURN(SPI_Master_ReceiveBlock(pHandle->hSPI, pu8Data, 1));
+    ERROR_CHECK_RETURN(SPI_Master_ReceiveByte(pHandle->hSPI, pu8Data));
     SPI_Master_Deselect(pHandle->hSPI);
     return ERR_NONE;
 }
@@ -178,32 +178,20 @@ err_t AD770x_ReadFullCal(spi_ad770x_t* pHandle, ad770x_channel_e eChannel, uint3
 
 #if CONFIG_DEMOS_SW
 
-#include "delay.h"
-
-#define CONFIG_AD770X_CHANNEL1_SW 1
-#define CONFIG_AD770X_CHANNEL2_SW 1
 #define CONFIG_AD770X_VREF        2.5f
-
-#define AD770X_PRINT_FREQ_ONLY    1
-
-void DAC_Start()
-{
-    // HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
-}
-
-void DAC_Set(uint16_t val)
-{
-    //  HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, val);
-}
 
 void AD7705_Test(void)
 {
+#if defined(BOARD_STM32F407VET6_XWS)
+
     spi_mst_t spi = {
         .MISO = {GPIOA, GPIO_PIN_5},
         .MOSI = {GPIOA, GPIO_PIN_4},
         .SCLK = {GPIOA, GPIO_PIN_6},
         .CS   = {GPIOA, GPIO_PIN_3},
     };
+
+#endif
 
     spi_ad770x_t ad770x = {
         .hSPI = &spi,
@@ -214,7 +202,6 @@ void AD7705_Test(void)
 
     AD770x_Init(&ad770x);
 
-#if CONFIG_AD770X_CHANNEL1_SW
     AD770x_ConfigChannel(
         &ad770x,
         AD7705_CHANNEL_AIN1P_AIN1N,
@@ -223,9 +210,7 @@ void AD7705_Test(void)
         AD770X_GAIN_2,
         AD770X_POLARITY_BIPOLAR,
         AD770X_UPDATE_RATE_50_HZ);
-#endif
-
-#if CONFIG_AD770X_CHANNEL2_SW
+		
     AD770x_ConfigChannel(
         &ad770x,
         AD7705_CHANNEL_AIN2P_AIN2N,
@@ -234,67 +219,19 @@ void AD7705_Test(void)
         AD770X_GAIN_8,
         AD770X_POLARITY_BIPOLAR,
         AD770X_UPDATE_RATE_60_HZ);
-#endif
-
-    uint8_t hz = 0;
 
     while (1)
     {
-        static uint16_t dac = 0;
-
-        uint16_t  u16ChannelData[2] = {0.f};
+        uint16_t  u16ChannelData[2] = {0};
         float32_t f32ChannelData[2] = {0.f};
-        float32_t f32DacData;
 
-#if CONFIG_AD770X_CHANNEL1_SW
         AD770x_ReadAdc(&ad770x, AD7705_CHANNEL_AIN1P_AIN1N, &u16ChannelData[0]);
-#endif
-#if CONFIG_AD770X_CHANNEL2_SW
         AD770x_ReadAdc(&ad770x, AD7705_CHANNEL_AIN2P_AIN2N, &u16ChannelData[1]);
-#endif
-
-#if AD770X_PRINT_FREQ_ONLY == 0
-
-        // ch1: 50hz -> 0.02s,   ch2: 60hz -> 0.016s,  t_total = t_ch1 + t_ch2 = 0.036s => 8.9hz
-        // ch1: 250hz -> 0.004s, ch2: 250hz -> 0.004s, t_total = t_ch1 + t_ch2 = 0.008s => 39.64hz
-
-#if 1
-        f32DacData = dac;
-#else
-        f32DacData = HAL_DAC_GetValue(&hdac, DAC_CHANNEL_2);
-#endif
-        f32DacData        = dac * 3.3f / 4095.f;
+				
         f32ChannelData[0] = u16ChannelData[0] * CONFIG_AD770X_VREF / 65535.f;
         f32ChannelData[1] = u16ChannelData[1] * CONFIG_AD770X_VREF / 65535.f;
 
-        LOGI("%.2f,%.2f,%.2f,%.2f", hz, f32DacData, f32ChannelData[0], f32ChannelData[1]);
-
-        dac += 5;
-        if (dac > 4095)
-        {
-            dac = 0;
-        }
-
-        dac_set(dac);
-
-#endif
-
-        static tick_t t = 0;
-
-        if (t == 0)
-        {
-            t = GetTickUs();
-        }
-        else if (DelayNonBlockS(t, 1))
-        {
-            LOGI("freq = %d Hz\r\n", hz);
-            hz = 0;
-            t  = GetTickUs();
-        }
-        else
-        {
-            ++hz;
-        }
+        PRINTLN("%.2f,%.2f", f32ChannelData[0], f32ChannelData[1]);
     }
 }
 

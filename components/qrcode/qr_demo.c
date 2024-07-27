@@ -16,7 +16,7 @@
 /**
  * @brief CONFIG_QRCODE_DISPLAY_MODE
  */
-#define QRCODE_DISPLAY_ASCII 0  // ascii (GSDK_PRINTF)
+#define QRCODE_DISPLAY_ASCII 0  // ascii (PRINTF)
 #define QRCODE_DISPLAY_IMAGE 1  // st7735 (SPI LCD)
 
 //---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ void QRCode_Test()
     uint8_t au8BitTable[QR_MAX_BITDATA];
 
     uint8_t u8Side = qr_encode(QR_LEVEL_L /* ECC Level */, 0, "123abc你好!?", 0, au8BitTable);
-    GSDK_PRINTF("side: %d\n", u8Side);
+    PRINTF("side: %d\n", u8Side);
 
 #if CONFIG_QRCODE_DISPLAY_MODE == QRCODE_DISPLAY_ASCII
 
@@ -80,28 +80,28 @@ void QRCode_Test()
 
     for (i = 0; i < u8Side + 2; i++)
     {
-        GSDK_PRINTF("██");
+        PRINTF("██");
     }
 
-    GSDK_PRINTF("\n");
+    PRINTF("\n");
     for (i = 0; i < u8Side; i++)
     {
-        GSDK_PRINTF("██");
+        PRINTF("██");
         for (j = 0; j < u8Side; j++)
         {
             uint16_t a = i * u8Side + j;
-            GSDK_PRINTF((au8BitTable[a / 8] & (1 << (7 - a % 8))) ? "  " : "██");
+            PRINTF((au8BitTable[a / 8] & (1 << (7 - a % 8))) ? "  " : "██");
         }
-        GSDK_PRINTF("██");
-        GSDK_PRINTF("\n");
+        PRINTF("██");
+        PRINTF("\n");
     }
 
     for (i = 0; i < u8Side + 2; i++)
     {
-        GSDK_PRINTF("██");
+        PRINTF("██");
     }
 
-    GSDK_PRINTF("\n");
+    PRINTF("\n");
 
 #elif CONFIG_QRCODE_DISPLAY_MODE == QRCODE_DISPLAY_IMAGE
 

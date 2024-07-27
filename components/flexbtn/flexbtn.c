@@ -32,9 +32,9 @@ bool FlexBtn_Attach(flexbtn_t* pHandle)
 {
     // check
 
-    GSDK_ASSERT(pHandle, "pointer is nullptr");
-    GSDK_ASSERT(pHandle->pfnEventCb, "callback function needs to be set");
-    GSDK_ASSERT(pHandle->pfnIsPressed, "callback function needs to be set");
+    ASSERT(pHandle, "pointer is nullptr");
+    ASSERT(pHandle->pfnEventCb, "callback function needs to be set");
+    ASSERT(pHandle->pfnIsPressed, "callback function needs to be set");
 
     pHandle->eEvent  = FLEXBTN_EVENT_NONE;
     pHandle->_eState = FLEXBTN_STATE_DEFAULT;

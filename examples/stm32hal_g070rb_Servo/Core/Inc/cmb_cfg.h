@@ -32,7 +32,7 @@
 #include "gsdk.h"
 
 /* print line, must config by user */
-#define cmb_println(...) GSDK_PRINTF(__VA_ARGS__), GSDK_PRINTF("\r\n") /* e.g., printf(__VA_ARGS__);printf("\r\n")  or  SEGGER_RTT_printf(0, __VA_ARGS__);SEGGER_RTT_WriteString(0, "\r\n")  */
+#define cmb_println(...) PRINTF(__VA_ARGS__), PRINTF("\r\n") /* e.g., printf(__VA_ARGS__);printf("\r\n")  or  SEGGER_RTT_printf(0, __VA_ARGS__);SEGGER_RTT_WriteString(0, "\r\n")  */
 
 /* enable bare metal(no OS) platform */
 #define CMB_USING_BARE_METAL_PLATFORM

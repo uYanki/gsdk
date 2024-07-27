@@ -49,7 +49,7 @@ static inline void AD9833_Write(spi_ad9833_t* pHandle, uint16_t u16Data)
 
         default:
         {
-            ASSERT(0);
+            ASSERT(0, "unsupported");
             break;
         }
     }

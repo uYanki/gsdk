@@ -598,7 +598,7 @@ uint8_t DS18B20_ReadTemp(onewire_ds18b20_t* pHandle, ds18b20_romcode_t* romcode,
 
     if (u8Crc != DS18B20_CRC8(au8Data, 8))
     {
-        // GSDK_PRINTLN(" crc error");
+        // PRINTLN(" crc error");
         return false;  // CRC 校验失败
     }
 
@@ -679,13 +679,13 @@ bool DS18B20_ReadROM(onewire_ds18b20_t* pHandle, ds18b20_romcode_t* romcode)
     DS18B20_Reset(pHandle);
 
 #if 0  // log it
-    GSDK_PRINTF("ROM:");
+    PRINTF("ROM:");
     for (i = 0; i < 8; i++)
     {
-        GSDK_PRINTF(" %02X", romcode->au8Data[i]);
+        PRINTF(" %02X", romcode->au8Data[i]);
     }
-    GSDK_PRINTF(", CRC %s", (DS18B20_CRC8(romcode->au8Data, 7) == romcode->au8Data[7]) ? "ok" : "err");
-    GSDK_PRINTLN();
+    PRINTF(", CRC %s", (DS18B20_CRC8(romcode->au8Data, 7) == romcode->au8Data[7]) ? "ok" : "err");
+    PRINTLN();
 #endif
 
     return true;
@@ -782,7 +782,7 @@ void DS18B20_Test()
 
             if (DS18B20_ReadTemp(&ds18b20, nullptr, &f32Temperature))
             {
-                GSDK_PRINTLN("T = %.5f", f32Temperature);
+                PRINTLN("T = %.5f", f32Temperature);
             }
         }
     }
@@ -820,7 +820,7 @@ void DS18B20_Test()
     /* If any devices on 1wire */
     if (u8SlaveCount > 0)
     {
-        GSDK_PRINTF("Devices found on 1-wire: %d\n", u8SlaveCount);
+        PRINTF("Devices found on 1-wire: %d\n", u8SlaveCount);
 
         /* Display 64bit rom code for each device */
 
@@ -828,15 +828,15 @@ void DS18B20_Test()
         {
             for (i = 0; i < 8; i++)
             {
-                GSDK_PRINTF("0x%02X ", aSlave[j].au8Data[i]);
+                PRINTF("0x%02X ", aSlave[j].au8Data[i]);
             }
 
-            GSDK_PRINTF("\n");
+            PRINTF("\n");
         }
     }
     else
     {
-        GSDK_PRINTF("No devices on OneWire.\n");
+        PRINTF("No devices on OneWire.\n");
     }
 
     /* Go through all connected devices and set resolution to 12bits */
@@ -864,13 +864,13 @@ void DS18B20_Test()
             /* Read temperature from ROM address and store it to temps variable */
             if (DS18B20_ReadTemp(&onewire, &aSlave[i], &af32SlaveTemps[i]))
             {
-                /* GSDK_PRINT temperature */
-                GSDK_PRINTF("Temp %d: %3.5f; \n", i, af32SlaveTemps[i]);
+                /* PRINT temperature */
+                PRINTF("Temp %d: %3.5f; \n", i, af32SlaveTemps[i]);
             }
             else
             {
                 /* Reading error */
-                GSDK_PRINTF("Reading error;\n");
+                PRINTF("Reading error;\n");
             }
         }
 
@@ -887,7 +887,7 @@ void DS18B20_Test()
         }
 
         /* Format string and send over USART for debug */
-        GSDK_PRINTF("Devices with alarm: %d\n", u8AlarmedCount);
+        PRINTF("Devices with alarm: %d\n", u8AlarmedCount);
 
         /* Any device has alarm flag set? */
         if (u8AlarmedCount > 0)
@@ -895,18 +895,18 @@ void DS18B20_Test()
             /* Show romcode of pHandle devices */
             for (j = 0; j < u8AlarmedCount; j++)
             {
-                GSDK_PRINTF("Device with alarm: ");
+                PRINTF("Device with alarm: ");
                 for (i = 0; i < 8; i++)
                 {
-                    GSDK_PRINTF("0x%02X ", aAlarmedSlave[j].au8Data[i]);
+                    PRINTF("0x%02X ", aAlarmedSlave[j].au8Data[i]);
                 }
-                GSDK_PRINTF("\n    ");
+                PRINTF("\n    ");
             }
-            GSDK_PRINTF("ALARM devices recognized!\n\r");
+            PRINTF("ALARM devices recognized!\n\r");
         }
 
-        /* GSDK_PRINT separator */
-        GSDK_PRINTLN("----------");
+        /* PRINT separator */
+        PRINTLN("----------");
 
         /* Some delay */
         DelayBlockMs(1000);

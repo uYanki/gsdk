@@ -15,7 +15,7 @@ extern "C" {
  * @brief log output interface
  */
 #ifndef LOG_IMPL
-#define LOG_IMPL(...) GSDK_PRINTLN(__VA_ARGS__)
+#define LOG_IMPL(...) PRINTLN(__VA_ARGS__)
 #endif
 
 //---------------------------------------------------------------------------

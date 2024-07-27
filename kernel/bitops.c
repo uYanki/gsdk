@@ -97,8 +97,8 @@ void setbits(uint8_t* pu8Data, uint16_t u16StartBit, uint8_t u8BitWidth, uint8_t
     uint16_t u16NPreBits;
     uint16_t u16Value = u8Value;
 
-    GSDK_ASSERT(u8BitWidth <= 8,);
-    GSDK_ASSERT(BITS_PER_BYTE == sizeof(uint8_t) * 8,);
+    ASSERT(u8BitWidth <= 8, "illegal value");
+    ASSERT(BITS_PER_BYTE == sizeof(uint8_t) * 8, "illegal value");
 
     /* Calculate byte offset for first byte containing the bit values starting at u16BitOffset. */
     u18ByteOffset = (uint16_t)((u16StartBit) / BITS_PER_BYTE);

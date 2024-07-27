@@ -78,8 +78,8 @@ static void SSD1306_WriteBlockData(i2c_ssd1306_t* pHandle, const uint8_t* cpu8Da
 
 err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
 {
-    GSDK_ASSERT(pHandle->u8Rows, "rows must greate than 0");
-    GSDK_ASSERT(pHandle->u8Cols, "cols must greate than 0");
+    ASSERT(pHandle->u8Rows, "rows must greate than 0");
+    ASSERT(pHandle->u8Cols, "cols must greate than 0");
 
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
     {
@@ -180,7 +180,7 @@ void SSD1306_FillScreen(i2c_ssd1306_t* pHandle, uint8_t u8Data)
 
     if ((pHandle->u8Cols % u8ColSpan) != 0)
     {
-        GSDK_ASSERT(0, "u8ColSpan and u8Cols need to have an integer multiple relationship");  // 倍数关系
+        ASSERT(0, "u8ColSpan and u8Cols need to have an integer multiple relationship");  // 倍数关系
     }
 
     for (uint8_t u8Idx = 0; u8Idx < u8ColSpan; ++u8Idx)

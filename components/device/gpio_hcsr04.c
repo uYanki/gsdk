@@ -70,7 +70,7 @@ void HCSR04_Test(void)
 
     while (1)
     {
-        GSDK_PRINTLN("distance: %.2f cm", HCSR04_MeasureDistance(&hcsr04));
+        PRINTLN("distance: %.2f cm", HCSR04_MeasureDistance(&hcsr04));
     }
 }
 

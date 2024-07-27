@@ -20,11 +20,11 @@ extern "C" {
 #define LIENEND "\n"
 #endif /*!< LIENEND */
 
-#ifndef GSDK_PRINTF
-#define GSDK_PRINTF(...) printf(__VA_ARGS__)
-#endif /*!< GSDK_PRINTF */
+#ifndef PRINTF
+#define PRINTF(...) printf(__VA_ARGS__)
+#endif /*!< PRINTF */
 
-#define GSDK_PRINTLN(format, ...) GSDK_PRINTF(format LIENEND, ##__VA_ARGS__)
+#define PRINTLN(format, ...) PRINTF(format LIENEND, ##__VA_ARGS__)
 
 /**
  * @brief scanf
@@ -38,21 +38,21 @@ extern "C" {
  * @brief assert
  */
 
-#ifndef GSDK_ASSERT
+#ifndef ASSERT
 #ifndef NDEBUG
 
 #if 0
 
-#define GSDK_ASSERT(expr, msg) assert((msg, expr));
+#define ASSERT(expr, msg) assert((msg, expr));
 
 #else
 
-#define GSDK_ASSERT(expr, msg)                                                    \
+#define ASSERT(expr, msg)                                                    \
     do                                                                            \
     {                                                                             \
         if (!(expr))                                                              \
         {                                                                         \
-            GSDK_PRINTLN("\"" #expr "\" assert failed at file: %s, line: %d. %s", \
+            PRINTLN("\"" #expr "\" assert failed at file: %s, line: %d. %s", \
                          __FILE__, __LINE__, #msg);                               \
             while (1);                                                            \
         }                                                                         \
@@ -61,9 +61,9 @@ extern "C" {
 #endif
 
 #else /*!< NDEBUG */
-#define GSDK_ASSERT(expr, msg)
+#define ASSERT(expr, msg)
 #endif /*!< NDEBUG */
-#endif /*!< GSDK_ASSERT */
+#endif /*!< ASSERT */
 
 /**
  * @brief memory alloc

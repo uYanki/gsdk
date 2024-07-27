@@ -179,7 +179,7 @@ err_t EEPROM_Hexdump(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Siz
     uint8_t  u8Buff[16];  // 16x
     uint16_t u16XferSize;
 
-    GSDK_ASSERT(u16Size > 0, );
+    ASSERT(u16Size > 0, "illegal param");
 
     LOGI("address = 0x%08X, size = %d bytes", u32MemAddr, u16Size);
 

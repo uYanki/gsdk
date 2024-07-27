@@ -153,6 +153,8 @@ int main(void)
 
     DelayInit();
     // MX_TIM1_Init();
+    AD7705_Test();
+    MCP2515_Test();
 
     while (1)
     {
@@ -205,8 +207,7 @@ int main(void)
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
 
-    ST7735_Test();
-    QRCode_Test();
+    // QRCode_Test();
 
     // EEFS_Test();
     // FlexBtn_Test();
@@ -236,6 +237,7 @@ int main(void)
     // DS1302_Test();
     // AD7705_Test();  // !
     // ST7735_Test();
+    MCP2515_Test();
 #endif
 
     while (1)
@@ -323,7 +325,7 @@ void assert_failed(uint8_t* file, uint32_t line)
 {
     /* USER CODE BEGIN 6 */
     /* User can add his own implementation to report the file name and line number,
-       ex: GSDK_PRINTF("Wrong parameters value: file %s on line %d\r\n", file, line) */
+       ex: PRINTF("Wrong parameters value: file %s on line %d\r\n", file, line) */
     /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

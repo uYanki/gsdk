@@ -58,6 +58,7 @@ extern "C" {
 typedef enum {
     I2C_DUTYCYCLE_64_36 = 163,  // 255*0.63 (16:9)
     I2C_DUTYCYCLE_67_33 = 171,  // 255*0.67 (2:1)
+    I2C_DUTYCYCLE_50_50 = 127,  // 255*0.5 (1:1)
 } i2c_duty_cycle_e;
 
 /**

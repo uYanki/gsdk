@@ -46,7 +46,7 @@ static err_t SWSPI_Master_SetClock(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz,
 {
     uint32_t u32ClockCycleUs;
 
-    GSDK_ASSERT(u32ClockSpeedHz, "clock freq must greater than 0");
+    ASSERT(u32ClockSpeedHz, "clock freq must greater than 0");
 
     u32ClockCycleUs           = 1000000UL / u32ClockSpeedHz;
     pHandle->u32FirstCycleUs  = (u32ClockCycleUs * ((uint32_t)eDutyCycle + 1)) >> 8;

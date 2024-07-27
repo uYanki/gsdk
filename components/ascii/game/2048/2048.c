@@ -60,50 +60,50 @@ static void DrawBoard(uint8_t board[SIZE][SIZE])
 {
     uint8_t x, y;
     char    color[40], reset[] = "\033[m";
-    GSDK_PRINTF("\033[H");
+    PRINTF("\033[H");
 
-    GSDK_PRINTF("2048.c %17d pts\n\n", m_u32Score);
+    PRINTF("2048.c %17d pts\n\n", m_u32Score);
 
     for (y = 0; y < SIZE; y++)
     {
         for (x = 0; x < SIZE; x++)
         {
             GetColor(board[x][y], color, 40);
-            GSDK_PRINTF("%s", color);
-            GSDK_PRINTF("       ");
-            GSDK_PRINTF("%s", reset);
+            PRINTF("%s", color);
+            PRINTF("       ");
+            PRINTF("%s", reset);
         }
-        GSDK_PRINTF("\n");
+        PRINTF("\n");
         for (x = 0; x < SIZE; x++)
         {
             GetColor(board[x][y], color, 40);
-            GSDK_PRINTF("%s", color);
+            PRINTF("%s", color);
             if (board[x][y] != 0)
             {
                 char s[8];
                 snprintf(s, 8, "%u", (uint32_t)1 << board[x][y]);
                 uint8_t t = 7 - strlen(s);
-                GSDK_PRINTF("%*s%s%*s", t - t / 2, "", s, t / 2, "");
+                PRINTF("%*s%s%*s", t - t / 2, "", s, t / 2, "");
             }
             else
             {
-                GSDK_PRINTF("   ·   ");
+                PRINTF("   ·   ");
             }
-            GSDK_PRINTF("%s", reset);
+            PRINTF("%s", reset);
         }
-        GSDK_PRINTF("\n");
+        PRINTF("\n");
         for (x = 0; x < SIZE; x++)
         {
             GetColor(board[x][y], color, 40);
-            GSDK_PRINTF("%s", color);
-            GSDK_PRINTF("       ");
-            GSDK_PRINTF("%s", reset);
+            PRINTF("%s", color);
+            PRINTF("       ");
+            PRINTF("%s", reset);
         }
-        GSDK_PRINTF("\n");
+        PRINTF("\n");
     }
-    GSDK_PRINTF("\n");
-    GSDK_PRINTF("        ←,↑,→,↓ or q        \n");
-    GSDK_PRINTF("\033[A");  // one line up
+    PRINTF("\n");
+    PRINTF("        ←,↑,→,↓ or q        \n");
+    PRINTF("\033[A");  // one line up
 }
 
 static uint8_t FindTarget(uint8_t array[SIZE], uint8_t x, uint8_t stop)
@@ -355,7 +355,7 @@ void Game2048(void)
                      // m_u8Scheme = 1;  // blackwhite
                      // m_u8Scheme = 2;  // bluered
 
-    GSDK_PRINTF("\033[?25l\033[2J");
+    PRINTF("\033[?25l\033[2J");
 
     InitBoard(board);
 
@@ -365,7 +365,7 @@ void Game2048(void)
 
         if (c == -1)
         {
-            GSDK_PRINTF("\nError! Cannot read keyboard input!");
+            PRINTF("\nError! Cannot read keyboard input!");
             break;
         }
 
@@ -403,7 +403,7 @@ void Game2048(void)
 
             if (GameEnded(board))
             {
-                GSDK_PRINTF("         GAME OVER          \n");
+                PRINTF("         GAME OVER          \n");
                 break;
             }
         }
@@ -412,7 +412,7 @@ void Game2048(void)
         {
             case 'q':
             {
-                GSDK_PRINTF("        QUIT? (y/n)         \n");
+                PRINTF("        QUIT? (y/n)         \n");
                 c = getchar();
                 if (c == 'y')
                 {
@@ -424,7 +424,7 @@ void Game2048(void)
 
             case 'r':
             {
-                GSDK_PRINTF("       RESTART? (y/n)       \n");
+                PRINTF("       RESTART? (y/n)       \n");
                 c = getchar();
                 if (c == 'y')
                 {
@@ -441,7 +441,7 @@ void Game2048(void)
         }
     }
 
-    GSDK_PRINTF("\033[?25h\033[m");
+    PRINTF("\033[?25h\033[m");
 }
 
 //---------------------------------------------------------------------------

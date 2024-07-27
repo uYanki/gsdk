@@ -47,7 +47,7 @@ typedef int32_t err_t;
 
 #if 1
 #define ThrowError(errno, reason, ...) \
-    GSDK_PRINTLN(reason, ##__VA_ARGS__), -(errno)
+    PRINTLN(reason, ##__VA_ARGS__), -(errno)
 #else
 #define ThrowError(errno, reason, ...) \
     UNUSED(reason, ##__VA_ARGS__), -(errno)

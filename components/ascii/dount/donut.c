@@ -46,8 +46,8 @@ void DisplaySpinningDonut(void)
         return;
     }
 
-    GSDK_PRINTF("\033[?25l");  // hide cursor
-    GSDK_PRINTF("Have a donut!\r\n");
+    PRINTF("\033[?25l");  // hide cursor
+    PRINTF("Have a donut!\r\n");
 
     while (1)
     {
@@ -86,10 +86,10 @@ void DisplaySpinningDonut(void)
         }
         for (int k = 0; 1761 > k; k++)
         {
-            GSDK_PRINTF("%c", (k % 80 ? b[k] : 10));
+            PRINTF("%c", (k % 80 ? b[k] : 10));
         }
         R(5, 7, cA, sA);
         R(5, 8, cB, sB);
-        GSDK_PRINTF("\x1b[23A");
+        PRINTF("\x1b[23A");
     }
 }

@@ -268,12 +268,12 @@ uint8_t I2C_Master_ScanAddress(i2c_mst_t* pHandle)
     uint8_t  u8SlvAddr = 0, u8Step = 0, u8Count = 0;
     uint16_t u16Flags = 0;
 
-    GSDK_PRINTLN("i2c 7-bit slave address detector:");
-    GSDK_PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+    PRINTLN("i2c 7-bit slave address detector:");
+    PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
 
     while (u8SlvAddr < 0x7F)
     {
-        GSDK_PRINTF("%02X: ", u8SlvAddr);
+        PRINTF("%02X: ", u8SlvAddr);
 
         u8Step = 0x10;
 
@@ -281,22 +281,22 @@ uint8_t I2C_Master_ScanAddress(i2c_mst_t* pHandle)
         {
             if (I2C_Master_IsDeviceReady(pHandle, u8SlvAddr, u16Flags) == true)
             {
-                GSDK_PRINTF("%02X ", u8SlvAddr);
+                PRINTF("%02X ", u8SlvAddr);
                 u8Count++;
             }
             else
             {
-                GSDK_PRINTF("-- ");  // none
+                PRINTF("-- ");  // none
             }
 
             ++u8SlvAddr;
 
         } while (--u8Step);
 
-        GSDK_PRINTLN();
+        PRINTLN();
     }
 
-    GSDK_PRINTLN(">> %d slaves are detected in this scan", u8Count);
+    PRINTLN(">> %d slaves are detected in this scan", u8Count);
 
     return u8Count;
 }
@@ -307,12 +307,12 @@ err_t I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Fl
     uint8_t u8MemAddr = 0;
     uint8_t u8Step    = 0;
 
-    GSDK_PRINTLN("i2c 7-bit slave memory hexdump:");
-    GSDK_PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+    PRINTLN("i2c 7-bit slave memory hexdump:");
+    PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
 
     do
     {
-        GSDK_PRINTF("%02X: ", u8MemAddr);
+        PRINTF("%02X: ", u8MemAddr);
 
         u8Step = 0x10;
 
@@ -322,18 +322,18 @@ err_t I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Fl
 
             if (I2C_Master_ReadBlock(pHandle, u16SlvAddr, u8MemAddr, &u8Data, 1, u16Flags) == ERR_NONE)
             {
-                GSDK_PRINTF("%02X ", u8Data);
+                PRINTF("%02X ", u8Data);
             }
             else
             {
-                GSDK_PRINTF("-- ");  // none
+                PRINTF("-- ");  // none
             }
 
             ++u8MemAddr;
 
         } while (--u8Step);
 
-        GSDK_PRINTLN();
+        PRINTLN();
 
     } while (u8MemAddr);
 

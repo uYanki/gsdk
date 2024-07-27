@@ -133,10 +133,10 @@ bool hexdump(const uint8_t* cpu8Buffer, uint32_t u32BytesDumped, uint8_t u8Bytes
             pLinePos += sprintf(pLinePos, "|");
         }
 
-#if defined(GSDK_PRINTLN)
-        GSDK_PRINTLN("%s", aLineBuf);
-#elif defined(GSDK_PRINTF)
-        GSDK_PRINTF("%s\n", aLineBuf);
+#if defined(PRINTLN)
+        PRINTLN("%s", aLineBuf);
+#elif defined(PRINTF)
+        PRINTF("%s\n", aLineBuf);
 #else
 #error "hexdump is not effective"
 #endif

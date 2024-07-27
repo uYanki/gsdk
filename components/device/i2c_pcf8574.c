@@ -122,7 +122,7 @@ err_t PCF8574_ScanMatrixkey4x4(i2c_pcf8574_t* pHandle, uint8_t* pu8KeyIndex)
     uint8_t u8InputState, u8OutputState;
     uint8_t u8PressedRow, u8PressedCol;
 
-    GSDK_ASSERT(pu8KeyIndex != nullptr, "pointer is nullptr");
+    ASSERT(pu8KeyIndex != nullptr, "pointer is nullptr");
 
     for (uint8_t i = 0; i < 4; ++i)
     {

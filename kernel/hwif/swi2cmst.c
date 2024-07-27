@@ -73,7 +73,7 @@ static err_t SWI2C_Master_SetClock(i2c_mst_t* pHandle, uint32_t u32ClockSpeedHz,
 {
     uint32_t u32ClockCycleUs;
 
-    GSDK_ASSERT(u32ClockSpeedHz, "clock freq must greater than 0");
+    ASSERT(u32ClockSpeedHz, "clock freq must greater than 0");
 
     u32ClockCycleUs              = 1000000UL / u32ClockSpeedHz;
     pHandle->u32ClockLowCycleUs  = (u32ClockCycleUs * ((uint32_t)eDutyCycle + 1)) >> 8;

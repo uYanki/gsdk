@@ -128,7 +128,7 @@ err_t PCA9685_SetFreq(i2c_pca9685_t* pHandle, float32_t f32PwmFreq)
 
 err_t PCA9685_SetAngle_Servo(i2c_pca9685_t* pHandle, pca9685_channel_e eChannel, uint8_t u8Angle)
 {
-    GSDK_ASSERT(pHandle->_f32PeriodUs > 0.00001f, );
+    ASSERT(pHandle->_f32PeriodUs > 0.00001f, );
     float32_t f32PulseOff = (float32_t)u8Angle / 180 * 2000 + 500;  // map [0,180] to [500,2500]
     ERROR_CHECK_RETURN(PCA9685_SetDuty(pHandle, eChannel, 0, 4095.f * f32PulseOff / pHandle->_f32PeriodUs));
     return ERR_NONE;
@@ -136,7 +136,7 @@ err_t PCA9685_SetAngle_Servo(i2c_pca9685_t* pHandle, pca9685_channel_e eChannel,
 
 err_t PCA9685_SetAngle_AllServo(i2c_pca9685_t* pHandle, uint8_t u8Angle)
 {
-    GSDK_ASSERT(pHandle->_f32PeriodUs > 0.00001f, );
+    ASSERT(pHandle->_f32PeriodUs > 0.00001f, );
     float32_t f32PulseOff = (float32_t)u8Angle / 180 * 2000 + 500;  // map [0,180] to [500,2500]
     ERROR_CHECK_RETURN(PCA9685_SetAllDuty(pHandle, 0, 4095.f * f32PulseOff / pHandle->_f32PeriodUs));
     return ERR_NONE;
