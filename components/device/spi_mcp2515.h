@@ -85,7 +85,7 @@ typedef enum {
     CLKOUT_DIV2    = 0x1,
     CLKOUT_DIV4    = 0x2,
     CLKOUT_DIV8    = 0x3,
-} CAN_CLKOUT;
+} mcp2515_clkout_e;
 
 typedef enum {
     MCP2515_ERROR_OK        = 0,
@@ -133,17 +133,6 @@ typedef enum {
 } CANINTF;
 
 typedef enum {
-    EFLG_RX1OVR = (1 << 7),
-    EFLG_RX0OVR = (1 << 6),
-    EFLG_TXBO   = (1 << 5),
-    EFLG_TXEP   = (1 << 4),
-    EFLG_RXEP   = (1 << 3),
-    EFLG_TXWAR  = (1 << 2),
-    EFLG_RXWAR  = (1 << 1),
-    EFLG_EWARN  = (1 << 0)
-} EFLG;
-
-typedef enum {
     CANCTRL_REQOP_NORMAL     = 0x00,
     CANCTRL_REQOP_SLEEP      = 0x20,
     CANCTRL_REQOP_LOOPBACK   = 0x40,
@@ -166,29 +155,22 @@ typedef enum {
     TXB_TXP   = 0x03
 } TXBnCTRL;
 
-typedef uint8_t REGISTER;
-
 struct TXBn_REGS {
-    REGISTER CTRL;
-    REGISTER SIDH;
-    REGISTER DATA;
+    uint8_t CTRL;
+    uint8_t SIDH;
+    uint8_t DATA;
 };
 
 struct RXBn_REGS {
-    REGISTER CTRL;
-    REGISTER SIDH;
-    REGISTER DATA;
-    CANINTF  CANINTF_RXnIF;
+    uint8_t CTRL;
+    uint8_t SIDH;
+    uint8_t DATA;
+    CANINTF CANINTF_RXnIF;
 };
 
 void MCP2515_Init(spi_mcp2515_t* pHandle);
 
 mcp2515_error_e MCP2515_SetMode(spi_mcp2515_t* pHandle, const CANCTRL_REQOP_MODE mode);
-uint8_t         MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const REGISTER reg);
-void            MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const REGISTER reg, uint8_t values[], const uint8_t n);
-void            MCP2515_SetRegister(spi_mcp2515_t* pHandle, const REGISTER reg, const uint8_t value);
-void            MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const REGISTER reg, const uint8_t values[], const uint8_t n);
-void            MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const REGISTER reg, const uint8_t mask, const uint8_t data);
 void            MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool ext, const uint32_t id);
 
 mcp2515_error_e MCP2515_Reset(spi_mcp2515_t* pHandle);
@@ -197,7 +179,7 @@ mcp2515_error_e MCP2515_SetListenOnlyMode(spi_mcp2515_t* pHandle);
 mcp2515_error_e MCP2515_SetSleepMode(spi_mcp2515_t* pHandle);
 mcp2515_error_e MCP2515_SetLoopbackMode(spi_mcp2515_t* pHandle);
 mcp2515_error_e MCP2515_SetNormalMode(spi_mcp2515_t* pHandle);
-mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const CAN_CLKOUT divisor);
+mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e divisor);
 mcp2515_error_e MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e canSpeed, const mcp2515_clock_e canClock);
 mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const MASK num, const bool ext, const uint32_t ulData);
 mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const RXF num, const bool ext, const uint32_t ulData);
