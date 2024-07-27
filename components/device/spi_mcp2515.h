@@ -44,11 +44,11 @@ typedef uint32_t canid_t;
 #define CAN_MAX_DLC  8
 #define CAN_MAX_DLEN 8
 
-struct can_frame {
+typedef struct {
     canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
     uint8_t can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
     uint8_t data[CAN_MAX_DLEN] __attribute__((aligned(8)));
-};
+} can_frame_t;
 
 typedef enum {
     MCP2515_20MHZ,
@@ -183,10 +183,8 @@ mcp2515_error_e MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e
 mcp2515_error_e MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e canSpeed, const mcp2515_clock_e canClock);
 mcp2515_error_e MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const MASK num, const bool ext, const uint32_t ulData);
 mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const RXF num, const bool ext, const uint32_t ulData);
-mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, const struct can_frame* frame);
-mcp2515_error_e MCP2515_SendMessageEx(spi_mcp2515_t* pHandle, const struct can_frame* frame);
-mcp2515_error_e MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, struct can_frame* frame);
-mcp2515_error_e MCP2515_ReadMessageEx(spi_mcp2515_t* pHandle, struct can_frame* frame);
+mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame);
+mcp2515_error_e MCP2515_ReadMessageEx(spi_mcp2515_t* pHandle, can_frame_t* pFrame);
 bool            MCP2515_CheckReceive(spi_mcp2515_t* pHandle);
 bool            MCP2515_CheckError(spi_mcp2515_t* pHandle);
 uint8_t         MCP2515_GetErrorFlags(spi_mcp2515_t* pHandle);

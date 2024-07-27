@@ -723,9 +723,9 @@ mcp2515_error_e MCP2515_SetFilter(spi_mcp2515_t* pHandle, const RXF num, const b
     return ERR_NONE;
 }
 
-mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, const struct can_frame* frame)
+mcp2515_error_e _MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, const can_frame_t* pFrame)
 {
-    if (frame->can_dlc > CAN_MAX_DLEN)
+    if (pFrame->can_dlc > CAN_MAX_DLEN)
     {
         return MCP2515_ERROR_FAILTX;
     }
@@ -734,17 +734,17 @@ mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, con
 
     uint8_t data[13];
 
-    bool     ext = (frame->can_id & CAN_EFF_FLAG);
-    bool     rtr = (frame->can_id & CAN_RTR_FLAG);
-    uint32_t id  = (frame->can_id & (ext ? CAN_EFF_MASK : CAN_SFF_MASK));
+    bool     ext = (pFrame->can_id & CAN_EFF_FLAG);
+    bool     rtr = (pFrame->can_id & CAN_RTR_FLAG);
+    uint32_t id  = (pFrame->can_id & (ext ? CAN_EFF_MASK : CAN_SFF_MASK));
 
     MCP2515_PrepareId(pHandle, data, ext, id);
 
-    data[MCP2515_DLC] = rtr ? (frame->can_dlc | RTR_MASK) : frame->can_dlc;
+    data[MCP2515_DLC] = rtr ? (pFrame->can_dlc | RTR_MASK) : pFrame->can_dlc;
 
-    memcpy(&data[MCP2515_DATA], frame->data, frame->can_dlc);
+    memcpy(&data[MCP2515_DATA], pFrame->data, pFrame->can_dlc);
 
-    MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + frame->can_dlc);
+    MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + pFrame->can_dlc);
 
     MCP2515_ModifyRegister(pHandle, txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
 
@@ -756,9 +756,9 @@ mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, con
     return ERR_NONE;
 }
 
-mcp2515_error_e MCP2515_SendMessageEx(spi_mcp2515_t* pHandle, const struct can_frame* frame)
+mcp2515_error_e MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame)
 {
-    if (frame->can_dlc > CAN_MAX_DLEN)
+    if (pFrame->can_dlc > CAN_MAX_DLEN)
     {
         return MCP2515_ERROR_FAILTX;
     }
@@ -771,14 +771,14 @@ mcp2515_error_e MCP2515_SendMessageEx(spi_mcp2515_t* pHandle, const struct can_f
         uint8_t                 ctrlval = MCP2515_ReadRegister(pHandle, txbuf->CTRL);
         if ((ctrlval & TXB_TXREQ) == 0)
         {
-            return MCP2515_SendMessage(pHandle, txBuffers[i], frame);
+            return _MCP2515_SendMessage(pHandle, txBuffers[i], pFrame);
         }
     }
 
     return MCP2515_ERROR_ALLTXBUSY;
 }
 
-mcp2515_error_e MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, struct can_frame* frame)
+mcp2515_error_e _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, can_frame_t* pFrame)
 {
     const struct RXBn_REGS rxb[N_RXBUFFERS] = {
         {MCP2515_REG_RXB0CTRL, MCP2515_REG_RXB0SIDH, MCP2515_REG_RXB0DATA, CANINTF_RX0IF},
@@ -811,28 +811,28 @@ mcp2515_error_e MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, str
         id |= CAN_RTR_FLAG;
     }
 
-    frame->can_id  = id;
-    frame->can_dlc = dlc;
+    pFrame->can_id  = id;
+    pFrame->can_dlc = dlc;
 
-    MCP2515_ReadRegisters(pHandle, rxb->DATA, frame->data, dlc);
+    MCP2515_ReadRegisters(pHandle, rxb->DATA, pFrame->data, dlc);
 
     MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, rxb->CANINTF_RXnIF, 0);
 
     return ERR_NONE;
 }
 
-mcp2515_error_e MCP2515_ReadMessageEx(spi_mcp2515_t* pHandle, struct can_frame* frame)
+mcp2515_error_e MCP2515_ReadMessageEx(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 {
     mcp2515_error_e rc;
     uint8_t         stat = MCP2515_GetStatus(pHandle);
 
     if (stat & STAT_RX0IF)
     {
-        rc = MCP2515_ReadMessage(pHandle, RXB0, frame);
+        rc = _MCP2515_ReadMessage(pHandle, RXB0, pFrame);
     }
     else if (stat & STAT_RX1IF)
     {
-        rc = MCP2515_ReadMessage(pHandle, RXB1, frame);
+        rc = _MCP2515_ReadMessage(pHandle, RXB1, pFrame);
     }
     else
     {
@@ -966,30 +966,17 @@ void MCP2515_Test(void)
 
     MCP2515_Init(&mcp2515);
 
-    struct can_frame canMsg1;
-    struct can_frame canMsg2;
+    can_frame_t canMsg1 = {
+        .can_id  = 0x0F6,
+        .can_dlc = 8,
+        .data    = {0x8E, 0x87, 0x32, 0xFA, 0x26, 0x8E, 0xBE, 0x86},
+    };
 
-    canMsg1.can_id  = 0x0F6;
-    canMsg1.can_dlc = 8;
-    canMsg1.data[0] = 0x8E;
-    canMsg1.data[1] = 0x87;
-    canMsg1.data[2] = 0x32;
-    canMsg1.data[3] = 0xFA;
-    canMsg1.data[4] = 0x26;
-    canMsg1.data[5] = 0x8E;
-    canMsg1.data[6] = 0xBE;
-    canMsg1.data[7] = 0x86;
-
-    canMsg2.can_id  = 0x036;
-    canMsg2.can_dlc = 8;
-    canMsg2.data[0] = 0x0E;
-    canMsg2.data[1] = 0x00;
-    canMsg2.data[2] = 0x00;
-    canMsg2.data[3] = 0x08;
-    canMsg2.data[4] = 0x01;
-    canMsg2.data[5] = 0x00;
-    canMsg2.data[6] = 0x00;
-    canMsg2.data[7] = 0xA0;
+    can_frame_t canMsg2 = {
+        .can_id  = 0x036,
+        .can_dlc = 8,
+        .data[0] = {0x0E, 0x00, 0x00, 0x08, 0x01, 0x00, 0x00, 0xA0},
+    };
 
     MCP2515_Reset(&mcp2515);
     MCP2515_SetBitrate(&mcp2515, CAN_125KBPS, MCP2515_8MHZ);
@@ -997,8 +984,8 @@ void MCP2515_Test(void)
 
     while (1)
     {
-        MCP2515_SendMessageEx(&mcp2515, &canMsg1);
-        MCP2515_SendMessageEx(&mcp2515, &canMsg2);
+        MCP2515_SendMessage(&mcp2515, &canMsg1);
+        MCP2515_SendMessage(&mcp2515, &canMsg2);
         DelayBlockMs(1000);
     }
 }
