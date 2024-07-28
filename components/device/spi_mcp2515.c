@@ -690,7 +690,7 @@ err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool b
         case MCP2515_FILTER_3: u8Addr = REG_RXF3SIDH; break;
         case MCP2515_FILTER_4: u8Addr = REG_RXF4SIDH; break;
         case MCP2515_FILTER_5: u8Addr = REG_RXF5SIDH; break;
-        default: return ERR_INVALID_VALUE;  // invaild value
+        default: return ERR_INVALID_VALUE;
     }
 
     _MCP2515_PrepareId(pHandle, au8Data, bExtFrame, u32Data);
@@ -774,7 +774,7 @@ err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
     }
     else
     {
-        return (ERR_NO_MESSAGE, "no message");
+        return ERR_NO_MESSAGE;  // no message;
     }
 
     uint8_t au8Data[5];

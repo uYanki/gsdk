@@ -412,7 +412,7 @@ err_t CLP_Init(clp_ctx_t* ctx, int argc, char** argv, const arg_attr_t* attrs)
 {
     if (argc < 1 || argv == nullptr)
     {
-        return -ERR_INVALID_VALUE;
+        return ERR_INVALID_VALUE;
     }
 
     ctx->argc = argc - 1;
@@ -441,7 +441,7 @@ err_t CLP_Init(clp_ctx_t* ctx, int argc, char** argv, const arg_attr_t* attrs)
                 {
                     // illegal char
                     LOGD("err: %s", pArgAttr->longname);
-                    return -ERR_INVALID_VALUE;
+                    return ERR_INVALID_VALUE;
                 }
 
                 default:
