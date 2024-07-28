@@ -49,7 +49,7 @@
 * [ ] device-as5047
 * [x] device-mcp2515
 * [ ] device-st7789
-* [ ] device-mfrc522
+* [x] device-mfrc522
 * [ ] device-ws2812b
 * [ ] device-lis3dh
 * [ ] device-ads1292

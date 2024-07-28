@@ -52,65 +52,55 @@ typedef int32_t err_t;
  * @{
  */
 
-#ifdef NDEBUG
+// #ifdef NDEBUG
 
-#define ERROR_CHECK(x)   \
-    do {                 \
-        err_t e = (x);   \
-        (void)sizeof(e); \
+// #else
+
+#define ERRCHK_ABORT(expr)   \
+    do {                     \
+        err_t eno = (expr);  \
+                             \
+        if (eno != ERR_NONE) \
+        {                    \
+            abort();         \
+        }                    \
+                             \
     } while (0)
 
-#else
-
-#ifdef errno
-#undef errno
-#endif
-
-#define ERRCHK_ABORT(expr)    \
-    do {                      \
-        err_t errno = (expr); \
-                              \
-        if (errno != 0)       \
-        {                     \
-            abort();          \
-        }                     \
-                              \
+#define ERRCHK_EXIT(expr)    \
+    do {                     \
+        err_t eno = (expr);  \
+                             \
+        if (eno != ERR_NONE) \
+        {                    \
+            return;          \
+        }                    \
+                             \
     } while (0)
 
-#define ERRCHK_EXIT(expr)     \
-    do {                      \
-        err_t errno = (expr); \
-                              \
-        if (errno != 0)       \
-        {                     \
-            return;           \
-        }                     \
-                              \
+#define ERRCHK_RETURN(expr)  \
+    do {                     \
+        err_t eno = (expr);  \
+                             \
+        if (eno != ERR_NONE) \
+        {                    \
+            return eno;      \
+        }                    \
+                             \
     } while (0)
 
-#define ERRCHK_RETURN(expr)   \
-    do {                      \
-        err_t errno = (expr); \
-                              \
-        if (errno != 0)       \
-        {                     \
-            return errno;     \
-        }                     \
-                              \
+#define ERRCHK_JUMP(expr, eno, label) \
+    do {                              \
+        eno = (expr);                 \
+                                      \
+        if (eno != ERR_NONE)          \
+        {                             \
+            goto label;               \
+        }                             \
+                                      \
     } while (0)
 
-#define ERRCHK_JUMP(expr, errno, label) \
-    do {                                \
-        errno = (expr);                 \
-                                        \
-        if (errno != 0)                 \
-        {                               \
-            goto label;                 \
-        }                               \
-                                        \
-    } while (0)
-
-#endif
+// #endif
 
 /**
  * @}

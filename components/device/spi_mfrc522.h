@@ -37,7 +37,6 @@ uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t sourceaddr, uint8_t goaladd
 err_t RC522_Halt(spi_rc522_t* pHandle);  // 休眠
 
 uint8_t RC522_ComMF522(spi_rc522_t* pHandle, uint8_t Command, uint8_t* pInData, uint8_t InLenByte, uint8_t* pOutData, uint16_t* pOutLenBit);
-void    CalulateCRC(spi_rc522_t* pHandle, uint8_t* pIndata, uint8_t len, uint8_t* pOutData);
 
 bool RC522_IsDataBlock(spi_rc522_t* pHandle, uint8_t u8Addr);
 

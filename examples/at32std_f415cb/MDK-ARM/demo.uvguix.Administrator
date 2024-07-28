@@ -3615,9 +3615,9 @@
       </Doc>
       <Doc>
         <Name>..\..\..\components\device\spi_mfrc522.c</Name>
-        <ColumnNumber>25</ColumnNumber>
+        <ColumnNumber>23</ColumnNumber>
         <TopLine>470</TopLine>
-        <CurrentLine>471</CurrentLine>
+        <CurrentLine>472</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3660,7 +3660,7 @@
       </Doc>
       <Doc>
         <Name>..\..\..\kernel\gerrno.h</Name>
-        <ColumnNumber>15</ColumnNumber>
+        <ColumnNumber>26</ColumnNumber>
         <TopLine>57</TopLine>
         <CurrentLine>61</CurrentLine>
         <Folding>1</Folding>
