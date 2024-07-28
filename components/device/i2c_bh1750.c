@@ -65,14 +65,14 @@ err_t BH1750_Init(i2c_bh1750_t* pHandle)
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
     {
-        return MakeError(ERR_NOT_EXIST, "device doesn't exist");
+        return ERR_NOT_EXIST;  // device doesn't exist
     }
 
-    ERROR_CHECK_RETURN(BH1750_PowerOff(pHandle));
+    ERRCHK_RET(BH1750_PowerOff(pHandle));
     DelayBlockMs(100);
-    ERROR_CHECK_RETURN(BH1750_PowerOn(pHandle));
-    ERROR_CHECK_RETURN(BH1750_SetModeRes(pHandle, BH1750_CONTINUE_HIGH_RES));  // 高分辨率连续测量
-    ERROR_CHECK_RETURN(BH1750_SetSensitivity(pHandle, 69));                    // 芯片缺省灵敏度倍率
+    ERRCHK_RET(BH1750_PowerOn(pHandle));
+    ERRCHK_RET(BH1750_SetModeRes(pHandle, BH1750_CONTINUE_HIGH_RES));  // 高分辨率连续测量
+    ERRCHK_RET(BH1750_SetSensitivity(pHandle, 69));                    // 芯片缺省灵敏度倍率
 
     return ERR_NONE;
 }
@@ -97,7 +97,7 @@ err_t BH1750_Reset(i2c_bh1750_t* pHandle)
  */
 err_t BH1750_SetModeRes(i2c_bh1750_t* pHandle, bh1750_mode_e eMode)
 {
-    ERROR_CHECK_RETURN(BH1750_WriteCmd(pHandle, (uint8_t)eMode));
+    ERRCHK_RET(BH1750_WriteCmd(pHandle, (uint8_t)eMode));
     pHandle->_eMeasureMode = eMode;
     return ERR_NONE;
 }
@@ -110,11 +110,11 @@ err_t BH1750_SetSensitivity(i2c_bh1750_t* pHandle, uint8_t u8Sensitivity)
 {
     u8Sensitivity = CLAMP(u8Sensitivity, 31, 254);
 
-    ERROR_CHECK_RETURN(BH1750_WriteCmd(pHandle, 0x40 + (u8Sensitivity >> 5)));   /* 更改高3bit */
-    ERROR_CHECK_RETURN(BH1750_WriteCmd(pHandle, 0x60 + (u8Sensitivity & 0x1F))); /* 更改低5bit */
+    ERRCHK_RET(BH1750_WriteCmd(pHandle, 0x40 + (u8Sensitivity >> 5)));   /* 更改高3bit */
+    ERRCHK_RET(BH1750_WriteCmd(pHandle, 0x60 + (u8Sensitivity & 0x1F))); /* 更改低5bit */
 
     /*　更改量程范围后，需要重新发送命令设置测量模式　*/
-    ERROR_CHECK_RETURN(BH1750_SetModeRes(pHandle, pHandle->_eMeasureMode));
+    ERRCHK_RET(BH1750_SetModeRes(pHandle, pHandle->_eMeasureMode));
 
     pHandle->_u8Sensitivity = u8Sensitivity;
 
@@ -128,7 +128,7 @@ err_t BH1750_GetLux(i2c_bh1750_t* pHandle, float32_t* pf32Lux)
 {
     uint16_t u16Data;
 
-    ERROR_CHECK_RETURN(BH1750_ReadData(pHandle, &u16Data));
+    ERRCHK_RET(BH1750_ReadData(pHandle, &u16Data));
 
     *pf32Lux = (float32_t)(u16Data * 5 * 69) / (6 * pHandle->_u8Sensitivity);
 

@@ -27,7 +27,7 @@ err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycl
         extern const i2cmst_ops_t g_swI2cOps;
         pHandle->pOps = &g_swI2cOps;
 #else
-        return MakeError(ERR_NOT_EXIST, "swi2c master module is disabled");
+        return ERR_NOT_EXIST;  // swi2c master module is disabled
 #endif
     }
     else
@@ -36,7 +36,7 @@ err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycl
         extern const i2cmst_ops_t g_hwI2cOps;
         pHandle->pOps = &g_hwI2cOps;
 #else
-        return MakeError(ERR_NOT_EXIST, "hwi2c master module is disabled");
+        return ERR_NOT_EXIST;  // hwi2c master module is disabled
 #endif
     }
 
@@ -116,7 +116,7 @@ err_t I2C_Master_ReceiveWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t* 
 {
     uint8_t au8Data[2];
 
-    ERROR_CHECK_RETURN(I2C_Master_ReceiveBlock(pHandle, u16SlvAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags));
+    ERRCHK_RET(I2C_Master_ReceiveBlock(pHandle, u16SlvAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags));
 
     switch (u16Flags & I2C_FLAG_WORD_ENDIAN_Msk)
     {
@@ -164,7 +164,7 @@ err_t I2C_Master_ReadWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16M
 {
     uint8_t au8Data[2];
 
-    ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags));
+    ERRCHK_RET(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, au8Data, ARRAY_SIZE(au8Data), u16Flags));
 
     switch (u16Flags & I2C_FLAG_WORD_ENDIAN_Msk)
     {
@@ -191,16 +191,16 @@ err_t I2C_Master_WriteByteBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t
 
     if ((u8StartBit + u8BitsCount) > 8)
     {
-        return MakeError(ERR_OVERFLOW, "termination bit overflow");
+        return ERR_OVERFLOW;  // termination bit overflow
     }
 
-    ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
+    ERRCHK_RET(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
 
     u8BitsValue <<= u8StartBit;
     u8Data &= ~u8BitMask;
     u8Data |= u8BitMask & u8BitsValue;
 
-    ERROR_CHECK_RETURN(I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
+    ERRCHK_RET(I2C_Master_WriteBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
 
     return ERR_NONE;
 }
@@ -212,10 +212,10 @@ err_t I2C_Master_ReadByteBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t 
 
     if ((u8StartBit + u8BitsCount) > 8)
     {
-        return MakeError(ERR_OVERFLOW, "termination bit overflow");
+        return ERR_OVERFLOW;  // termination bit overflow
     }
 
-    ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
+    ERRCHK_RET(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
 
     *pu8BitsValue = (u8BitMask & u8Data) >> u8StartBit;
 
@@ -229,10 +229,10 @@ err_t I2C_Master_ReadWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t 
 
     if ((u8StartBit + u8BitsCount) > 16)
     {
-        return MakeError(ERR_OVERFLOW, "termination bit overflow");
+        return ERR_OVERFLOW;  // termination bit overflow
     }
 
-    ERROR_CHECK_RETURN(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
+    ERRCHK_RET(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
 
     *pu16BitsValue = (u16BitMask & u16Data) >> u8StartBit;
 
@@ -246,16 +246,16 @@ err_t I2C_Master_WriteWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t
 
     if ((u8StartBit + u8BitsCount) > 16)
     {
-        return MakeError(ERR_OVERFLOW, "termination bit overflow");
+        return ERR_OVERFLOW;  // termination bit overflow
     }
 
-    ERROR_CHECK_RETURN(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
+    ERRCHK_RET(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
 
     u16BitsValue <<= u8StartBit;
     u16Data &= ~u16BitMask;
     u16Data |= u16BitMask & u16BitsValue;
 
-    ERROR_CHECK_RETURN(I2C_Master_WriteWord(pHandle, u16SlvAddr, u16MemAddr, u16Data, u16Flags));
+    ERRCHK_RET(I2C_Master_WriteWord(pHandle, u16SlvAddr, u16MemAddr, u16Data, u16Flags));
 
     return ERR_NONE;
 }

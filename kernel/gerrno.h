@@ -85,37 +85,37 @@ typedef int32_t err_t;
                                 \
     } while (0)
 
-#define ERROR_CHECK_RETURN_NULL(expr) \
-    do {                              \
-        err_t errno = (expr);         \
-                                      \
-        if (errno < 0)                \
-        {                             \
-            return;                   \
-        }                             \
-                                      \
+#define ERRCHK_EXIT(expr)     \
+    do {                      \
+        err_t errno = (expr); \
+                              \
+        if (errno < 0)        \
+        {                     \
+            return;           \
+        }                     \
+                              \
     } while (0)
 
-#define ERROR_CHECK_RETURN(expr) \
-    do {                         \
-        err_t errno = (expr);    \
-                                 \
-        if (errno < 0)           \
-        {                        \
-            return errno;        \
-        }                        \
-                                 \
+#define ERRCHK_RET(expr)      \
+    do {                      \
+        err_t errno = (expr); \
+                              \
+        if (errno < 0)        \
+        {                     \
+            return errno;     \
+        }                     \
+                              \
     } while (0)
 
-#define ERROR_CHECK_JUMP(expr, errno, label) \
-    do {                                     \
-        errno = (expr);                      \
-                                             \
-        if (errno < 0)                       \
-        {                                    \
-            goto label;                      \
-        }                                    \
-                                             \
+#define ERRCHK_JUMP(expr, errno, label) \
+    do {                                \
+        errno = (expr);                 \
+                                        \
+        if (errno < 0)                  \
+        {                               \
+            goto label;                 \
+        }                               \
+                                        \
     } while (0)
 
 #endif

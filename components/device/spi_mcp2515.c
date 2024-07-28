@@ -427,12 +427,12 @@ err_t MCP2515_Reset(spi_mcp2515_t* pHandle)
 
     for (uint8_t i = 0; i < ARRAY_SIZE(aFilters); i++)
     {
-        ERROR_CHECK_RETURN(MCP2515_SetFilter(pHandle, aFilters[i], i == 1, 0));
+        ERRCHK_RET(MCP2515_SetFilter(pHandle, aFilters[i], i == 1, 0));
     }
 
     for (uint8_t i = 0; i < ARRAY_SIZE(aMask); i++)
     {
-        ERROR_CHECK_RETURN(MCP2515_SetFilterMask(pHandle, aMask[i], true, 0));
+        ERRCHK_RET(MCP2515_SetFilterMask(pHandle, aMask[i], true, 0));
     }
 
     return ERR_NONE;
@@ -514,12 +514,12 @@ err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, mcp2515_mode_e eMode)
         }
     }
 
-    return MakeError(ERR_FAIL, "fail to change mode");
+    return ERR_FAIL;  // fail to change mode
 }
 
 err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock)
 {
-    ERROR_CHECK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
+    ERRCHK_RET(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     bool    bMatched = true;
     uint8_t aCFG[3]  = {0};
@@ -607,7 +607,7 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clk
         return ERR_NONE;
     }
 
-    return MakeError(ERR_FAIL, "fail to set bitrate");
+    return ERR_FAIL;  // fail to set bitrate
 }
 
 void MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkdiv_e eDivisor)
@@ -657,7 +657,7 @@ static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, __OUT uint8_t* pu8Buffer,
 
 err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask, bool bExtFrame, uint32_t u32Data)
 {
-    ERROR_CHECK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
+    ERRCHK_RET(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     uint8_t u8Addr;
     uint8_t au8Data[4];
@@ -666,7 +666,7 @@ err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask,
     {
         case MCP2515_FILTER_MASK_0: u8Addr = REG_RXM0SIDH; break;
         case MCP2515_FILTER_MASK_1: u8Addr = REG_RXM1SIDH; break;
-        default: return MakeError(ERR_INVALID_VALUE, "invaild value");
+        default: return ERR_INVALID_VALUE;  // invaild value
     }
 
     _MCP2515_PrepareId(pHandle, au8Data, bExtFrame, u32Data);
@@ -677,7 +677,7 @@ err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask,
 
 err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool bExtFrame, uint32_t u32Data)
 {
-    ERROR_CHECK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
+    ERRCHK_RET(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     uint8_t u8Addr;
     uint8_t au8Data[4];
@@ -690,7 +690,7 @@ err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool b
         case MCP2515_FILTER_3: u8Addr = REG_RXF3SIDH; break;
         case MCP2515_FILTER_4: u8Addr = REG_RXF4SIDH; break;
         case MCP2515_FILTER_5: u8Addr = REG_RXF5SIDH; break;
-        default: return MakeError(ERR_INVALID_VALUE, "invaild value");
+        default: return ERR_INVALID_VALUE;  // invaild value
     }
 
     _MCP2515_PrepareId(pHandle, au8Data, bExtFrame, u32Data);
@@ -714,7 +714,7 @@ err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 
     if (pFrame->u8DLC > CAN_MAX_DLEN)
     {
-        return MakeError(ERR_OVERFLOW, "frame length is too long");
+        return ERR_OVERFLOW;  // frame length is too long
     }
 
     for (int i = 0; i < ARRAY_SIZE(aTxbufReg); i++)
@@ -738,14 +738,14 @@ err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 
             if ((_MCP2515_ReadRegister(pHandle, aTxbufReg[i].CTRL) & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0)
             {
-                return MakeError(ERR_FAIL, "fail to tx");
+                return ERR_FAIL;  // fail to tx
             }
 
             return ERR_NONE;
         }
     }
 
-    return MakeError(ERR_BUSY, "tx buffer is full");
+    return ERR_BUSY;  // tx buffer is full
 }
 
 err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
@@ -795,7 +795,7 @@ err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 
     if (u8DLC > CAN_MAX_DLEN)
     {
-        return MakeError(ERR_OVERFLOW, "frame length is too long");
+        return ERR_OVERFLOW;  // frame length is too long
     }
 
     if (_MCP2515_ReadRegister(pHandle, aRxbufReg[u8Index].CTRL) & RXBnCTRL_RTR)

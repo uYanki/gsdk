@@ -385,7 +385,7 @@ static err_t SWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
         }
     }
 
-    ERROR_CHECK_RETURN(SWSPI_Master_SetClock(pHandle, u32ClockSpeedHz, eDutyCycle));
+    ERRCHK_RET(SWSPI_Master_SetClock(pHandle, u32ClockSpeedHz, eDutyCycle));
 
     return ERR_NONE;
 }

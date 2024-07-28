@@ -13,14 +13,14 @@
 
 #define I2C_TIMEOUT     0xFF
 
-#define MakeError_(eStatus)                                             \
-    do {                                                                \
-        switch (eStatus)                                                \
-        {                                                               \
-            case HAL_OK: return ERR_NONE;                               \
-            case HAL_BUSY: return MakeError(ERR_BUSY, "busy");          \
-            case HAL_TIMEOUT: return MakeError(ERR_TIMEOUT, "timeout"); \
-            default: return MakeError(ERR_FAIL, "generic error");       \
+#define MakeError_(eStatus)               \
+    do {                                  \
+        switch (eStatus)                  \
+        {                                 \
+            case HAL_OK: return ERR_NONE; \
+            case HAL_BUSY: return ERR_BUSY;  // busy          \
+            case HAL_TIMEOUT: return ERR_TIMEOUT; // timeout \
+            default: return ERR_FAIL; // generic error       \
         }                                                               \
     } while (0)
 
@@ -78,7 +78,7 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
     }
 
     // invalid instance
-    return MakeError(ERR_INVALID_VALUE, "unknown instance");
+    return ERR_INVALID_VALUE;  // unknown instance
 }
 
 static inline bool HWI2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags)

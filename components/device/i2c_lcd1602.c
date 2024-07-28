@@ -141,15 +141,15 @@ err_t LCD1602_Init(i2c_lcd1602_t* pHandle)
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
     {
-        return MakeError(ERR_NOT_EXIST, "device doesn't exist");
+        return ERR_NOT_EXIST;  // device doesn't exist
     }
 
     pHandle->_u8Backlight = LCD1602_BL_HIGH;
 
-    ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, 0x28));                         // 0b00111000 显示模式设置
-    ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, 0x0C));                         // 0b00001100 开启显示开关但不闪烁
-    ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, pHandle->_u8DispMode = 0x06));  // 0b00000110 显示光标移动位置
-    ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, pHandle->_u8DispCtrl = 0x01));  // 0b00000001 清除屏幕
+    ERRCHK_RET(LCD1602_WriteCmd(pHandle, 0x28));                         // 0b00111000 显示模式设置
+    ERRCHK_RET(LCD1602_WriteCmd(pHandle, 0x0C));                         // 0b00001100 开启显示开关但不闪烁
+    ERRCHK_RET(LCD1602_WriteCmd(pHandle, pHandle->_u8DispMode = 0x06));  // 0b00000110 显示光标移动位置
+    ERRCHK_RET(LCD1602_WriteCmd(pHandle, pHandle->_u8DispCtrl = 0x01));  // 0b00000001 清除屏幕
 
 #if 0
 
@@ -191,7 +191,7 @@ err_t LCD1602_ShowString(i2c_lcd1602_t* pHandle, const char* str)
 {
     while (*str)
     {
-        ERROR_CHECK_RETURN(LCD1602_WriteData(pHandle, *str++));
+        ERRCHK_RET(LCD1602_WriteData(pHandle, *str++));
     }
 
     return ERR_NONE;
@@ -200,8 +200,8 @@ err_t LCD1602_ShowString(i2c_lcd1602_t* pHandle, const char* str)
 err_t LCD1602_ClearLine(i2c_lcd1602_t* pHandle, uint8_t u8Row)
 {
     // 仅适用于写入方向为左的情况 ( pHandle->_u8DispMode & LCD1602_ENTRYLEFT != 0 )
-    ERROR_CHECK_RETURN(LCD1602_SetCursor(pHandle, 0x00, u8Row));
-    ERROR_CHECK_RETURN(LCD1602_ShowString(pHandle, "                "));  // 16
+    ERRCHK_RET(LCD1602_SetCursor(pHandle, 0x00, u8Row));
+    ERRCHK_RET(LCD1602_ShowString(pHandle, "                "));  // 16
     return ERR_NONE;
 }
 
@@ -217,8 +217,8 @@ err_t LCD1602_SetCursor(i2c_lcd1602_t* pHandle, uint8_t u8Col, uint8_t u8Row)
 
 err_t LCD1602_ShowStringAt(i2c_lcd1602_t* pHandle, uint8_t u8Col, uint8_t u8Row, const char* str)
 {
-    ERROR_CHECK_RETURN(LCD1602_SetCursor(pHandle, u8Col, u8Row));
-    ERROR_CHECK_RETURN(LCD1602_ShowString(pHandle, str));
+    ERRCHK_RET(LCD1602_SetCursor(pHandle, u8Col, u8Row));
+    ERRCHK_RET(LCD1602_ShowString(pHandle, str));
     return ERR_NONE;
 }
 
@@ -234,7 +234,7 @@ err_t LCD1602_ShowStringWrap(i2c_lcd1602_t* pHandle, uint8_t u8Col, uint8_t u8Ro
     }
 
     u8Col %= LCD1602_DISPLAY_LENGTH;
-    ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, LCD1602_SETDDRAMADDR | (u8Col + m_u8RowOffset[u8Row])));
+    ERRCHK_RET(LCD1602_WriteCmd(pHandle, LCD1602_SETDDRAMADDR | (u8Col + m_u8RowOffset[u8Row])));
 
     // LCD1602_Show string
     for (uint8_t i = u8Col; *str; ++i)
@@ -246,10 +246,10 @@ err_t LCD1602_ShowStringWrap(i2c_lcd1602_t* pHandle, uint8_t u8Col, uint8_t u8Ro
                 return ERR_NONE;
             }
 
-            ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, LCD1602_SETDDRAMADDR | m_u8RowOffset[u8Row]));  // wrap
+            ERRCHK_RET(LCD1602_WriteCmd(pHandle, LCD1602_SETDDRAMADDR | m_u8RowOffset[u8Row]));  // wrap
             i = 0;
         }
-        ERROR_CHECK_RETURN(LCD1602_WriteData(pHandle, *str++));
+        ERRCHK_RET(LCD1602_WriteData(pHandle, *str++));
     }
 
     return ERR_NONE;
@@ -318,11 +318,11 @@ err_t LCD1602_CreateChar(i2c_lcd1602_t* pHandle, uint8_t u8Location /*0~7*/, uin
     // uint8_t cgram[8] = {0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78};
 
     u8Location &= 0x07;  // only have 8 locations
-    ERROR_CHECK_RETURN(LCD1602_WriteCmd(pHandle, LCD1602_SETCGRAMADDR | (u8Location << 3)));
+    ERRCHK_RET(LCD1602_WriteCmd(pHandle, LCD1602_SETCGRAMADDR | (u8Location << 3)));
 
     for (uint8_t i = 0; i < 8; ++i)
     {
-        ERROR_CHECK_RETURN(LCD1602_WriteData(pHandle, u8CharMap[i]));
+        ERRCHK_RET(LCD1602_WriteData(pHandle, u8CharMap[i]));
     }
 
     return ERR_NONE;

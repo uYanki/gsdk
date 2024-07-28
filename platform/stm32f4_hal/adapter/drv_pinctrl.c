@@ -42,7 +42,7 @@ static err_t PIN_SetMode(const pin_t* pHandle, pin_mode_e eMode, pin_pull_e ePul
         case PIN_MODE_OUTPUT_OPEN_DRAIN: GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD; break;
         case PIN_MODE_OUTPUT_PUSH_PULL: GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; break;
         case PIN_MODE_HIGH_RESISTANCE: HAL_GPIO_DeInit(pHandle->Port, pHandle->Pin); return ERR_NONE;
-        default: return MakeError(ERR_INVALID_VALUE, "invaild in/out mode");
+        default: return ERR_INVALID_VALUE;  // invaild in/out mode
     }
 
     switch (ePull)
@@ -50,7 +50,7 @@ static err_t PIN_SetMode(const pin_t* pHandle, pin_mode_e eMode, pin_pull_e ePul
         case PIN_PULL_NONE: GPIO_InitStruct.Pull = GPIO_NOPULL; break;
         case PIN_PULL_DOWN: GPIO_InitStruct.Pull = GPIO_PULLDOWN; break;
         case PIN_PULL_UP: GPIO_InitStruct.Pull = GPIO_PULLUP; break;
-        default: return MakeError(ERR_INVALID_VALUE, "invaild pull mode");
+        default: return ERR_INVALID_VALUE;  // invaild pull mode
     }
 
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;

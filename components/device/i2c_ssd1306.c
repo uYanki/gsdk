@@ -83,7 +83,7 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
 
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
     {
-        return MakeError(ERR_NOT_EXIST, "device doesn't exist");
+        return ERR_NOT_EXIST;  // device doesn't exist
     }
 
     SSD1306_WriteCmd(pHandle, 0xAE);  // display off
@@ -119,7 +119,7 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
     }
     else
     {
-        return MakeError(ERR_NOT_SUPPORTED, "unsupported size");
+        return ERR_NOT_SUPPORTED;  // unsupported size
     }
 
     SSD1306_WriteCmd(pHandle, 0xA4);  // 0xA4,Output follows RAM content;0xA5,Output ignores RAM content

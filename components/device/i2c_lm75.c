@@ -51,7 +51,7 @@ static err_t LM75_GetLimit(i2c_lm75_t* pHandle, uint8_t u8MemAddr, float32_t* pf
 {
     uint16_t u16Data;
 
-    ERROR_CHECK_RETURN(LM75_ReadWord(pHandle, u8MemAddr, &u16Data));
+    ERRCHK_RET(LM75_ReadWord(pHandle, u8MemAddr, &u16Data));
 
     u16Data >>= 7;
 
@@ -93,7 +93,7 @@ err_t LM75_Init(i2c_lm75_t* pHandle)
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
     {
-        return MakeError(ERR_NOT_EXIST, "device doesn't exist");
+        return ERR_NOT_EXIST;  // device doesn't exist
     }
 
     return ERR_NONE;
@@ -103,7 +103,7 @@ err_t LM75_ReadTemp(i2c_lm75_t* pHandle, float32_t* pTemperature)
 {
     uint16_t u16Data;
 
-    ERROR_CHECK_RETURN(LM75_ReadWord(pHandle, LM75_REG_TEMP, &u16Data));
+    ERRCHK_RET(LM75_ReadWord(pHandle, LM75_REG_TEMP, &u16Data));
 
     u16Data >>= 5;
 

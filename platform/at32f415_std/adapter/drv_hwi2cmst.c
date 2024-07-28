@@ -13,13 +13,13 @@
 
 #define I2C_TIMEOUT     0xFF
 
-#define MakeError_(eStatus)                                        \
-    do {                                                           \
-        switch (eStatus)                                           \
-        {                                                          \
-            case I2C_OK: return ERR_NONE;                          \
-            case I2C_ERR_BUSY: return MakeError(ERR_BUSY, "busy"); \
-            default: return MakeError(ERR_TIMEOUT, "timeout");     \
+#define MakeError_(eStatus)               \
+    do {                                  \
+        switch (eStatus)                  \
+        {                                 \
+            case I2C_OK: return ERR_NONE; \
+            case I2C_ERR_BUSY: return ERR_BUSY;  // busy \
+            default: return ERR_TIMEOUT; // timeout     \
         }                                                          \
     } while (0)
 
@@ -65,7 +65,7 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
     }
     else
     {
-        return MakeError(ERR_INVALID_VALUE, "unknown instance");
+        return ERR_INVALID_VALUE;  // unknown instance
     }
 
     if (pHandle->SDA.Port == GPIOA || pHandle->SCL.Port == GPIOA)

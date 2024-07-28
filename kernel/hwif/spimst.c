@@ -90,7 +90,7 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
     {
         if (memcmp(&pHandle->MOSI, &pHandle->MISO, sizeof(pin_t)) == 0)  // same
         {
-            return MakeError(ERR_NOT_ALLOWED, "MOSI must be different from MISO");
+            return ERR_NOT_ALLOWED;  // MOSI must be different from MISO
         }
     }
 
@@ -100,7 +100,7 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
         extern const spimst_ops_t g_swSpiOps;
         pHandle->pOps = &g_swSpiOps;
 #else
-        return MakeError(ERR_NOT_EXIST, "swspi master module is disabled");
+        return ERR_NOT_EXIST;  // swspi master module is disabled
 #endif
     }
     else
@@ -109,7 +109,7 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
         extern const spimst_ops_t g_hwSpiOps;
         pHandle->pOps = &g_hwSpiOps;
 #else
-        return MakeError(ERR_NOT_EXIST, "hwspi master module is disabled");
+        return ERR_NOT_EXIST;  // hwspi master module is disabled
 #endif
     }
 
@@ -123,8 +123,8 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
         {
             PIN_SetMode(&pHandle->CS, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_DOWN);
         }
-				
-				SPI_Master_Deselect(&pHandle->CS);
+
+        SPI_Master_Deselect(&pHandle->CS);
     }
 
     return pHandle->pOps->Init(pHandle, u32ClockSpeedHz, eDutyCycle, u16Flags);

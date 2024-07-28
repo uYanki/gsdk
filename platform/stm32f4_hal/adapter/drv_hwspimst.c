@@ -13,14 +13,14 @@
 
 #define SPI_TIMEOUT     0xFF
 
-#define MakeError_(eStatus)                                             \
-    do {                                                                \
-        switch (eStatus)                                                \
-        {                                                               \
-            case HAL_OK: return ERR_NONE;                               \
-            case HAL_BUSY: return MakeError(ERR_BUSY, "busy");          \
-            case HAL_TIMEOUT: return MakeError(ERR_TIMEOUT, "timeout"); \
-            default: return MakeError(ERR_FAIL, "generic error");       \
+#define MakeError_(eStatus)               \
+    do {                                  \
+        switch (eStatus)                  \
+        {                                 \
+            case HAL_OK: return ERR_NONE; \
+            case HAL_BUSY: return ERR_BUSY;  // busy          \
+            case HAL_TIMEOUT: return ERR_TIMEOUT; // timeout \
+            default: return ERR_FAIL; // generic error       \
         }                                                               \
     } while (0)
 
@@ -78,7 +78,7 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
     }
 
     // invalid instance
-    return MakeError(ERR_INVALID_VALUE, "unknown instance");
+    return ERR_INVALID_VALUE;  // unknown instance
 }
 
 static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)

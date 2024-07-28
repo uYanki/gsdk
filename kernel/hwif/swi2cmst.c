@@ -64,7 +64,7 @@ static err_t SWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_
     PIN_WriteLevel(&pHandle->SDA, PIN_LEVEL_HIGH);
     PIN_WriteLevel(&pHandle->SCL, PIN_LEVEL_HIGH);
 
-    ERROR_CHECK_RETURN(SWI2C_Master_SetClock(pHandle, u32ClockFreqHz, eDutyCycle));
+    ERRCHK_RET(SWI2C_Master_SetClock(pHandle, u32ClockFreqHz, eDutyCycle));
 
     return ERR_NONE;
 }
