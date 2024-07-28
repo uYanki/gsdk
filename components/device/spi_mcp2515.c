@@ -330,18 +330,16 @@
 
 #define STAT_RXIF_MASK (STAT_RX0IF | STAT_RX1IF)
 
-#define N_TXBUFFERS    3
+typedef enum {
+    MCP2515_RX_BUFFER_0 = 0,
+    MCP2515_RX_BUFFER_1 = 1,
+} mcp2515_rx_buffer_e;
 
 typedef enum {
-    RXB0 = 0,
-    RXB1 = 1
-} RXBn;
-
-typedef enum {
-    TXB0 = 0,
-    TXB1 = 1,
-    TXB2 = 2
-} TXBn;
+    MCP2515_TX_BUFFER_0 = 0,
+    MCP2515_TX_BUFFER_1 = 1,
+    MCP2515_TX_BUFFER_2 = 2,
+} mcp2515_tx_buffer_e;
 
 typedef enum {
     CANINTF_RX0IF = 0x01,
@@ -374,6 +372,13 @@ struct TXBn_REGS {
     uint8_t DATA;
 };
 
+struct RXBn_REGS {
+    uint8_t CTRL;
+    uint8_t SIDH;
+    uint8_t DATA;
+    CANINTF CANINTF_RXnIF;
+};
+
 //---------------------------------------------------------------------------
 // Prototypes
 //---------------------------------------------------------------------------
@@ -390,15 +395,24 @@ static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bo
 // Variables
 //---------------------------------------------------------------------------
 
-static const struct TXBn_REGS TXB[N_TXBUFFERS] = {
+static const struct TXBn_REGS TXB[] = {
     {MCP2515_REG_TXB0CTRL, MCP2515_REG_TXB0SIDH, MCP2515_REG_TXB0DATA},
     {MCP2515_REG_TXB1CTRL, MCP2515_REG_TXB1SIDH, MCP2515_REG_TXB1DATA},
     {MCP2515_REG_TXB2CTRL, MCP2515_REG_TXB2SIDH, MCP2515_REG_TXB2DATA}
 };
 
+static const struct RXBn_REGS RXB[] = {
+    {MCP2515_REG_RXB0CTRL, MCP2515_REG_RXB0SIDH, MCP2515_REG_RXB0DATA, CANINTF_RX0IF},
+    {MCP2515_REG_RXB1CTRL, MCP2515_REG_RXB1SIDH, MCP2515_REG_RXB1DATA, CANINTF_RX1IF}
+};
+
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
+
+#define MCP2515_ERROR_FAIL      1
+#define MCP2515_ERROR_ALLTXBUSY 2
+#define MCP2515_ERROR_FAILTX    4
 
 void MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock)
 {
@@ -436,28 +450,30 @@ err_t MCP2515_Reset(spi_mcp2515_t* pHandle)
     // clear filters and masks
     // do not filter any standard frames for RXF0 used by RXB0
     // do not filter any extended frames for RXF1 used by RXB1
-    mcp2515_filter_e filters[] = {
+    mcp2515_filter_e aFilters[] = {
         MCP2515_FILTER_0,
         MCP2515_FILTER_1,
         MCP2515_FILTER_2,
         MCP2515_FILTER_3,
         MCP2515_FILTER_4,
-        MCP2515_FILTER_5};
-    for (int i = 0; i < ARRAY_SIZE(filters); i++)
+        MCP2515_FILTER_5,
+    };
+
+    for (int i = 0; i < ARRAY_SIZE(aFilters); i++)
     {
         bool  bExt   = (i == 1);
-        err_t result = MCP2515_SetFilter(pHandle, filters[i], bExt, 0);
+        err_t result = MCP2515_SetFilter(pHandle, aFilters[i], bExt, 0);
         if (result != ERR_NONE)
         {
             return result;
         }
     }
 
-    mcp2515_filter_mask_e masks[] = {MCP2515_FILTER_MASK_0, MCP2515_FILTER_MASK_1};
+    mcp2515_filter_mask_e aMask[] = {MCP2515_FILTER_MASK_0, MCP2515_FILTER_MASK_1};
 
-    for (int i = 0; i < ARRAY_SIZE(masks); i++)
+    for (int i = 0; i < ARRAY_SIZE(aMask); i++)
     {
-        err_t result = MCP2515_SetFilterMask(pHandle, masks[i], true, 0);
+        err_t result = MCP2515_SetFilterMask(pHandle, aMask[i], true, 0);
 
         if (result != ERR_NONE)
         {
@@ -749,72 +765,72 @@ err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, 
     return ERR_NONE;
 }
 
-static err_t _MCP2515_SendMessage(spi_mcp2515_t* pHandle, const TXBn txbn, const can_frame_t* pFrame)
-{
-    if (pFrame->u8DLC > CAN_MAX_DLEN)
-    {
-        return MCP2515_ERROR_FAILTX;
-    }
-
-    const struct TXBn_REGS* txbuf = &TXB[txbn];
-
-    uint8_t data[13];
-
-    bool     bExt  = (pFrame->u32ID & CAN_EFF_FLAG);
-    bool     rtr   = (pFrame->u32ID & CAN_RTR_FLAG);
-    uint32_t u32ID = (pFrame->u32ID & (bExt ? CAN_EFF_MASK : CAN_SFF_MASK));
-
-    _MCP2515_PrepareId(pHandle, data, bExt, u32ID);
-
-    data[MCP2515_DLC] = rtr ? (pFrame->u8DLC | RTR_MASK) : pFrame->u8DLC;
-
-    memcpy(&data[MCP2515_DATA], pFrame->au8Data, pFrame->u8DLC);
-
-    _MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + pFrame->u8DLC);
-
-    _MCP2515_ModifyRegister(pHandle, txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
-
-    uint8_t u8CtrlRegVal = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
-    if ((u8CtrlRegVal & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0)
-    {
-        return MCP2515_ERROR_FAILTX;
-    }
-    return ERR_NONE;
-}
-
 err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame)
 {
     if (pFrame->u8DLC > CAN_MAX_DLEN)
     {
-        return MCP2515_ERROR_FAILTX;
+        return MakeError(ERR_OVERFLOW, "frame length is too long");
     }
 
-    TXBn txBuffers[N_TXBUFFERS] = {TXB0, TXB1, TXB2};
-
-    for (int i = 0; i < N_TXBUFFERS; i++)
+    for (int i = 0; i < ARRAY_SIZE(TXB); i++)
     {
-        const struct TXBn_REGS* txbuf   = &TXB[txBuffers[i]];
-        uint8_t                 ctrlval = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
+        const struct TXBn_REGS* txbuf = &TXB[i];
+
+        uint8_t ctrlval = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
+
         if ((ctrlval & TXB_TXREQ) == 0)
         {
-            return _MCP2515_SendMessage(pHandle, txBuffers[i], pFrame);
+            uint8_t data[13];
+
+            bool     bExt  = (pFrame->u32ID & CAN_EFF_FLAG);
+            bool     rtr   = (pFrame->u32ID & CAN_RTR_FLAG);
+            uint32_t u32ID = (pFrame->u32ID & (bExt ? CAN_EFF_MASK : CAN_SFF_MASK));
+
+            _MCP2515_PrepareId(pHandle, data, bExt, u32ID);
+
+            data[MCP2515_DLC] = rtr ? (pFrame->u8DLC | RTR_MASK) : pFrame->u8DLC;
+
+            memcpy(&data[MCP2515_DATA], pFrame->au8Data, pFrame->u8DLC);
+
+            _MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + pFrame->u8DLC);
+
+            _MCP2515_ModifyRegister(pHandle, txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
+
+            uint8_t u8CtrlRegVal = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
+
+            if ((u8CtrlRegVal & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0)
+            {
+                return MCP2515_ERROR_FAILTX;
+            }
+
+            return ERR_NONE;
         }
     }
 
-    return MCP2515_ERROR_ALLTXBUSY;
+    return MakeError(ERR_BUSY, "tx buffer is full");
 }
 
-static err_t _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, can_frame_t* pFrame)
+err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 {
-    const struct {
-        uint8_t CTRL;
-        uint8_t SIDH;
-        uint8_t DATA;
-        CANINTF CANINTF_RXnIF;
-    } rxb[] = {
-        {MCP2515_REG_RXB0CTRL, MCP2515_REG_RXB0SIDH, MCP2515_REG_RXB0DATA, CANINTF_RX0IF},
-        {MCP2515_REG_RXB1CTRL, MCP2515_REG_RXB1SIDH, MCP2515_REG_RXB1DATA, CANINTF_RX1IF}
-    };
+    err_t   rc;
+    uint8_t u8Stat = MCP2515_GetStatus(pHandle);
+
+    mcp2515_rx_buffer_e rxbn;
+
+    if (u8Stat & STAT_RX0IF)
+    {
+        rxbn = MCP2515_RX_BUFFER_0;
+    }
+    else if (u8Stat & STAT_RX1IF)
+    {
+        rxbn = MCP2515_RX_BUFFER_1;
+    }
+    else
+    {
+        return (ERR_NO_MESSAGE, "no message");
+    }
+
+    const struct RXBn_REGS* rxb = &RXB[rxbn];
 
     uint8_t tbufdata[5];
 
@@ -831,6 +847,7 @@ static err_t _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, can_f
     }
 
     uint8_t u8DLC = (tbufdata[MCP2515_DLC] & DLC_MASK);
+
     if (u8DLC > CAN_MAX_DLEN)
     {
         return MCP2515_ERROR_FAIL;
@@ -849,27 +866,6 @@ static err_t _MCP2515_ReadMessage(spi_mcp2515_t* pHandle, const RXBn rxbn, can_f
     _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, rxb->CANINTF_RXnIF, 0);
 
     return ERR_NONE;
-}
-
-err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
-{
-    err_t   rc;
-    uint8_t u8Stat = MCP2515_GetStatus(pHandle);
-
-    if (u8Stat & STAT_RX0IF)
-    {
-        rc = _MCP2515_ReadMessage(pHandle, RXB0, pFrame);
-    }
-    else if (u8Stat & STAT_RX1IF)
-    {
-        rc = _MCP2515_ReadMessage(pHandle, RXB1, pFrame);
-    }
-    else
-    {
-        rc = MCP2515_ERROR_NOMSG;
-    }
-
-    return rc;
 }
 
 bool MCP2515_CheckReceive(spi_mcp2515_t* pHandle)

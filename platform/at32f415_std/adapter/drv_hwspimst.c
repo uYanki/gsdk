@@ -61,7 +61,7 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
     }
     else
     {
-        return ThrowError(ERR_INVALID_VALUE, "unknown instance");
+        return MakeError(ERR_INVALID_VALUE, "unknown instance");
     }
 
     gpio_init_type gpio_init_struct = {
@@ -110,7 +110,7 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
     {
         case SPI_FLAG_DATAWIDTH_8B: spi_init_struct.frame_bit_num = SPI_FRAME_8BIT; break;
         case SPI_FLAG_DATAWIDTH_16B: spi_init_struct.frame_bit_num = SPI_FRAME_16BIT; break;
-        case SPI_FLAG_DATAWIDTH_32B: return ThrowError(ERR_NOT_SUPPORTED, "unsupported datawidth");
+        case SPI_FLAG_DATAWIDTH_32B: return MakeError(ERR_NOT_SUPPORTED, "unsupported datawidth");
     }
 
     switch (u16Flags & SPI_FLAG_CS_MODE_Msk)

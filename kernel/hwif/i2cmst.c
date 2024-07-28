@@ -27,7 +27,7 @@ err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycl
         extern const i2cmst_ops_t g_swI2cOps;
         pHandle->pOps = &g_swI2cOps;
 #else
-        return ThrowError(ERR_NOT_EXIST, "swi2c master module is disabled");
+        return MakeError(ERR_NOT_EXIST, "swi2c master module is disabled");
 #endif
     }
     else
@@ -36,7 +36,7 @@ err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycl
         extern const i2cmst_ops_t g_hwI2cOps;
         pHandle->pOps = &g_hwI2cOps;
 #else
-        return ThrowError(ERR_NOT_EXIST, "hwi2c master module is disabled");
+        return MakeError(ERR_NOT_EXIST, "hwi2c master module is disabled");
 #endif
     }
 
@@ -191,7 +191,7 @@ err_t I2C_Master_WriteByteBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t
 
     if ((u8StartBit + u8BitsCount) > 8)
     {
-        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+        return MakeError(ERR_OVERFLOW, "termination bit overflow");
     }
 
     ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
@@ -212,7 +212,7 @@ err_t I2C_Master_ReadByteBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t 
 
     if ((u8StartBit + u8BitsCount) > 8)
     {
-        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+        return MakeError(ERR_OVERFLOW, "termination bit overflow");
     }
 
     ERROR_CHECK_RETURN(I2C_Master_ReadBlock(pHandle, u16SlvAddr, u16MemAddr, &u8Data, sizeof(u8Data), u16Flags));
@@ -229,7 +229,7 @@ err_t I2C_Master_ReadWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t 
 
     if ((u8StartBit + u8BitsCount) > 16)
     {
-        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+        return MakeError(ERR_OVERFLOW, "termination bit overflow");
     }
 
     ERROR_CHECK_RETURN(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));
@@ -246,7 +246,7 @@ err_t I2C_Master_WriteWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t
 
     if ((u8StartBit + u8BitsCount) > 16)
     {
-        return ThrowError(ERR_OVERFLOW, "termination bit overflow");
+        return MakeError(ERR_OVERFLOW, "termination bit overflow");
     }
 
     ERROR_CHECK_RETURN(I2C_Master_ReadWord(pHandle, u16SlvAddr, u16MemAddr, &u16Data, u16Flags));

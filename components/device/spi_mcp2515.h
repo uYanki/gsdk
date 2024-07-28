@@ -32,12 +32,6 @@ typedef enum {
     MCP2515_CLKOUT_DIV8    = 0x3,
 } mcp2515_clkout_e;
 
-#define MCP2515_ERROR_FAIL      1
-#define MCP2515_ERROR_ALLTXBUSY 2
-#define MCP2515_ERROR_FAILINIT  3
-#define MCP2515_ERROR_FAILTX    4
-#define MCP2515_ERROR_NOMSG     5
-
 /**
  * @brief request operation mode @ CANCTRL bit[7,5]
  */

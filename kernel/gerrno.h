@@ -38,18 +38,19 @@ typedef int32_t err_t;
 #define ERR_BUSY          113 /*!< busy state */
 #define ERR_TIMEOUT       114 /*!< operation timed out */
 #define ERR_BAD_MESSAGE   115 /*!< bad message */
-#define ERR_OVERFLOW      116 /*!< address... overflow */
-#define ERR_UNDERFLOW     117 /*!< address... underflow */
+#define ERR_NO_MESSAGE    116 /*!< no message */
+#define ERR_OVERFLOW      117 /*!< address... overflow */
+#define ERR_UNDERFLOW     118 /*!< address... underflow */
 
 /**
  * @}
  */
 
 #if 1
-#define ThrowError(errno, reason, ...) \
+#define MakeError(errno, reason, ...) \
     PRINTLN(reason, ##__VA_ARGS__), -(errno)
 #else
-#define ThrowError(errno, reason, ...) \
+#define MakeError(errno, reason, ...) \
     UNUSED(reason, ##__VA_ARGS__), -(errno)
 #endif
 

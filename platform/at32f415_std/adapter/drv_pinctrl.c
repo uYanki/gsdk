@@ -41,8 +41,8 @@ static err_t PIN_SetMode(const pin_t* pHandle, pin_mode_e eMode, pin_pull_e ePul
         case PIN_MODE_INPUT_FLOATING: gpio_init_struct.gpio_mode = GPIO_MODE_INPUT; break;
         case PIN_MODE_OUTPUT_OPEN_DRAIN: gpio_init_struct.gpio_mode = GPIO_MODE_OUTPUT, gpio_init_struct.gpio_out_type = GPIO_OUTPUT_OPEN_DRAIN; break;
         case PIN_MODE_OUTPUT_PUSH_PULL: gpio_init_struct.gpio_mode = GPIO_MODE_OUTPUT, gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL; break;
-        case PIN_MODE_HIGH_RESISTANCE: return ThrowError(ERR_NOT_SUPPORTED, "unsupported mode");
-        default: return ThrowError(ERR_INVALID_VALUE, "invaild in/out mode");
+        case PIN_MODE_HIGH_RESISTANCE: return MakeError(ERR_NOT_SUPPORTED, "unsupported mode");
+        default: return MakeError(ERR_INVALID_VALUE, "invaild in/out mode");
     }
 
     switch (ePull)
@@ -50,7 +50,7 @@ static err_t PIN_SetMode(const pin_t* pHandle, pin_mode_e eMode, pin_pull_e ePul
         case PIN_PULL_NONE: gpio_init_struct.gpio_pull = GPIO_PULL_NONE; break;
         case PIN_PULL_DOWN: gpio_init_struct.gpio_pull = GPIO_PULL_DOWN; break;
         case PIN_PULL_UP: gpio_init_struct.gpio_pull = GPIO_PULL_UP; break;
-        default: return ThrowError(ERR_INVALID_VALUE, "invaild pull mode");
+        default: return MakeError(ERR_INVALID_VALUE, "invaild pull mode");
     }
 
     gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER;

@@ -90,12 +90,12 @@ static err_t EEFS_Setup(void)
 
     if (EEFS_InitFS(CONFIG_EEFS_DEVICE_NAME, 0) != EEFS_SUCCESS)
     {
-        return ThrowError(ERR_FAIL, "fail to init eefs");
+        return MakeError(ERR_FAIL, "fail to init eefs");
     }
 
     if (EEFS_Mount(CONFIG_EEFS_DEVICE_NAME, CONFIG_EEFS_MOUNT_POINT) != EEFS_SUCCESS)
     {
-        return ThrowError(ERR_FAIL, "fail to mount disk");
+        return MakeError(ERR_FAIL, "fail to mount disk");
     }
 
     return ERR_NONE;
@@ -114,7 +114,7 @@ err_t EEFS_Test(void)
 
     if (eefs_fd != EEFS_SUCCESS)
     {
-        return ThrowError(ERR_FAIL, "fail to creat file");
+        return MakeError(ERR_FAIL, "fail to creat file");
     }
 
     EEFS_Write(eefs_fd, (char*)szFileWrData, strlen(szFileWrData));  // return WrCnt
@@ -125,7 +125,7 @@ err_t EEFS_Test(void)
 
     if (EEFS_Open("/disk/file.txt", 0) != EEFS_SUCCESS)
     {
-        return ThrowError(ERR_FAIL, "fail to open file");
+        return MakeError(ERR_FAIL, "fail to open file");
     }
 
     memset(szFileRdData, 0, sizeof(szFileRdData));

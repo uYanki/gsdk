@@ -13,14 +13,14 @@
 
 #define I2C_TIMEOUT     0xFF
 
-#define ThrowError_(eStatus)                                        \
-    do {                                                            \
-        switch (eStatus)                                            \
-        {                                                           \
-            case I2C_OK: return ERR_NONE;                           \
-            case I2C_ERR_BUSY: return ThrowError(ERR_BUSY, "busy"); \
-            default: return ThrowError(ERR_TIMEOUT, "timeout");     \
-        }                                                           \
+#define MakeError_(eStatus)                                        \
+    do {                                                           \
+        switch (eStatus)                                           \
+        {                                                          \
+            case I2C_OK: return ERR_NONE;                          \
+            case I2C_ERR_BUSY: return MakeError(ERR_BUSY, "busy"); \
+            default: return MakeError(ERR_TIMEOUT, "timeout");     \
+        }                                                          \
     } while (0)
 
 //---------------------------------------------------------------------------
@@ -65,7 +65,7 @@ static inline err_t HWI2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqH
     }
     else
     {
-        return ThrowError(ERR_INVALID_VALUE, "unknown instance");
+        return MakeError(ERR_INVALID_VALUE, "unknown instance");
     }
 
     if (pHandle->SDA.Port == GPIOA || pHandle->SCL.Port == GPIOA)
@@ -138,26 +138,26 @@ static inline err_t HWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAd
 {
     i2c_type*                  hwi2c        = (i2c_type*)(pHandle->I2Cx);
     i2c_mem_address_width_type eMemAddrSize = CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEM_ADDR_WIDIH_16 : I2C_MEM_ADDR_WIDIH_8;
-    ThrowError_(i2c_memory_read(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, pu8Data, u16Size, I2C_TIMEOUT));
+    MakeError_(i2c_memory_read(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16MemAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     i2c_type*                  hwi2c        = (i2c_type*)(pHandle->I2Cx);
     i2c_mem_address_width_type eMemAddrSize = CHKMSK16(u16Flags, I2C_FLAG_MEMADDR_SIZE_Msk, I2C_FLAG_16BIT_MEMADDR) ? I2C_MEM_ADDR_WIDIH_16 : I2C_MEM_ADDR_WIDIH_8;
-    ThrowError_(i2c_memory_write(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
+    MakeError_(i2c_memory_write(hwi2c, eMemAddrSize, u16SlvAddr << 1, u16MemAddr, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_ReceiveBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint8_t* pu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
-    ThrowError_(i2c_master_receive(hwi2c, u16SlvAddr << 1, pu8Data, u16Size, I2C_TIMEOUT));
+    MakeError_(i2c_master_receive(hwi2c, u16SlvAddr << 1, pu8Data, u16Size, I2C_TIMEOUT));
 }
 
 static inline err_t HWI2C_Master_TransmitBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, const uint8_t* cpu8Data, uint16_t u16Size, uint16_t u16Flags)
 {
     i2c_type* hwi2c = (i2c_type*)(pHandle->I2Cx);
-    ThrowError_(i2c_master_transmit(hwi2c, u16SlvAddr << 1, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
+    MakeError_(i2c_master_transmit(hwi2c, u16SlvAddr << 1, (uint8_t*)cpu8Data, u16Size, I2C_TIMEOUT));
 }
 
 #endif

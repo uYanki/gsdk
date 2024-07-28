@@ -13,15 +13,15 @@
 
 #define SPI_TIMEOUT     0xFF
 
-#define ThrowError_(eStatus)                                             \
-    do {                                                                 \
-        switch (eStatus)                                                 \
-        {                                                                \
-            case HAL_OK: return ERR_NONE;                                \
-            case HAL_BUSY: return ThrowError(ERR_BUSY, "busy");          \
-            case HAL_TIMEOUT: return ThrowError(ERR_TIMEOUT, "timeout"); \
-            default: return ThrowError(ERR_FAIL, "generic error");       \
-        }                                                                \
+#define MakeError_(eStatus)                                             \
+    do {                                                                \
+        switch (eStatus)                                                \
+        {                                                               \
+            case HAL_OK: return ERR_NONE;                               \
+            case HAL_BUSY: return MakeError(ERR_BUSY, "busy");          \
+            case HAL_TIMEOUT: return MakeError(ERR_TIMEOUT, "timeout"); \
+            default: return MakeError(ERR_FAIL, "generic error");       \
+        }                                                               \
     } while (0)
 
 //---------------------------------------------------------------------------
@@ -78,25 +78,25 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
     }
 
     // invalid instance
-    return ThrowError(ERR_INVALID_VALUE, "unknown instance");
+    return MakeError(ERR_INVALID_VALUE, "unknown instance");
 }
 
 static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
-    ThrowError_(HAL_SPI_Transmit(hwspi, (uint8_t*)cpu8TxData, u16Size, SPI_TIMEOUT));
+    MakeError_(HAL_SPI_Transmit(hwspi, (uint8_t*)cpu8TxData, u16Size, SPI_TIMEOUT));
 }
 
 static err_t HWSPI_Master_ReceiveBlock(spi_mst_t* pHandle, uint8_t* pu8RxData, uint16_t u16Size)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
-    ThrowError_(HAL_SPI_Receive(hwspi, pu8RxData, u16Size, SPI_TIMEOUT));
+    MakeError_(HAL_SPI_Receive(hwspi, pu8RxData, u16Size, SPI_TIMEOUT));
 }
 
 static err_t HWSPI_Master_TransmitReceiveBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint8_t* pu8RxData, uint16_t u16Size)
 {
     SPI_HandleTypeDef* hwspi = (SPI_HandleTypeDef*)(pHandle->SPIx);
-    ThrowError_(HAL_SPI_TransmitReceive(hwspi, (uint8_t*)cpu8TxData, pu8RxData, u16Size, SPI_TIMEOUT));
+    MakeError_(HAL_SPI_TransmitReceive(hwspi, (uint8_t*)cpu8TxData, pu8RxData, u16Size, SPI_TIMEOUT));
 }
 
 #endif

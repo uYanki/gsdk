@@ -66,14 +66,14 @@ static inline bool _IsOption(const arg_attr_t* p)
 {
     switch (p->eType)
     {
-        case ARGUMENT_TYPE_FLAG :
-        case ARGUMENT_TYPE_REQUIRED :
-        case ARGUMENT_TYPE_REQUIRED_INT32 :
-        case ARGUMENT_TYPE_REQUIRED_FP32 :
-        case ARGUMENT_TYPE_OPTIONAL :
-        case ARGUMENT_TYPE_OPTIONAL_INT32 :
-        case ARGUMENT_TYPE_OPTIONAL_FP32 : return true;
-        default : return false;
+        case ARGUMENT_TYPE_FLAG:
+        case ARGUMENT_TYPE_REQUIRED:
+        case ARGUMENT_TYPE_REQUIRED_INT32:
+        case ARGUMENT_TYPE_REQUIRED_FP32:
+        case ARGUMENT_TYPE_OPTIONAL:
+        case ARGUMENT_TYPE_OPTIONAL_INT32:
+        case ARGUMENT_TYPE_OPTIONAL_FP32: return true;
+        default: return false;
     }
 }
 
@@ -81,14 +81,14 @@ static inline bool _IsPosArg(const arg_attr_t* p)
 {
     switch (p->eType)
     {
-        case ARGUMENT_TYPE_POSITIONAL :
-        case ARGUMENT_TYPE_POSITIONAL_INT32 :
-        case ARGUMENT_TYPE_POSITIONAL_FP32 : return true;
-        default : return false;
+        case ARGUMENT_TYPE_POSITIONAL:
+        case ARGUMENT_TYPE_POSITIONAL_INT32:
+        case ARGUMENT_TYPE_POSITIONAL_FP32: return true;
+        default: return false;
     }
 }
 
-static int32_t _ThrowError(clp_ctx_t* ctx, clp_error_e eErrCode)
+static int32_t _MakeError(clp_ctx_t* ctx, clp_error_e eErrCode)
 {
     ctx->cpszArgStr = ctx->argv[ctx->argi - 1];
     ctx->eErrCode   = eErrCode;
@@ -113,34 +113,34 @@ static inline int32_t _MatchedOption(clp_ctx_t* ctx, const char* cpszArgStr)
 
         switch (pArgAttr->type)
         {
-            case ARGUMENT_TYPE_POSITIONAL :
-            case ARGUMENT_TYPE_REQUIRED :
-            case ARGUMENT_TYPE_OPTIONAL :
+            case ARGUMENT_TYPE_POSITIONAL:
+            case ARGUMENT_TYPE_REQUIRED:
+            case ARGUMENT_TYPE_OPTIONAL:
             {
                 LOGD("[ok] (%-8s) %c, %s = %s", CLP_TypeStr(pArgAttr->type), shortname, longname, ctx->cpszArgStr);
                 break;
             }
 
-            case ARGUMENT_TYPE_POSITIONAL_INT32 :
-            case ARGUMENT_TYPE_OPTIONAL_INT32 :
-            case ARGUMENT_TYPE_REQUIRED_INT32 :
+            case ARGUMENT_TYPE_POSITIONAL_INT32:
+            case ARGUMENT_TYPE_OPTIONAL_INT32:
+            case ARGUMENT_TYPE_REQUIRED_INT32:
             {
                 ctx->uArgVal.i32 = strtol(cpszArgStr, &pEnd, 0);
                 LOGD("[ok] (%-8s) %c, %s = %s , %d", CLP_TypeStr(pArgAttr->type), shortname, longname, ctx->cpszArgStr, ctx->uArgVal.i32);
                 break;
             }
 
-            case ARGUMENT_TYPE_POSITIONAL_FP32 :
-            case ARGUMENT_TYPE_REQUIRED_FP32 :
-            case ARGUMENT_TYPE_OPTIONAL_FP32 :
+            case ARGUMENT_TYPE_POSITIONAL_FP32:
+            case ARGUMENT_TYPE_REQUIRED_FP32:
+            case ARGUMENT_TYPE_OPTIONAL_FP32:
             {
                 ctx->uArgVal.fp32 = strtof(cpszArgStr, &pEnd);
                 LOGD("[ok] (%-8s) %c, %s = %s , %f", CLP_TypeStr(pArgAttr->type), shortname, longname, ctx->cpszArgStr, ctx->uArgVal.fp32);
                 break;
             }
 
-            default :
-            case ARGUMENT_TYPE_FLAG :
+            default:
+            case ARGUMENT_TYPE_FLAG:
             {
                 break;
             }
@@ -148,7 +148,7 @@ static inline int32_t _MatchedOption(clp_ctx_t* ctx, const char* cpszArgStr)
 
         if (pEnd != nullptr && *pEnd != '\0')
         {
-            return _ThrowError(ctx, CLP_ERROR_ILLEGAL_VALUE);
+            return _MakeError(ctx, CLP_ERROR_ILLEGAL_VALUE);
         }
     }
 
@@ -174,7 +174,7 @@ static inline int32_t _MatchedPosArg(clp_ctx_t* ctx, char* tokens)
         }
     }
 
-    return _ThrowError(ctx, CLP_ERROR_POSITIONAL_ARGUMNET_TOO_MANY);
+    return _MakeError(ctx, CLP_ERROR_POSITIONAL_ARGUMNET_TOO_MANY);
 }
 
 static inline int32_t _MatchShortOpt(clp_ctx_t* ctx, char* tokens)
@@ -199,7 +199,7 @@ static inline int32_t _MatchShortOpt(clp_ctx_t* ctx, char* tokens)
 
         switch (pArgAttr->type)
         {
-            case ARGUMENT_TYPE_FLAG :
+            case ARGUMENT_TYPE_FLAG:
             {
                 if (*tokens == '\0')
                 {
@@ -209,15 +209,15 @@ static inline int32_t _MatchShortOpt(clp_ctx_t* ctx, char* tokens)
                 else
                 {
                     // error usage: '-[shortname][value]'
-                    return _ThrowError(ctx, CLP_ERROR_OPTION_FLAG_ONLY);
+                    return _MakeError(ctx, CLP_ERROR_OPTION_FLAG_ONLY);
                 }
 
                 break;
             }
 
-            case ARGUMENT_TYPE_OPTIONAL :
-            case ARGUMENT_TYPE_OPTIONAL_INT32 :
-            case ARGUMENT_TYPE_OPTIONAL_FP32 :
+            case ARGUMENT_TYPE_OPTIONAL:
+            case ARGUMENT_TYPE_OPTIONAL_INT32:
+            case ARGUMENT_TYPE_OPTIONAL_FP32:
             {
                 if (*tokens != '\0')
                 {
@@ -241,9 +241,9 @@ static inline int32_t _MatchShortOpt(clp_ctx_t* ctx, char* tokens)
                 break;
             }
 
-            case ARGUMENT_TYPE_REQUIRED :
-            case ARGUMENT_TYPE_REQUIRED_INT32 :
-            case ARGUMENT_TYPE_REQUIRED_FP32 :
+            case ARGUMENT_TYPE_REQUIRED:
+            case ARGUMENT_TYPE_REQUIRED_INT32:
+            case ARGUMENT_TYPE_REQUIRED_FP32:
             {
                 if (*tokens != '\0')
                 {
@@ -255,7 +255,7 @@ static inline int32_t _MatchShortOpt(clp_ctx_t* ctx, char* tokens)
                     if (ctx->argi == ctx->argc)
                     {
                         // missing value: '-[shortname]'
-                        return _ThrowError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
+                        return _MakeError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
                     }
                     else
                     {
@@ -286,7 +286,7 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
             continue;
         }
 
-        const char* s1 = (const char*) tokens;
+        const char* s1 = (const char*)tokens;
         const char* s2 = pArgAttr->longname;
 
         for (; *s1 && *s2 && *s1 != '='; s1++, s2++)
@@ -311,16 +311,16 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
 
         ctx->u16ArgIdx = i;
 
-        tokens = (char*) s1;  // skip longname
+        tokens = (char*)s1;  // skip longname
 
         switch (pArgAttr->type)
         {
-            case ARGUMENT_TYPE_FLAG :
+            case ARGUMENT_TYPE_FLAG:
             {
                 if (*tokens == '=')
                 {
                     // error usage: '--[longname]='
-                    return _ThrowError(ctx, CLP_ERROR_OPTION_FLAG_ONLY);
+                    return _MakeError(ctx, CLP_ERROR_OPTION_FLAG_ONLY);
                 }
                 else
                 {
@@ -331,9 +331,9 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
                 break;
             }
 
-            case ARGUMENT_TYPE_OPTIONAL :
-            case ARGUMENT_TYPE_OPTIONAL_INT32 :
-            case ARGUMENT_TYPE_OPTIONAL_FP32 :
+            case ARGUMENT_TYPE_OPTIONAL:
+            case ARGUMENT_TYPE_OPTIONAL_INT32:
+            case ARGUMENT_TYPE_OPTIONAL_FP32:
             {
                 if (*tokens == '=')
                 {
@@ -342,7 +342,7 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
                     if (*tokens == '\0')
                     {
                         // missing value: '--[longname]='
-                        return _ThrowError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
+                        return _MakeError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
                     }
                     else
                     {
@@ -367,9 +367,9 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
                 break;
             }
 
-            case ARGUMENT_TYPE_REQUIRED :
-            case ARGUMENT_TYPE_REQUIRED_INT32 :
-            case ARGUMENT_TYPE_REQUIRED_FP32 :
+            case ARGUMENT_TYPE_REQUIRED:
+            case ARGUMENT_TYPE_REQUIRED_INT32:
+            case ARGUMENT_TYPE_REQUIRED_FP32:
             {
                 if (*tokens == '=')
                 {
@@ -378,7 +378,7 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
                     if (*tokens == '\0')
                     {
                         // missing value: '--[longname]='
-                        return _ThrowError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
+                        return _MakeError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
                     }
                     else
                     {
@@ -391,7 +391,7 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
                     if (ctx->argi == ctx->argc)
                     {
                         // missing value: '--[longname]'
-                        return _ThrowError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
+                        return _MakeError(ctx, CLP_ERROR_OPTION_MISSING_VALUE);
                     }
                     else
                     {
@@ -405,7 +405,7 @@ static inline int32_t _MatchLongOpt(clp_ctx_t* ctx, char* tokens)
         }
     }
 
-    return _ThrowError(ctx, CLP_ERROR_OPTION_UNDEFINED_NAME);  // no macthed
+    return _MakeError(ctx, CLP_ERROR_OPTION_UNDEFINED_NAME);  // no macthed
 }
 
 err_t CLP_Init(clp_ctx_t* ctx, int argc, char** argv, const arg_attr_t* attrs)
@@ -436,15 +436,15 @@ err_t CLP_Init(clp_ctx_t* ctx, int argc, char** argv, const arg_attr_t* attrs)
         {
             switch (pArgAttr->longname[0])
             {
-                case '-' :
-                case '\0' :
+                case '-':
+                case '\0':
                 {
                     // illegal char
                     LOGD("err: %s", pArgAttr->longname);
                     return -ERR_INVALID_VALUE;
                 }
 
-                default :
+                default:
                 {
                     break;
                 }
@@ -468,7 +468,7 @@ int32_t CLP_Next(clp_ctx_t* ctx)
     {
         if (ctx->u16MatchedPosCnt < ctx->u16PosCnt)
         {
-            return _ThrowError(ctx, CLP_ERROR_POSITIONAL_ARGUMNET_TOO_FEW);
+            return _MakeError(ctx, CLP_ERROR_POSITIONAL_ARGUMNET_TOO_FEW);
         }
 
         return CLP_TAG_EXIT;
@@ -485,7 +485,7 @@ int32_t CLP_Next(clp_ctx_t* ctx)
             if (*tokens == '\0')
             {
                 // missing longname: '--' or '--='
-                return _ThrowError(ctx, CLP_ERROR_OPTION_MISSING_NAME);
+                return _MakeError(ctx, CLP_ERROR_OPTION_MISSING_NAME);
             }
 
             return _MatchLongOpt(ctx, tokens);  // 选项参数
@@ -497,7 +497,7 @@ int32_t CLP_Next(clp_ctx_t* ctx)
             if (tokens[0] == '\0')
             {
                 // missing shortname: '-'
-                return _ThrowError(ctx, CLP_ERROR_OPTION_MISSING_NAME);
+                return _MakeError(ctx, CLP_ERROR_OPTION_MISSING_NAME);
             }
 
             return _MatchShortOpt(ctx, tokens);  // 选项参数
@@ -536,19 +536,19 @@ void CLP_MakeHelpText(clp_ctx_t* ctx)
         {
             switch (pArgAttr->type)
             {
-                case ARGUMENT_TYPE_REQUIRED :
+                case ARGUMENT_TYPE_REQUIRED:
                 {
                     printf(" <%s>", pArgAttr->value_desc);
                     break;
                 }
 
-                case ARGUMENT_TYPE_OPTIONAL :
+                case ARGUMENT_TYPE_OPTIONAL:
                 {
                     printf(" (%s)", pArgAttr->value_desc);
                     break;
                 }
 
-                default :
+                default:
                 {
                     break;
                 }

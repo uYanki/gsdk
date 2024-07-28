@@ -53,7 +53,7 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
 
     if ((u32MemAddr + (uint32_t)u16Size) > (uint32_t)(pHandle->eCapacity))
     {
-        return ThrowError(ERR_OVERFLOW, "memory address out of capacity");
+        return MakeError(ERR_OVERFLOW, "memory address out of capacity");
     }
 
 #endif
@@ -77,7 +77,7 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
         case AT24CM02: u16PageSize = 256; break;
         default:
         {
-            return ThrowError(ERR_INVALID_VALUE,"capacity is unsupported");
+            return MakeError(ERR_INVALID_VALUE,"capacity is unsupported");
         }
     }
     // clang-format on
@@ -113,7 +113,7 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
         // wait for ready
         if (EEPROM_WaitReady(pHandle, u16SlvAddr, EEPROM_TIMEOUT_MS) == false)
         {
-            return ThrowError(ERR_TIMEOUT, "eeprom doesn't ready");
+            return MakeError(ERR_TIMEOUT, "eeprom doesn't ready");
         }
 
         ERROR_CHECK_RETURN(I2C_Master_WriteBlock(pHandle->hI2C, u16SlvAddr, u16MemAddr, cpu8Buffer, u16XferSize, u16Flags));
@@ -141,7 +141,7 @@ err_t EEPROM_ReadBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint8_t* pu8B
 
     if ((u32MemAddr + (uint32_t)u16Size) > (uint32_t)(pHandle->eCapacity))
     {
-        return ThrowError(ERR_OVERFLOW, "emory address out of capacity");
+        return MakeError(ERR_OVERFLOW, "emory address out of capacity");
     }
 
 #endif
@@ -168,7 +168,7 @@ err_t EEPROM_ReadBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint8_t* pu8B
     // wait for ready
     if (EEPROM_WaitReady(pHandle, u16SlvAddr, EEPROM_TIMEOUT_MS) == false)
     {
-        return ThrowError(ERR_TIMEOUT, "eeprom doesn't ready");
+        return MakeError(ERR_TIMEOUT, "eeprom doesn't ready");
     }
 
     return I2C_Master_ReadBlock(pHandle->hI2C, u16SlvAddr, u16MemAddr, pu8Buffer, u16Size, u16Flags);
@@ -203,7 +203,7 @@ err_t EEPROM_DetectCapacity(i2c_eeprom_t* pHandle)
 
     if (EEPROM_WaitReady(pHandle, u16SlvAddr, EEPROM_TIMEOUT_MS) == false)
     {
-        return ThrowError(ERR_NOT_EXIST, "eeprom doesn't exist");
+        return MakeError(ERR_NOT_EXIST, "eeprom doesn't exist");
     }
 
     bool bAckPre = true;
