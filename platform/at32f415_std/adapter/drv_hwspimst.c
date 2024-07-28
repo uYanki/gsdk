@@ -1,7 +1,7 @@
 #include "spimst.h"
 
 /**
- * @test 全双工收发，半双工接收 待测试
+ * @test 全双工收发(有bug)，半双工接收 待测试
  */
 
 #if CONFIG_HWSPI_MODULE_SW
@@ -66,7 +66,7 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
 
     gpio_init_type gpio_init_struct = {
         .gpio_out_type       = GPIO_OUTPUT_PUSH_PULL,
-        .gpio_pull           = GPIO_PULL_DOWN,
+        .gpio_pull           = GPIO_PULL_UP,
         .gpio_mode           = GPIO_MODE_MUX,
         .gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER,
     };
@@ -155,13 +155,12 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
 
         case SPI_FLAG_4WIRE:
         {
-            spi_init_struct.transmission_mode = SPI_TRANSMIT_FULL_DUPLEX;
-
             gpio_init_struct.gpio_pins = pHandle->MOSI.Pin;
             gpio_init(pHandle->MOSI.Pin, &gpio_init_struct);
 
             gpio_init_struct.gpio_pins = pHandle->MISO.Pin;
             gpio_init(pHandle->MISO.Port, &gpio_init_struct);
+            spi_init_struct.transmission_mode = SPI_TRANSMIT_FULL_DUPLEX;
 
             break;
         }
@@ -187,8 +186,8 @@ static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8T
 
     while (u16Size--)
     {
-        spi_i2s_data_transmit(hwspi, *cpu8TxData++);
         while (spi_i2s_flag_get(hwspi, SPI_I2S_TDBE_FLAG) == RESET);
+        spi_i2s_data_transmit(hwspi, *cpu8TxData++);
     }
 
     return ERR_NONE;

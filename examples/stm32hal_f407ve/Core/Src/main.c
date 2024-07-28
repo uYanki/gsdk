@@ -153,7 +153,7 @@ int main(void)
 
     DelayInit();
     // MX_TIM1_Init();
-  //  AD7705_Test();
+    AD7705_Test();
     MCP2515_Test();
 
     while (1)

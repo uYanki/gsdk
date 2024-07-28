@@ -30,7 +30,7 @@ typedef enum {
     MCP2515_CLKOUT_DIV2    = 0x1,
     MCP2515_CLKOUT_DIV4    = 0x2,
     MCP2515_CLKOUT_DIV8    = 0x3,
-} mcp2515_clkout_e;
+} mcp2515_clkdiv_e;
 
 /**
  * @brief request operation mode @ CANCTRL bit[7,5]
@@ -77,7 +77,7 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clk
 
 uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle);
 
-err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkout_e eDivisor);
+void MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkdiv_e eDivisor);
 
 err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask, bool bExtFrame, uint32_t u32Data);
 err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool bExtFrame, uint32_t u32Data);

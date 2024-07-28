@@ -610,7 +610,7 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clk
     return MakeError(ERR_FAIL, "fail to set bitrate");
 }
 
-err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkout_e eDivisor)
+void MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkdiv_e eDivisor)
 {
     if (eDivisor == MCP2515_CLKOUT_DISABLE)
     {
@@ -619,19 +619,18 @@ err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkout_e eDivisor)
 
         /* Turn on CLKOUT for SOF */
         _MCP2515_ModifyRegister(pHandle, REG_CNF3, CNF3_SOF, CNF3_SOF);
-        return ERR_NONE;
     }
+    else
+    {
+        /* Set the MCP2515_Prescaler (pHandle,CLKPRE) */
+        _MCP2515_ModifyRegister(pHandle, REG_CANCTRL, CANCTRL_CLKPRE, eDivisor);
 
-    /* Set the MCP2515_Prescaler (pHandle,CLKPRE) */
-    _MCP2515_ModifyRegister(pHandle, REG_CANCTRL, CANCTRL_CLKPRE, eDivisor);
+        /* Turn on CLKEN */
+        _MCP2515_ModifyRegister(pHandle, REG_CANCTRL, CANCTRL_CLKEN, CANCTRL_CLKEN);
 
-    /* Turn on CLKEN */
-    _MCP2515_ModifyRegister(pHandle, REG_CANCTRL, CANCTRL_CLKEN, CANCTRL_CLKEN);
-
-    /* Turn off CLKOUT for SOF */
-    _MCP2515_ModifyRegister(pHandle, REG_CNF3, CNF3_SOF, 0x00);
-
-    return ERR_NONE;
+        /* Turn off CLKOUT for SOF */
+        _MCP2515_ModifyRegister(pHandle, REG_CNF3, CNF3_SOF, 0x00);
+    }
 }
 
 static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, __OUT uint8_t* pu8Buffer, bool bExtFrame, uint32_t u32FrameID)
@@ -900,8 +899,8 @@ void MCP2515_Test(void)
 #if defined(BOARD_STM32F407VET6_XWS)
 
     spi_mst_t spi = {
-        .MISO = {GPIOA, GPIO_PIN_5},
-        .MOSI = {GPIOA, GPIO_PIN_4},
+        .MISO = {GPIOA, GPIO_PIN_4},
+        .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6},
         .CS   = {GPIOA, GPIO_PIN_3},
     };
@@ -913,7 +912,7 @@ void MCP2515_Test(void)
         .MISO = {GPIOB, GPIO_PINS_14}, /*MISO*/
         .SCLK = {GPIOB, GPIO_PINS_13}, /*SCLK*/
         .CS   = {GPIOB, GPIO_PINS_12}, /*CS*/
-        .SPIx = SPI2,
+        // .SPIx = SPI2,
     };
 
 #elif defined(BOARD_CS32F103C8T6_QG)
@@ -948,22 +947,21 @@ void MCP2515_Test(void)
     SPI_Master_Init(&spi, 1000000, SPI_DUTYCYCLE_33_67, MCP2515_SPI_TIMING | SPI_FLAG_SOFT_CS);
 
     MCP2515_Init(&mcp2515, CAN_125KBPS, MCP2515_CLKIN_8MHZ);
-    MCP2515_SetMode(&mcp2515, MCP2515_MODE_NORMAL);
+    MCP2515_SetMode(&mcp2515, MCP2515_MODE_NORMAL);  // 模式配置成功，但发送失败，可拔掉/接上终端电阻
 
-    while (1)
+    while (1) // 中断模式未进行测试
     {
-#if 0
+#if 1
 
-        MCP2515_SendMessage(&mcp2515, &sCanMsgTx1);
-        MCP2515_SendMessage(&mcp2515, &sCanMsgTx2);
+        PeriodicTask(1 * UNIT_S, {
+            MCP2515_SendMessage(&mcp2515, &sCanMsgTx1);
+            MCP2515_SendMessage(&mcp2515, &sCanMsgTx2);
+        });
 
         if (MCP2515_ReadMessage(&mcp2515, &sCanMsgRx1) == ERR_NONE)
         {
             MCP2515_SendMessage(&mcp2515, &sCanMsgRx1);
         }
-
-        DelayBlockMs(1000);
-
 #else
 
         // speed test

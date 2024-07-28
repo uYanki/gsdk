@@ -157,9 +157,25 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>206</LineNumber>
+          <LineNumber>91</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134226260</Address>
+          <Address>134224198</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../../../platform/at32f415_std/adapter/drv_hwspimst.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../../../platform/at32f415_std/adapter/drv_hwspimst.c\91</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>949</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134227972</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -168,9 +184,37 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\..\..\components\device\spi_mcp2515.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\demo\../../../components/device/spi_mcp2515.c\206</Expression>
+          <Expression>\\demo\../../../components/device/spi_mcp2515.c\949</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>517</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134227732</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\..\components\device\spi_mcp2515.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../../../components/device/spi_mcp2515.c\517</Expression>
         </Bp>
       </Breakpoint>
+      <WatchWindow1>
+        <Ww>
+          <count>0</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pu8RxData</ItemText>
+        </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>spi_init_struct</ItemText>
+        </Ww>
+      </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>

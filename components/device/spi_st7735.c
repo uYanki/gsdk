@@ -442,8 +442,8 @@ void ST7735_Test(void)
 #if defined(BOARD_CS32F103C8T6_QG)
 
     spi_mst_t spi = {
-        .MISO = {LCD_SDA_PIN}, /*SDA*/
-        .MOSI = {LCD_SDA_PIN},
+        .MISO = {LCD_SDA_PIN},
+        .MOSI = {LCD_SDA_PIN}, /*SDA*/
         .SCLK = {LCD_SCL_PIN}, /*SCL*/
         .CS   = {LCD_CS_PIN},  /*CS*/
     };
@@ -467,8 +467,8 @@ void ST7735_Test(void)
 #elif defined(BOARD_STM32F407VET6_XWS)
 
     spi_mst_t spi = {
-        .MISO = {GPIOA, GPIO_PIN_5}, /*SDA*/
-        .MOSI = {GPIOA, GPIO_PIN_5},
+        .MISO = {GPIOA, GPIO_PIN_5}, 
+        .MOSI = {GPIOA, GPIO_PIN_5}, /*SDA*/
         .SCLK = {GPIOA, GPIO_PIN_6}, /*SCL*/
         .CS   = {GPIOA, GPIO_PIN_3}, /*CS*/
     };
@@ -492,8 +492,8 @@ void ST7735_Test(void)
 
     spi_mst_t spi = {
 #if 0
-        .MISO = {GPIOA, GPIO_PINS_7}, /*SDA*/
-        .MOSI = {GPIOA, GPIO_PINS_7},
+        .MISO = {GPIOA, GPIO_PINS_7}, 
+        .MOSI = {GPIOA, GPIO_PINS_7}, /*SDA*/
         .SCLK = {GPIOA, GPIO_PINS_5}, /*SCL*/
         .CS   = {GPIOB, GPIO_PINS_7}, /*CS*/
         .SPIx = SPI1,

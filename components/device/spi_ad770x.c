@@ -90,6 +90,7 @@ err_t AD770x_Init(spi_ad770x_t* pHandle)
 {
     ERROR_CHECK_RETURN(AD770x_Reset(pHandle));
     ERROR_CHECK_RETURN(AD770x_SyncSpi(pHandle));
+	
     return ERR_NONE;
 }
 
@@ -185,8 +186,8 @@ void AD7705_Test(void)
 #if defined(BOARD_STM32F407VET6_XWS)
 
     spi_mst_t spi = {
-        .MISO = {GPIOA, GPIO_PIN_5},
-        .MOSI = {GPIOA, GPIO_PIN_4},
+        .MISO = {GPIOA, GPIO_PIN_4},
+        .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6},
         .CS   = {GPIOA, GPIO_PIN_3},
     };
@@ -198,7 +199,7 @@ void AD7705_Test(void)
 
 #endif
 
-    SPI_Master_Init(&spi, 10000, SPI_DUTYCYCLE_50_50, AD770X_SPI_TIMING | SPI_FLAG_SOFT_CS);
+    SPI_Master_Init(&spi, 100000, SPI_DUTYCYCLE_33_67, AD770X_SPI_TIMING | SPI_FLAG_SOFT_CS);
 
     AD770x_Init(&ad770x);
 
@@ -232,6 +233,8 @@ void AD7705_Test(void)
         f32ChannelData[1] = u16ChannelData[1] * CONFIG_AD770X_VREF / 65535.f;
 
         PRINTLN("%.2f,%.2f", f32ChannelData[0], f32ChannelData[1]);
+				
+				DelayBlockMs(1);
     }
 }
 
