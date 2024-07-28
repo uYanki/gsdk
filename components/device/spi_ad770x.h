@@ -124,7 +124,7 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 err_t AD770x_Init(spi_ad770x_t* pHandle);
-err_t AD770x_IsDataReady(spi_ad770x_t* pHandle, ad770x_channel_e eChannel, bool* pbReady);
+bool AD770x_IsDataReady(spi_ad770x_t* pHandle, ad770x_channel_e eChannel);
 
 err_t AD770x_ConfigChannel(
     spi_ad770x_t*        pHandle,
