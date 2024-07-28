@@ -47,7 +47,7 @@ int main(void)
 
     DbgUartInit(115200);
     DelayInit();
-	
+	RC522_Test();
 	MCP2515_Test();
 
 #if 0  // eeprom demo

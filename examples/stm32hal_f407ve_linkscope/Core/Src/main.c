@@ -34,7 +34,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define I2C_IF              0
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -64,33 +64,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 /* USER CODE BEGIN 0 */
 #include "gdefs.h"
 #include "hwif.h"
-#include "i2c_eeprom.h"
-// #include "i2c_ssd1306.h"
-// #include "i2c_tca9548a.h"
-// #include "i2c_pcf8574.h"
-// #include "i2c_bh1750.h"
-// #include "i2c_lcd1602.h"
-// #include "spi_ad770x.h"
-// #include "spi_st7735.h"
-// #include "gpio_hcsr04.h"
-// #include "motdrv.h"
 
-#if 1
+uint8_t u8UartData, g_abc = 0;
 
-i2c_eeprom_t eefs_eeprom = {
-    .hI2C      = nullptr,
-    .u8SlvAddr = AT24CXX_ADDRESS_A000,
-    .eCapacity = AT24C02,
-};
-
-void eefs_init(i2c_mst_t* hI2C)
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)  // 后续改空闲中�?
 {
-    eefs_eeprom.hI2C = hI2C;
-
-    EEPROM_Init(&eefs_eeprom);
+    extern void Debug_SerialRecv(uint8_t * buf, uint16_t len);
+    Debug_SerialRecv(&u8UartData, 1);
+    HAL_UART_Receive_IT(&huart1, &u8UartData, 1);
 }
-
-#endif
 
 /* USER CODE END 0 */
 
@@ -137,72 +119,18 @@ int main(void)
 
     DelayInit();
     // MX_TIM1_Init();
-    // AD7705_Test();
-    RC522_Test();
+
+    HAL_UART_Receive_IT(&huart1, &u8UartData, 1);
+
+    while (1)
+    {
+        g_abc++; // use 'LinkScope.exe' to trace this variable
+        DelayBlockMs(2);
+    }
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
-
-    // Game2048();
-    // GameSnake();
-
-    // FlexBtn_Test();
-    // Shell_Test();
-    // foc();
-
-    i2c_mst_t i2c = {
-#if I2C_IF == 0
-        .SDA  = {AT24C02_SDA_PIN},
-        .SCL  = {AT24C02_SCL_PIN},
-        .I2Cx = nullptr,
-#elif I2C_IF == 1
-        .SDA  = {GPIOA, GPIO_PIN_6},
-        .SCL  = {GPIOA, GPIO_PIN_5},
-        .I2Cx = nullptr,
-#elif I2C_IF == 2
-        .SDA  = {AT24C02_SDA_PIN},
-        .SCL  = {AT24C02_SCL_PIN},
-        .I2Cx = &hi2c1,
-#endif
-    };
-
-    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
-    I2C_Master_ScanAddress(&i2c);
-
-    // QRCode_Test();
-
-    // EEFS_Test();
-    // FlexBtn_Test();
-
-#if CONFIG_DEMOS_SW
-    // EEPROM_Test(&i2c);
-    // SSD1306_Test(&i2c);
-    // LCD1602_Test(&i2c);
-    // LM75_Test(&i2c);
-    // MPU6050_Test(&i2c);
-    // TCA9548A_Test(&i2c);
-    // BH1750_Test(&i2c);
-    // PCF8574_Test(&i2c);
-    // AS5600_Test(&i2c);
-    // PCA9685_Test(&i2c); // !
-#endif
-
-#if CONFIG_DEMOS_SW
-    // DHT11_Test();
-    // DS18B20_Test(); // !
-    // HCSR04_Test();
-#endif
-
-#if CONFIG_DEMOS_SW
-    // AD9833_Test();
-    // TM1638_Test();
-    // DS1302_Test();
-    // AD7705_Test();  // !
-    // ST7735_Test();
-    MCP2515_Test();
-#endif
 
     while (1)
     {

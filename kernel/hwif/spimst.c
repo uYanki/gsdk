@@ -123,6 +123,8 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
         {
             PIN_SetMode(&pHandle->CS, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_DOWN);
         }
+				
+				SPI_Master_Deselect(&pHandle->CS);
     }
 
     return pHandle->pOps->Init(pHandle, u32ClockSpeedHz, eDutyCycle, u16Flags);

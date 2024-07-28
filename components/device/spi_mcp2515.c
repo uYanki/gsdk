@@ -949,7 +949,7 @@ void MCP2515_Test(void)
     MCP2515_Init(&mcp2515, CAN_125KBPS, MCP2515_CLKIN_8MHZ);
     MCP2515_SetMode(&mcp2515, MCP2515_MODE_NORMAL);  // 模式配置成功，但发送失败，可拔掉/接上终端电阻
 
-    while (1) // 中断模式未进行测试
+    while (1)  // 中断模式未进行测试
     {
 #if 1
 
