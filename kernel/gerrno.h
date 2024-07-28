@@ -41,6 +41,7 @@ typedef int32_t err_t;
 #define ERR_NO_MESSAGE    116 /*!< no message */
 #define ERR_OVERFLOW      117 /*!< address... overflow */
 #define ERR_UNDERFLOW     118 /*!< address... underflow */
+#define ERR_MISMACTH      119 /*!< content mismatch */
 
 /**
  * @}
@@ -82,6 +83,17 @@ typedef int32_t err_t;
             abort();            \
         }                       \
                                 \
+    } while (0)
+
+#define ERROR_CHECK_RETURN_NULL(expr) \
+    do {                              \
+        err_t errno = (expr);         \
+                                      \
+        if (errno < 0)                \
+        {                             \
+            return;                   \
+        }                             \
+                                      \
     } while (0)
 
 #define ERROR_CHECK_RETURN(expr) \

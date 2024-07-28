@@ -157,25 +157,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>91</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224198</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../../../platform/at32f415_std/adapter/drv_hwspimst.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\demo\../../../platform/at32f415_std/adapter/drv_hwspimst.c\91</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>949</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134227972</Address>
+          <Address>134228348</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -187,11 +171,11 @@
           <Expression>\\demo\../../../components/device/spi_mcp2515.c\949</Expression>
         </Bp>
         <Bp>
-          <Number>2</Number>
+          <Number>1</Number>
           <Type>0</Type>
           <LineNumber>517</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134227732</Address>
+          <Address>134228108</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -213,6 +197,11 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>spi_init_struct</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pu8RxData</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -586,7 +575,7 @@
 
   <Group>
     <GroupName>Application/MDK-ARM</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

@@ -136,17 +136,11 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
     {
         case SPI_FLAG_3WIRE:
         {
-            if (pHandle->MOSI.Port != NULL)
-            {
-                gpio_init_struct.gpio_pins = pHandle->MOSI.Pin;
-                gpio_init(pHandle->MOSI.Pin, &gpio_init_struct);
-            }
+						gpio_init_struct.gpio_pins = pHandle->MOSI.Pin;
+						gpio_init(pHandle->MOSI.Pin, &gpio_init_struct);
 
-            if (pHandle->MISO.Port != NULL)
-            {
-                gpio_init_struct.gpio_pins = pHandle->MISO.Pin;
-                gpio_init(pHandle->MISO.Port, &gpio_init_struct);
-            }
+						gpio_init_struct.gpio_pins = pHandle->MISO.Pin;
+						gpio_init(pHandle->MISO.Port, &gpio_init_struct);
 
             spi_init_struct.transmission_mode = SPI_TRANSMIT_HALF_DUPLEX_TX;
 

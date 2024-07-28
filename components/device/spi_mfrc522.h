@@ -1,5 +1,5 @@
-#ifndef __SPI_MT6701_H__
-#define __SPI_MT6701_H__
+#ifndef __SPI_MFRC522_H__
+#define __SPI_MFRC522_H__
 
 #include "spimst.h"
 
@@ -18,11 +18,8 @@ typedef struct {
 // Functions
 //---------------------------------------------------------------------------
 
-#define MI_OK       0
 #define MI_NOTAGERR 1
 #define MI_ERR      2
-
-uint8_t RC522_Reset(spi_rc522_t* pHandle);  // 复位
 
 void RC522_AntennaOn(spi_rc522_t* pHandle);   // 开启天线
 void RC522_AntennaOff(spi_rc522_t* pHandle);  // 关闭天线
@@ -37,13 +34,12 @@ uint8_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData);  // 写
 uint8_t RC522_Value(spi_rc522_t* pHandle, uint8_t dd_mode, uint8_t addr, uint8_t* pValue);
 uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t sourceaddr, uint8_t goaladdr);
 
-uint8_t RC522_Halt(spi_rc522_t* pHandle);  // 休眠
+err_t RC522_Halt(spi_rc522_t* pHandle);  // 休眠
 
 uint8_t RC522_ComMF522(spi_rc522_t* pHandle, uint8_t Command, uint8_t* pInData, uint8_t InLenByte, uint8_t* pOutData, uint16_t* pOutLenBit);
 void    CalulateCRC(spi_rc522_t* pHandle, uint8_t* pIndata, uint8_t len, uint8_t* pOutData);
-void    dumpHex(uint8_t* buffer, int len);
 
-uint8_t RC522_IsDataBlock(spi_rc522_t* pHandle, uint8_t addr);  // 判断地址是否位数据库
+bool RC522_IsDataBlock(spi_rc522_t* pHandle, uint8_t u8Addr);
 
 //---------------------------------------------------------------------------
 // Example
