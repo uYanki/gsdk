@@ -177,9 +177,9 @@ err_t RC522_Init(spi_rc522_t* pHandle)
     PIN_SetMode(&pHandle->RST, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_UP);
 
     PIN_WriteLevel(&pHandle->RST, PIN_LEVEL_LOW);  // hwrst
-    DelayBlockMs(1);
+    DelayBlockMs(5);
     PIN_WriteLevel(&pHandle->RST, PIN_LEVEL_HIGH);
-    DelayBlockMs(1);
+    DelayBlockMs(5);
 
     _RC522_WriteRegister(pHandle, REG_COMMAND, PCD_RESETPHASE);  // swrst
     DelayBlockMs(1);
@@ -678,7 +678,7 @@ void RC522_Test(void)
 		
     spi_rc522_t rc522 = {
         .hSPI = &spi,
-        .RST  = {GPIOA, GPIO_PIN_0},
+        .RST  = {GPIOA, GPIO_PIN_1},
     };
 		
 #elif defined(BOARD_AT32F415CB_DEV)
