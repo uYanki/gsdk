@@ -175,12 +175,12 @@ err_t RC522_Init(spi_rc522_t* pHandle)
 {
     PIN_SetMode(&pHandle->RST, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_UP);
 
-    PIN_WriteLevel(&pHandle->RST, PIN_LEVEL_LOW);  // 复位
+    PIN_WriteLevel(&pHandle->RST, PIN_LEVEL_LOW);  // hwrst
     DelayBlockMs(1);
     PIN_WriteLevel(&pHandle->RST, PIN_LEVEL_HIGH);
     DelayBlockMs(1);
 
-    _RC522_WriteRegister(pHandle, REG_COMMAND, PCD_RESETPHASE);
+    _RC522_WriteRegister(pHandle, REG_COMMAND, PCD_RESETPHASE);  // swrst
     DelayBlockMs(1);
 
     // 配置模式
@@ -202,18 +202,17 @@ err_t RC522_Init(spi_rc522_t* pHandle)
 }
 
 /**
-  * @brief 寻卡
-  * @param  req_code，寻卡方式 = 0x52，寻感应区内所有符合14443A标准的卡；
-            寻卡方式= 0x26，寻未进入休眠状态的卡
-  * @param  pTagType，卡片类型代码
-             = 0x4400，Mifare_UltraLight
-             = 0x0400，Mifare_One(S50)
-             = 0x0200，Mifare_One(S70)
-             = 0x0800，Mifare_Pro(X))
-             = 0x4403，Mifare_DESFire
-  * @retval 状态值 = ERR_NONE，成功
-  */
-uint8_t RC522_Request(spi_rc522_t* pHandle, uint8_t u8ReqCode, uint8_t* pu8TagType)
+ * @brief 寻卡
+ * @param  req_code，寻卡方式 = 0x52，寻感应区内所有符合14443A标准的卡；
+ *         寻卡方式= 0x26，寻未进入休眠状态的卡
+ * @param  pTagType，卡片类型代码
+ *          = 0x4400，Mifare_UltraLight
+ *          = 0x0400，Mifare_One(S50)
+ *          = 0x0200，Mifare_One(S70)
+ *          = 0x0800，Mifare_Pro(X)
+ *          = 0x4403，Mifare_DESFire
+ */
+err_t RC522_Request(spi_rc522_t* pHandle, uint8_t u8ReqCode, uint8_t* pu8TagType)
 {
     uint16_t u16Length;
     uint8_t  au8Buffer[MAXRLEN];
@@ -242,11 +241,9 @@ uint8_t RC522_Request(spi_rc522_t* pHandle, uint8_t u8ReqCode, uint8_t* pu8TagTy
 }
 
 /**
- * @brief  防冲撞
- * @param  pSnr，卡片序列号，4字节
- * @retval 状态值 = ERR_NONE，成功
+ * @brief 防冲撞
  */
-uint8_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8Snr)
+err_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8Snr)
 {
     uint8_t i;
 
@@ -264,18 +261,17 @@ uint8_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8Snr)
     au8Buffer[0] = PICC_ANTICOLL1;  // 卡片防冲突命令
     au8Buffer[1] = 0x20;
 
-    ERRCHK_RETURN(RC522_ComMF522(pHandle, PCD_TRANSCEIVE, au8Buffer, 2, au8Buffer, &u16Length));  // 与卡片通信
+    ERRCHK_RETURN(RC522_ComMF522(pHandle, PCD_TRANSCEIVE, au8Buffer, 2, au8Buffer, &u16Length));
 
-    // 通信成功
+    // check card serial number
     for (i = 0; i < 4; i++)
     {
-        pu8Snr[i] = au8Buffer[i];  // 读 UID
+        pu8Snr[i] = au8Buffer[i];
         u8SnrChk ^= au8Buffer[i];
     }
-
     if (u8SnrChk != au8Buffer[i])
     {
-        return ERR_INVALID_CRC;  // fail to check snr
+        return ERR_INVALID_CRC;
     }
 
     _RC522_SetBitMask(pHandle, REG_COLLISION, 0x80);
@@ -285,10 +281,8 @@ uint8_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8Snr)
 
 /**
  * @brief  选定卡片
- * @param  pSnr，卡片序列号，4字节
- * @retval 状态值 = ERR_NONE，成功
  */
-uint8_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8Snr)
+err_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8Snr)
 {
     uint8_t  i;
     uint16_t u16Length;
@@ -300,12 +294,11 @@ uint8_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8Snr)
 
     for (i = 0; i < 4; i++)
     {
-        au8Buffer[i + 2] = *(pu8Snr + i);
-        au8Buffer[6] ^= *(pu8Snr + i);
+        au8Buffer[i + 2] = pu8Snr[i];
+        au8Buffer[6] ^= pu8Snr[i];
     }
 
     _RC522_CRC(pHandle, au8Buffer, 7, &au8Buffer[7]);
-
     _RC522_ClearBitMask(pHandle, REG_STATUS2, 0x08);
 
     ERRCHK_RETURN(RC522_ComMF522(pHandle, PCD_TRANSCEIVE, au8Buffer, 9, au8Buffer, &u16Length));
@@ -320,14 +313,13 @@ uint8_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8Snr)
 
 /**
  * @brief  验证卡片密码
- * @param  auth_mode，密码验证模式= 0x60，验证A密钥，
- *                    密码验证模式= 0x61，验证B密钥
- * @param  addr，块地址
- * @param  pKey，密码
- * @param  pSnr，卡片序列号，4字节
- * @retval 状态值 = ERR_NONE，成功
+ * @param[in] auth_mode 密码验证模式= 0x60，验证A密钥，
+ *                       密码验证模式= 0x61，验证B密钥
+ * @param[in] addr 块地址
+ * @param[in] pKey 密码
+ * @param[in] pSnr 卡片序列号，4字节
  */
-uint8_t RC522_AuthState(spi_rc522_t* pHandle, uint8_t auth_mode, uint8_t addr, uint8_t* pKey, uint8_t* pu8Snr)
+err_t RC522_AuthState(spi_rc522_t* pHandle, uint8_t auth_mode, uint8_t addr, uint8_t* pKey, uint8_t* pu8Snr)
 {
     uint16_t u16Length;
     uint8_t  i, au8Buffer[MAXRLEN];
@@ -349,43 +341,34 @@ uint8_t RC522_AuthState(spi_rc522_t* pHandle, uint8_t auth_mode, uint8_t addr, u
 
 /**
  * @brief  读取M1卡一块数据
- * @param  addr，块地址（0-63）。M1卡总共有16个扇区(每个扇区有：3个数据块+1个控制块),共64个块
- * @param  pData，读出的数据，16字节
- * @retval 状态值 = ERR_NONE，成功
+ * @param[in] addr 块地址（0-63）。M1卡总共有16个扇区(每个扇区有：3个数据块+1个控制块),共64个块
+ * @param[in] pData 读出的数据，16字节
  */
-uint8_t RC522_Read(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
+err_t RC522_Read(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pu8Data)
 {
     uint16_t u16Length;
-    uint8_t  i, au8Buffer[MAXRLEN];
+    uint8_t  au8Buffer[MAXRLEN];
 
     au8Buffer[0] = PICC_READ;
-    au8Buffer[1] = addr;
+    au8Buffer[1] = u8BlockAddr;
     _RC522_CRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
-
     ERRCHK_RETURN(RC522_ComMF522(pHandle, PCD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
 
-    if (u16Length == 0x90)
-    {
-        for (i = 0; i < 16; i++)
-        {
-            pData[i] = au8Buffer[i];
-        }
-
-        return ERR_NONE;
-    }
-    else
+    if (u16Length != 0x90)
     {
         return ERR_FAIL;
     }
+
+    memcpy(&pu8Data[0], &au8Buffer[0], 16);
+    return ERR_NONE;
 }
 
 /**
  * @brief  写数据到M1卡一块
  * @param  addr，块地址（0-63）。M1卡总共有16个扇区(每个扇区有：3个数据块+1个控制块),共64个块
  * @param  pData，写入的数据，16字节
- * @retval 状态值 = ERR_NONE，成功
  */
-uint8_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
+err_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
 {
     uint16_t u16Length;
     uint8_t  i, au8Buffer[MAXRLEN];
@@ -401,10 +384,7 @@ uint8_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
         return ERR_FAIL;
     }
 
-    for (i = 0; i < 16; ++i)
-    {
-        au8Buffer[i] = *(pData + i);
-    }
+    memcpy(&au8Buffer[0], &pData[0], 16);
     _RC522_CRC(pHandle, au8Buffer, 16, &au8Buffer[16]);
 
     ERRCHK_RETURN(RC522_ComMF522(pHandle, PCD_TRANSCEIVE, au8Buffer, 18, au8Buffer, &u16Length));
@@ -417,7 +397,7 @@ uint8_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
     return ERR_NONE;
 }
 
-uint8_t RC522_Value(spi_rc522_t* pHandle, uint8_t dd_mode, uint8_t addr, uint8_t* pValue)
+err_t RC522_Value(spi_rc522_t* pHandle, uint8_t dd_mode, uint8_t addr, uint8_t* pValue)
 {
     uint16_t u16Length;
     uint8_t  i, au8Buffer[MAXRLEN];
@@ -453,7 +433,7 @@ uint8_t RC522_Value(spi_rc522_t* pHandle, uint8_t dd_mode, uint8_t addr, uint8_t
     return ERR_NONE;
 }
 
-uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t u8SrcAddr, uint8_t u8DstAddr)
+err_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t u8SrcAddr, uint8_t u8DstAddr)
 {
     uint16_t u16Length;
     uint8_t  au8Buffer[MAXRLEN];
@@ -493,7 +473,6 @@ uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t u8SrcAddr, uint8_t u8DstAdd
 
 /**
  * @brief  命令卡片进入休眠状态
- * @retval 状态值 = ERR_NONE，成功
  */
 err_t RC522_Halt(spi_rc522_t* pHandle)
 {
@@ -513,16 +492,26 @@ err_t RC522_Halt(spi_rc522_t* pHandle)
 void _RC522_CRC(spi_rc522_t* pHandle, uint8_t* pu8Indata, uint8_t u8Length, uint8_t* pu8OutData)
 {
     uint8_t i, n;
-    _RC522_ClearBitMask(pHandle, REG_DIV_IRQ, 0x04);
-    _RC522_WriteRegister(pHandle, REG_COMMAND, PCD_IDLE);
+
+    _RC522_ClearBitMask(pHandle, REG_DIV_IRQ, 0x04);       // CRCIrq = 0
+    _RC522_WriteRegister(pHandle, REG_COMMAND, PCD_IDLE);  // Clear the FIFO pointer
     _RC522_SetBitMask(pHandle, REG_FIFO_LEVEL, 0x80);
-    for (i = 0; i < u8Length; i++) { _RC522_WriteRegister(pHandle, REG_FIFO_DATA, *(pu8Indata + i)); }
+
+    // Writing data to the FIFO
+    for (i = 0; i < u8Length; i++)
+    {
+        _RC522_WriteRegister(pHandle, REG_FIFO_DATA, *(pu8Indata + i));
+    }
     _RC522_WriteRegister(pHandle, REG_COMMAND, PCD_CALCCRC);
+
+    // Wait CRC calculation is complete
     i = 0xFF;
     do {
         n = _RC522_ReadRegister(pHandle, REG_DIV_IRQ);
         i--;
-    } while ((i != 0) && !(n & 0x04));
+    } while ((i != 0) && !(n & 0x04));  // CRCIrq = 1
+
+    // Read CRC calculation result
     pu8OutData[0] = _RC522_ReadRegister(pHandle, REG_CRC_RESULT_L);
     pu8OutData[1] = _RC522_ReadRegister(pHandle, REG_CRC_RESULT_M);
 }
@@ -534,7 +523,6 @@ void _RC522_CRC(spi_rc522_t* pHandle, uint8_t* pu8Indata, uint8_t u8Length, uint
  * @param  ucInLenByte，发送数据的字节长度
  * @param  pOutData，接收到的卡片返回数据
  * @param  pOutLenBit，返回数据的位长度
- * @retval 状态值 = ERR_NONE，成功
  */
 uint8_t RC522_ComMF522(spi_rc522_t* pHandle,
                        uint8_t      Command,
@@ -737,35 +725,22 @@ void RC522_ReadWriteTest(spi_rc522_t* pHandle)
 void Read64Block(spi_rc522_t* pHandle)
 {
     uint8_t k = 0, p = 0;
-    uint8_t readdata[16];
-    uint8_t serNum[5];
+    uint8_t au8Data[16];
+    uint8_t au8SerNum[5];
+
     for (k = 0; k < 64; ++k)
     {
-        if (RC522_Request(pHandle, PICC_REQALL, g_ucTempbuf) != ERR_NONE)
+        if (RC522_Request(pHandle, PICC_REQALL, g_ucTempbuf) == ERR_NONE &&
+            RC522_Anticoll(pHandle, au8SerNum) == ERR_NONE &&
+            RC522_Select(pHandle, au8SerNum) == ERR_NONE &&
+            RC522_AuthState(pHandle, PICC_AUTHENT1A, k, defaultKeyA, au8SerNum) == ERR_NONE)
         {
-            continue;
-        }
-        if (RC522_Anticoll(pHandle, serNum) != ERR_NONE)
-        {
-            continue;
-        }
-        if (RC522_Select(pHandle, serNum) != ERR_NONE)
-        {
-            continue;
-        }
-        if (RC522_AuthState(pHandle, PICC_AUTHENT1A, k, defaultKeyA, serNum) != ERR_NONE)
-        {
-            continue;
-        }
-        PRINTF("[%03d] ", k);
-        if (RC522_Read(pHandle, k, readdata) == ERR_NONE)
-        {
-            for (p = 0; p < 16; ++p)
+            PRINTF("[%03d] ", k);
+            if (RC522_Read(pHandle, k, au8Data) == ERR_NONE)
             {
-                PRINTF("%02x ", readdata[p]);
+                hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 1, false, "", 0);
+                RC522_Halt(pHandle);
             }
-            PRINTLN("");
-            RC522_Halt(pHandle);
         }
     }
 }
