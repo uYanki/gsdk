@@ -283,7 +283,6 @@ uint8_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8Snr)
  */
 uint8_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8Snr)
 {
-    uint8_t  u8Status;
     uint8_t  i;
     uint16_t u16Length;
     uint8_t  au8Buffer[MAXRLEN];
@@ -337,13 +336,13 @@ uint8_t RC522_AuthState(spi_rc522_t* pHandle, uint8_t auth_mode, uint8_t addr, u
     {
         au8Buffer[i + 8] = *(pu8Snr + i);
     }
-    u8Status = RC522_ComMF522(pHandle, CMD_AUTHENT, au8Buffer, 12, au8Buffer, &u16Length);
-    if ((u8Status != ERR_NONE) || (!(_RC522_ReadRegister(pHandle, REG_STATUS2) & 0x08)))
+    ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_AUTHENT, au8Buffer, 12, au8Buffer, &u16Length));
+    if ((!(_RC522_ReadRegister(pHandle, REG_STATUS2) & 0x08)))
     {
-        u8Status = MI_ERR;
+        return MakeError(ERR_FAIL, "");
     }
 
-    return u8Status;
+    return ERR_NONE;
 }
 
 /**
@@ -362,7 +361,7 @@ uint8_t RC522_Read(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
     au8Buffer[1] = addr;
     CalulateCRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
 
-    u8Status = RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length);
+    ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
     if ((u8Status == ERR_NONE) && (u16Length == 0x90))
     {
         for (i = 0; i < 16; i++)
@@ -372,10 +371,10 @@ uint8_t RC522_Read(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
     }
     else
     {
-        u8Status = MI_ERR;
+        return MakeError(ERR_FAIL, "");
     }
 
-    return u8Status;
+    return ERR_NONE;
 }
 
 /**
@@ -386,7 +385,6 @@ uint8_t RC522_Read(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
  */
 uint8_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
 {
-    uint8_t  u8Status;
     uint16_t u16Length;
     uint8_t  i, au8Buffer[MAXRLEN];
 
@@ -394,28 +392,27 @@ uint8_t RC522_Write(spi_rc522_t* pHandle, uint8_t addr, uint8_t* pData)
     au8Buffer[1] = addr;
     CalulateCRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
 
-    u8Status = RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length);
+    ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
 
-    if ((u8Status != ERR_NONE) || (u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
+    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
     {
-        u8Status = MI_ERR;
+        return MakeError(ERR_FAIL, "");
     }
 
-    if (u8Status == ERR_NONE)
-    {
+
         for (i = 0; i < 16; ++i)
         {
             au8Buffer[i] = *(pData + i);
         }
         CalulateCRC(pHandle, au8Buffer, 16, &au8Buffer[16]);
-        u8Status = RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 18, au8Buffer, &u16Length);
-        if ((u8Status != ERR_NONE) || (u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
+        ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 18, au8Buffer, &u16Length));
+        if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
         {
-            u8Status = MI_ERR;
+            return MakeError(ERR_FAIL, "");
         }
-    }
+    
 
-    return u8Status;
+    return ERR_NONE;
 }
 
 uint8_t RC522_Value(spi_rc522_t* pHandle, uint8_t dd_mode, uint8_t addr, uint8_t* pValue)
@@ -463,9 +460,9 @@ uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t sourceaddr, uint8_t goaladd
     au8Buffer[1] = sourceaddr;
     CalulateCRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
 
-    u8Status = RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length);
+    ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
 
-    if ((u8Status != ERR_NONE) || (u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A)) { u8Status = MI_ERR; }
+    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A)) { return MakeError(ERR_FAIL, ""); }
 
     if (u8Status == ERR_NONE)
     {
@@ -475,7 +472,7 @@ uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t sourceaddr, uint8_t goaladd
         au8Buffer[3] = 0;
         CalulateCRC(pHandle, au8Buffer, 4, &au8Buffer[4]);
 
-        u8Status = RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 6, au8Buffer, &u16Length);
+        ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 6, au8Buffer, &u16Length));
         if (u8Status != MI_ERR) { u8Status = ERR_NONE; }
     }
 
@@ -486,11 +483,11 @@ uint8_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t sourceaddr, uint8_t goaladd
 
     CalulateCRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
 
-    u8Status = RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length);
+    ERROR_CHECK_RETURN(RC522_ComMF522(pHandle, CMD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
 
-    if ((u8Status != ERR_NONE) || (u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A)) { u8Status = MI_ERR; }
+    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A)) { return MakeError(ERR_FAIL, ""); }
 
-    return u8Status;
+    return ERR_NONE;
 }
 
 /**
@@ -542,9 +539,8 @@ uint8_t RC522_ComMF522(spi_rc522_t* pHandle,
                        uint8_t*     pu8OutData,
                        uint16_t*    pOutLenBit)
 {
-    uint8_t  u8Status = MI_ERR;
-    uint8_t  irqEn    = 0x00;
-    uint8_t  waitFor  = 0x00;
+    uint8_t  irqEn   = 0x00;
+    uint8_t  waitFor = 0x00;
     uint8_t  lastBits;
     uint8_t  n;
     uint16_t i;
@@ -606,11 +602,11 @@ uint8_t RC522_ComMF522(spi_rc522_t* pHandle,
         // 读错误标志寄存器BufferOfI CollErr ParityErr ProtocolErr
         if (!(_RC522_ReadRegister(pHandle, REG_ERROR) & 0x1B))
         {
-            u8Status = ERR_NONE;
+           
             // 是否发生定时器中断
             if (n & irqEn & 0x01)
             {
-                u8Status = MI_NOTAGERR;
+							return MakeError(ERR_NOT_EXIST, "no tag");
             }
 
             if (Command == CMD_TRANSCEIVE)
@@ -645,12 +641,12 @@ uint8_t RC522_ComMF522(spi_rc522_t* pHandle,
         }
         else
         {
-            u8Status = MI_ERR;
+            return MakeError(ERR_FAIL, "");
         }
     }
     _RC522_SetBitMask(pHandle, REG_CONTROL, 0x80);  // stop timer now
     _RC522_WriteRegister(pHandle, REG_COMMAND, CMD_IDLE);
-    return u8Status;
+    return ERR_NONE;
 }
 
 void RC522_AntennaOn(spi_rc522_t* pHandle)
