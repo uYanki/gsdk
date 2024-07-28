@@ -68,11 +68,11 @@ err_t BH1750_Init(i2c_bh1750_t* pHandle)
         return ERR_NOT_EXIST;  // device doesn't exist
     }
 
-    ERRCHK_RET(BH1750_PowerOff(pHandle));
+    ERRCHK_RETURN(BH1750_PowerOff(pHandle));
     DelayBlockMs(100);
-    ERRCHK_RET(BH1750_PowerOn(pHandle));
-    ERRCHK_RET(BH1750_SetModeRes(pHandle, BH1750_CONTINUE_HIGH_RES));  // 高分辨率连续测量
-    ERRCHK_RET(BH1750_SetSensitivity(pHandle, 69));                    // 芯片缺省灵敏度倍率
+    ERRCHK_RETURN(BH1750_PowerOn(pHandle));
+    ERRCHK_RETURN(BH1750_SetModeRes(pHandle, BH1750_CONTINUE_HIGH_RES));  // 高分辨率连续测量
+    ERRCHK_RETURN(BH1750_SetSensitivity(pHandle, 69));                    // 芯片缺省灵敏度倍率
 
     return ERR_NONE;
 }
@@ -97,7 +97,7 @@ err_t BH1750_Reset(i2c_bh1750_t* pHandle)
  */
 err_t BH1750_SetModeRes(i2c_bh1750_t* pHandle, bh1750_mode_e eMode)
 {
-    ERRCHK_RET(BH1750_WriteCmd(pHandle, (uint8_t)eMode));
+    ERRCHK_RETURN(BH1750_WriteCmd(pHandle, (uint8_t)eMode));
     pHandle->_eMeasureMode = eMode;
     return ERR_NONE;
 }
@@ -110,11 +110,11 @@ err_t BH1750_SetSensitivity(i2c_bh1750_t* pHandle, uint8_t u8Sensitivity)
 {
     u8Sensitivity = CLAMP(u8Sensitivity, 31, 254);
 
-    ERRCHK_RET(BH1750_WriteCmd(pHandle, 0x40 + (u8Sensitivity >> 5)));   /* 更改高3bit */
-    ERRCHK_RET(BH1750_WriteCmd(pHandle, 0x60 + (u8Sensitivity & 0x1F))); /* 更改低5bit */
+    ERRCHK_RETURN(BH1750_WriteCmd(pHandle, 0x40 + (u8Sensitivity >> 5)));   /* 更改高3bit */
+    ERRCHK_RETURN(BH1750_WriteCmd(pHandle, 0x60 + (u8Sensitivity & 0x1F))); /* 更改低5bit */
 
     /*　更改量程范围后，需要重新发送命令设置测量模式　*/
-    ERRCHK_RET(BH1750_SetModeRes(pHandle, pHandle->_eMeasureMode));
+    ERRCHK_RETURN(BH1750_SetModeRes(pHandle, pHandle->_eMeasureMode));
 
     pHandle->_u8Sensitivity = u8Sensitivity;
 
@@ -128,7 +128,7 @@ err_t BH1750_GetLux(i2c_bh1750_t* pHandle, float32_t* pf32Lux)
 {
     uint16_t u16Data;
 
-    ERRCHK_RET(BH1750_ReadData(pHandle, &u16Data));
+    ERRCHK_RETURN(BH1750_ReadData(pHandle, &u16Data));
 
     *pf32Lux = (float32_t)(u16Data * 5 * 69) / (6 * pHandle->_u8Sensitivity);
 

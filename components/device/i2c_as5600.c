@@ -136,7 +136,7 @@ err_t AS5600_SetWatchDog(i2c_as5600_t* pHandle, bool bEnable)
 err_t AS5600_GetWatchDog(i2c_as5600_t* pHandle, bool* pbEnable)
 {
     uint8_t* u8Conf;
-    ERRCHK_RET(AS5600_WriteBits(pHandle, REG_CONF_H, 5, 1, &u8Conf));
+    ERRCHK_RETURN(AS5600_WriteBits(pHandle, REG_CONF_H, 5, 1, &u8Conf));
     *pbEnable = u8Conf ? true : false;
     return ERR_NONE;
 }
@@ -212,7 +212,7 @@ err_t AS5600_GetStatus(i2c_as5600_t* pHandle, uint8_t* pu8Status)
 err_t AS5600_DetectMagnet(i2c_as5600_t* pHandle, bool* pbExist)
 {
     uint8_t u8State;
-    ERRCHK_RET(AS5600_GetStatus(pHandle, &u8State));
+    ERRCHK_RETURN(AS5600_GetStatus(pHandle, &u8State));
     *pbExist = (u8State & AS5600_STATUS_MD) ? true : false;
     return ERR_NONE;
 }

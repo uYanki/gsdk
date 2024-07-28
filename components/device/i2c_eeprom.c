@@ -77,7 +77,7 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
         case AT24CM02: u16PageSize = 256; break;
         default:
         {
-            return MakeError(ERR_INVALID_VALUE,"capacity is unsupported");
+            return ERR_INVALID_VALUE; // capacity is unsupported
         }
     }
     // clang-format on
@@ -116,7 +116,7 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
             return ERR_TIMEOUT;  // eeprom doesn't ready
         }
 
-        ERRCHK_RET(I2C_Master_WriteBlock(pHandle->hI2C, u16SlvAddr, u16MemAddr, cpu8Buffer, u16XferSize, u16Flags));
+        ERRCHK_RETURN(I2C_Master_WriteBlock(pHandle->hI2C, u16SlvAddr, u16MemAddr, cpu8Buffer, u16XferSize, u16Flags));
 
         u32MemAddr += (uint32_t)u16XferSize;
         cpu8Buffer += u16XferSize;
@@ -187,7 +187,7 @@ err_t EEPROM_Hexdump(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Siz
     {
         u16XferSize = MIN(u16Size, ARRAY_SIZE(u8Buff));
 
-        ERRCHK_RET(EEPROM_ReadBlock(pHandle, u32MemAddr, &u8Buff[0], u16XferSize));
+        ERRCHK_RETURN(EEPROM_ReadBlock(pHandle, u32MemAddr, &u8Buff[0], u16XferSize));
         hexdump(&u8Buff[0], u16XferSize, 16, 4, true, nullptr, u32MemAddr);
 
         u32MemAddr += u16XferSize;

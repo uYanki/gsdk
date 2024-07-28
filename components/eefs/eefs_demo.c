@@ -103,7 +103,7 @@ static err_t EEFS_Setup(void)
 
 err_t EEFS_Test(void)
 {
-    ERRCHK_RET(EEFS_Setup());
+    ERRCHK_RETURN(EEFS_Setup());
 
     char* szFileWrData     = "hello world!";
     char  szFileRdData[32] = {0};

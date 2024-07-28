@@ -37,7 +37,7 @@ err_t PCF8574_ReadPort(i2c_pcf8574_t* pHandle, uint8_t* pu8InputState)
 
 err_t PCF8574_WritePort(i2c_pcf8574_t* pHandle, uint8_t u8OutputState)
 {
-    ERRCHK_RET(I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8OutputState, I2C_FLAG_7BIT_SLVADDR));
+    ERRCHK_RETURN(I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8OutputState, I2C_FLAG_7BIT_SLVADDR));
     pHandle->_u8OutputState = u8OutputState;
     return ERR_NONE;
 }
@@ -50,7 +50,7 @@ err_t PCF8574_TogglePort(i2c_pcf8574_t* pHandle)
 err_t PCF8574_ReadPins(i2c_pcf8574_t* pHandle, uint8_t u8PinMask, pin_level_e* peLevel)
 {
     uint8_t u8State;
-    ERRCHK_RET(PCF8574_ReadPort(pHandle, &u8State));
+    ERRCHK_RETURN(PCF8574_ReadPort(pHandle, &u8State));
     *peLevel = (u8State & u8PinMask) ? PIN_LEVEL_HIGH : PIN_LEVEL_LOW;
     return ERR_NONE;
 }
@@ -108,9 +108,9 @@ err_t PCF8574_ReadKey(i2c_pcf8574_t* pHandle, pcf8574_pin_e ePin, bool* pbIsPres
     uint8_t     u8PinMask     = (uint8_t)ePin;
     pin_level_e ePinLevel;
 
-    ERRCHK_RET(PCF8574_WritePins(pHandle, u8PinMask, PIN_LEVEL_HIGH));
-    ERRCHK_RET(PCF8574_ReadPins(pHandle, u8PinMask, &ePinLevel));
-    ERRCHK_RET(PCF8574_WritePort(pHandle, u8OutputState));
+    ERRCHK_RETURN(PCF8574_WritePins(pHandle, u8PinMask, PIN_LEVEL_HIGH));
+    ERRCHK_RETURN(PCF8574_ReadPins(pHandle, u8PinMask, &ePinLevel));
+    ERRCHK_RETURN(PCF8574_WritePort(pHandle, u8OutputState));
 
     *pbIsPressed = (ePinLevel == PIN_LEVEL_LOW);
 
@@ -128,8 +128,8 @@ err_t PCF8574_ScanMatrixkey4x4(i2c_pcf8574_t* pHandle, uint8_t* pu8KeyIndex)
     {
         u8OutputState = 0xF0 | ~BV(i);
 
-        ERRCHK_RET(PCF8574_WritePort(pHandle, u8OutputState));
-        ERRCHK_RET(PCF8574_ReadPort(pHandle, &u8InputState));
+        ERRCHK_RETURN(PCF8574_WritePort(pHandle, u8OutputState));
+        ERRCHK_RETURN(PCF8574_ReadPort(pHandle, &u8InputState));
 
         u8InputState = ~u8InputState & 0xF0;
 

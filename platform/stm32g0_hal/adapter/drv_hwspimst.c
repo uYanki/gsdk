@@ -13,15 +13,15 @@
 
 #define SPI_TIMEOUT     0xFF
 
-#define MakeError_(eStatus)               \
-    do {                                  \
-        switch (eStatus)                  \
-        {                                 \
-            case HAL_OK: return ERR_NONE; \
-            case HAL_BUSY: return ERR_BUSY;  // busy          \
-            case HAL_TIMEOUT: return ERR_TIMEOUT; // timeout \
-            default: return ERR_FAIL; // generic error       \
-        }                                                               \
+#define MakeError_(eStatus)                       \
+    do {                                          \
+        switch (eStatus)                          \
+        {                                         \
+            case HAL_OK: return ERR_NONE;         \
+            case HAL_BUSY: return ERR_BUSY;       \
+            case HAL_TIMEOUT: return ERR_TIMEOUT; \
+            default: return ERR_FAIL;             \
+        }                                         \
     } while (0)
 
 //---------------------------------------------------------------------------

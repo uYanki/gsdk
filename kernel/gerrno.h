@@ -47,14 +47,6 @@ typedef int32_t err_t;
  * @}
  */
 
-#if 1
-#define MakeError(errno, reason, ...) \
-    PRINTLN(reason, ##__VA_ARGS__), -(errno)
-#else
-#define MakeError(errno, reason, ...) \
-    UNUSED(reason, ##__VA_ARGS__), -(errno)
-#endif
-
 /**
  * @brief error check
  * @{
@@ -74,33 +66,33 @@ typedef int32_t err_t;
 #undef errno
 #endif
 
-#define ERROR_CHECK_ABORT(expr) \
-    do {                        \
-        err_t errno = (expr);   \
-                                \
-        if (errno < 0)          \
-        {                       \
-            abort();            \
-        }                       \
-                                \
+#define ERRCHK_ABORT(expr)    \
+    do {                      \
+        err_t errno = (expr); \
+                              \
+        if (errno != 0)       \
+        {                     \
+            abort();          \
+        }                     \
+                              \
     } while (0)
 
 #define ERRCHK_EXIT(expr)     \
     do {                      \
         err_t errno = (expr); \
                               \
-        if (errno < 0)        \
+        if (errno != 0)       \
         {                     \
             return;           \
         }                     \
                               \
     } while (0)
 
-#define ERRCHK_RET(expr)      \
+#define ERRCHK_RETURN(expr)   \
     do {                      \
         err_t errno = (expr); \
                               \
-        if (errno < 0)        \
+        if (errno != 0)       \
         {                     \
             return errno;     \
         }                     \
@@ -111,7 +103,7 @@ typedef int32_t err_t;
     do {                                \
         errno = (expr);                 \
                                         \
-        if (errno < 0)                  \
+        if (errno != 0)                 \
         {                               \
             goto label;                 \
         }                               \

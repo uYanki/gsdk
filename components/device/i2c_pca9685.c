@@ -66,22 +66,22 @@ err_t PCA9685_Init(i2c_pca9685_t* pHandle)
     pHandle->_f32PeriodUs = 0;
 #endif
 
-    ERRCHK_RET(PCA9685_WriteByte(pHandle, REG_MODE1, 0x00));  // reset
+    ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, 0x00));  // reset
 
     return ERR_NONE;
 }
 
 err_t PCA9685_SetDuty(i2c_pca9685_t* pHandle, pca9685_channel_e eChannel, uint16_t u16PulseOn, uint16_t u16PulseOff)
 {
-    ERRCHK_RET(PCA9685_WriteWord(pHandle, REG_LED0_ON_L + 4 * eChannel, u16PulseOn));
-    ERRCHK_RET(PCA9685_WriteWord(pHandle, REG_LED0_OFF_L + 4 * eChannel, u16PulseOff));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_LED0_ON_L + 4 * eChannel, u16PulseOn));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_LED0_OFF_L + 4 * eChannel, u16PulseOff));
     return ERR_NONE;
 }
 
 err_t PCA9685_SetAllDuty(i2c_pca9685_t* pHandle, uint16_t u16PulseOn, uint16_t u16PulseOff)
 {
-    ERRCHK_RET(PCA9685_WriteWord(pHandle, REG_ALLLED_ON_L, u16PulseOn));
-    ERRCHK_RET(PCA9685_WriteWord(pHandle, REG_ALLLED_OFF_L, u16PulseOff));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_ALLLED_ON_L, u16PulseOn));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_ALLLED_OFF_L, u16PulseOff));
     return ERR_NONE;
 }
 
@@ -106,16 +106,16 @@ err_t PCA9685_SetFreq(i2c_pca9685_t* pHandle, float32_t f32PwmFreq)
         u8Prescale = 25000000.f / 4096.f / f32PwmFreq * 0.915f;
     }
 
-    ERRCHK_RET(PCA9685_ReadByte(pHandle, REG_MODE1, &u8OldMode));
+    ERRCHK_RETURN(PCA9685_ReadByte(pHandle, REG_MODE1, &u8OldMode));
     // setup sleep mode, Low power mode. Oscillator off (bit4: 1-sleep, 0-normal)
-    ERRCHK_RET(PCA9685_WriteByte(pHandle, REG_MODE1, (u8OldMode & 0x7F) | 0x10));
+    ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, (u8OldMode & 0x7F) | 0x10));
     // set the prescaler
-    ERRCHK_RET(PCA9685_WriteByte(pHandle, REG_PRESCALE, u8Prescale));
+    ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_PRESCALE, u8Prescale));
     // setup normal mode (bit4: 1-sleep, 0-normal)
-    ERRCHK_RET(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode));
+    ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode));
     DelayBlockMs(5);
     // PCA9685_WriteByte(pHandle,REG_MODE1, oldmode | 0xa1);
-    ERRCHK_RET(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode | 0x80));
+    ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode | 0x80));
     // pHandle sets the MODE1 register to turn on auto increment.
     // pHandle is why the beginTransmission below was not working.
 
@@ -130,7 +130,7 @@ err_t PCA9685_SetAngle_Servo(i2c_pca9685_t* pHandle, pca9685_channel_e eChannel,
 {
     ASSERT(pHandle->_f32PeriodUs > 0.00001f, );
     float32_t f32PulseOff = (float32_t)u8Angle / 180 * 2000 + 500;  // map [0,180] to [500,2500]
-    ERRCHK_RET(PCA9685_SetDuty(pHandle, eChannel, 0, 4095.f * f32PulseOff / pHandle->_f32PeriodUs));
+    ERRCHK_RETURN(PCA9685_SetDuty(pHandle, eChannel, 0, 4095.f * f32PulseOff / pHandle->_f32PeriodUs));
     return ERR_NONE;
 }
 
@@ -138,7 +138,7 @@ err_t PCA9685_SetAngle_AllServo(i2c_pca9685_t* pHandle, uint8_t u8Angle)
 {
     ASSERT(pHandle->_f32PeriodUs > 0.00001f, );
     float32_t f32PulseOff = (float32_t)u8Angle / 180 * 2000 + 500;  // map [0,180] to [500,2500]
-    ERRCHK_RET(PCA9685_SetAllDuty(pHandle, 0, 4095.f * f32PulseOff / pHandle->_f32PeriodUs));
+    ERRCHK_RETURN(PCA9685_SetAllDuty(pHandle, 0, 4095.f * f32PulseOff / pHandle->_f32PeriodUs));
     return ERR_NONE;
 }
 

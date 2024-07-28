@@ -427,12 +427,12 @@ err_t MCP2515_Reset(spi_mcp2515_t* pHandle)
 
     for (uint8_t i = 0; i < ARRAY_SIZE(aFilters); i++)
     {
-        ERRCHK_RET(MCP2515_SetFilter(pHandle, aFilters[i], i == 1, 0));
+        ERRCHK_RETURN(MCP2515_SetFilter(pHandle, aFilters[i], i == 1, 0));
     }
 
     for (uint8_t i = 0; i < ARRAY_SIZE(aMask); i++)
     {
-        ERRCHK_RET(MCP2515_SetFilterMask(pHandle, aMask[i], true, 0));
+        ERRCHK_RETURN(MCP2515_SetFilterMask(pHandle, aMask[i], true, 0));
     }
 
     return ERR_NONE;
@@ -519,7 +519,7 @@ err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, mcp2515_mode_e eMode)
 
 err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock)
 {
-    ERRCHK_RET(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
+    ERRCHK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     bool    bMatched = true;
     uint8_t aCFG[3]  = {0};
@@ -657,7 +657,7 @@ static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, __OUT uint8_t* pu8Buffer,
 
 err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask, bool bExtFrame, uint32_t u32Data)
 {
-    ERRCHK_RET(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
+    ERRCHK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     uint8_t u8Addr;
     uint8_t au8Data[4];
@@ -677,7 +677,7 @@ err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask,
 
 err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool bExtFrame, uint32_t u32Data)
 {
-    ERRCHK_RET(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
+    ERRCHK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     uint8_t u8Addr;
     uint8_t au8Data[4];

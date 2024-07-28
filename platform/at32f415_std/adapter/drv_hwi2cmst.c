@@ -13,14 +13,14 @@
 
 #define I2C_TIMEOUT     0xFF
 
-#define MakeError_(eStatus)               \
-    do {                                  \
-        switch (eStatus)                  \
-        {                                 \
-            case I2C_OK: return ERR_NONE; \
-            case I2C_ERR_BUSY: return ERR_BUSY;  // busy \
-            default: return ERR_TIMEOUT; // timeout     \
-        }                                                          \
+#define MakeError_(eStatus)                     \
+    do {                                        \
+        switch (eStatus)                        \
+        {                                       \
+            case I2C_OK: return ERR_NONE;       \
+            case I2C_ERR_BUSY: return ERR_BUSY; \
+            default: return ERR_TIMEOUT;        \
+        }                                       \
     } while (0)
 
 //---------------------------------------------------------------------------
