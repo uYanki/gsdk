@@ -682,11 +682,10 @@ bool RC522_IsDataBlock(spi_rc522_t* pHandle, uint8_t u8Addr)
 
 #include "hexdump.h"
 
-uint8_t g_ucTempbuf[20];
-uint8_t flag_loop       = 0;
-uint8_t defaultKeyA[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+static uint8_t m_au8TempBuf[20];
+static uint8_t m_au8DefaultKeyA[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-static uint8_t CompareID(uint8_t* au8CardID, uint8_t* au8CompareID)
+static bool CompareID(uint8_t* au8CardID, uint8_t* au8CompareID)
 {
     uint8_t i;
 
@@ -694,23 +693,23 @@ static uint8_t CompareID(uint8_t* au8CardID, uint8_t* au8CompareID)
     {
         if (au8CardID[i] != au8CompareID[i])
         {
-            return ERR_MISMACTH;  // id mismatch
+            return false;  // mismatch
         }
     }
 
-    return ERR_NONE;
+    return true;
 }
 
-void RC522_ReadWriteTest(spi_rc522_t* pHandle)
+static void ReadWriteTest(spi_rc522_t* pHandle)
 {
     uint8_t u8Addr = 5;
     uint8_t au8SerNum[5];
     uint8_t au8Data[16];
 
-    ERRCHK_EXIT(RC522_Request(pHandle, PICC_REQALL, g_ucTempbuf));
+    ERRCHK_EXIT(RC522_Request(pHandle, PICC_REQALL, m_au8TempBuf));
     ERRCHK_EXIT(RC522_Anticoll(pHandle, au8SerNum));
     ERRCHK_EXIT(RC522_Select(pHandle, au8SerNum));
-    ERRCHK_EXIT(RC522_AuthState(pHandle, PICC_AUTHENT1A, u8Addr, defaultKeyA, au8SerNum));
+    ERRCHK_EXIT(RC522_AuthState(pHandle, PICC_AUTHENT1A, u8Addr, m_au8DefaultKeyA, au8SerNum));
 
     ERRCHK_EXIT(RC522_Read(pHandle, u8Addr, au8Data));  // 读取
     hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 1, false, "RD: ", 0);
@@ -722,7 +721,7 @@ void RC522_ReadWriteTest(spi_rc522_t* pHandle)
     RC522_Halt(pHandle);
 }
 
-void Read64Block(spi_rc522_t* pHandle)
+static void Read64Block(spi_rc522_t* pHandle)
 {
     uint8_t k = 0, p = 0;
     uint8_t au8Data[16];
@@ -730,10 +729,10 @@ void Read64Block(spi_rc522_t* pHandle)
 
     for (k = 0; k < 64; ++k)
     {
-        if (RC522_Request(pHandle, PICC_REQALL, g_ucTempbuf) == ERR_NONE &&
+        if (RC522_Request(pHandle, PICC_REQALL, m_au8TempBuf) == ERR_NONE &&
             RC522_Anticoll(pHandle, au8SerNum) == ERR_NONE &&
             RC522_Select(pHandle, au8SerNum) == ERR_NONE &&
-            RC522_AuthState(pHandle, PICC_AUTHENT1A, k, defaultKeyA, au8SerNum) == ERR_NONE)
+            RC522_AuthState(pHandle, PICC_AUTHENT1A, k, m_au8DefaultKeyA, au8SerNum) == ERR_NONE)
         {
             PRINTF("[%03d] ", k);
             if (RC522_Read(pHandle, k, au8Data) == ERR_NONE)
@@ -774,46 +773,46 @@ void RC522_Test(void)
     };
 #endif
 
+    uint8_t au8MyID[5] = {0x2c, 0xff, 0xd3, 0x21};
+
     SPI_Master_Init(&spi, 1000000, SPI_DUTYCYCLE_33_67, RC522_SPI_TIMING | SPI_FLAG_SOFT_CS);  // clk spd
 
-    uint8_t MyID[5] = {0x2c, 0xff, 0xd3, 0x21};
     RC522_Init(&rc522);
-    LOGI("RFID Reading\r\n");
+
+    LOGI("RFID Scaning\r\n");
+
     while (1)
     {
-        if (RC522_Request(&rc522, PICC_REQALL, g_ucTempbuf) != ERR_NONE)
+        static bool bDetected = false;
+
+        if (RC522_Request(&rc522, PICC_REQALL, m_au8TempBuf) == ERR_NONE &&
+            RC522_Anticoll(&rc522, m_au8TempBuf) == ERR_NONE)
         {
-            flag_loop = 0;
-            continue;
-        }
-        if (RC522_Anticoll(&rc522, g_ucTempbuf) != ERR_NONE)
-        {
-            flag_loop = 0;
-            continue;
-        }
-        if (flag_loop == 1)
-        {
+            if (bDetected)
+            {
+                RC522_Halt(&rc522);
+                continue;
+            }
+
+            hexdump(m_au8TempBuf, 4, 16, 1, false, "UID: ", 0);
+            LOGI("%s", CompareID(m_au8TempBuf, au8MyID) ? "match" : "mismatch");
+
             RC522_Halt(&rc522);
-            continue;
-        }
-        flag_loop = 1;
-        LOGI("\r\n[UID] %x:%x:%x:%x", g_ucTempbuf[0], g_ucTempbuf[1], g_ucTempbuf[2], g_ucTempbuf[3]);
-        RC522_Halt(&rc522);
-        if (CompareID(g_ucTempbuf, MyID) == ERR_NONE)
-        {
-            LOGI(" [CHECK] True");
+
+#if 0
+            LOGI("Read 64 sectors\r\n");
+            Read64Block(&rc522);
+#else
+            LOGI("Read Write Block");
+            ReadWriteTest(&rc522);
+#endif
+
+            bDetected = true;
         }
         else
         {
-            LOGI(" [CHECK] False");
+            bDetected = false;
         }
-#if 0
-        // PRINTF("Read 64 sectors\r\n");
-        // Read64Block();
-#else
-        LOGI("Read Write Block");
-        RC522_ReadWriteTest(&rc522);
-#endif
     }
 }
 

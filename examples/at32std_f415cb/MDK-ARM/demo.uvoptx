@@ -159,7 +159,7 @@
           <Type>0</Type>
           <LineNumber>949</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134228348</Address>
+          <Address>134227952</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -175,7 +175,7 @@
           <Type>0</Type>
           <LineNumber>517</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134228108</Address>
+          <Address>134227730</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -185,6 +185,70 @@
           <Filename>..\..\..\components\device\spi_mcp2515.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\demo\../../../components/device/spi_mcp2515.c\517</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>709</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134230880</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\..\components\device\spi_mfrc522.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../../../components/device/spi_mfrc522.c\709</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>710</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134230910</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\..\components\device\spi_mfrc522.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../../../components/device/spi_mfrc522.c\710</Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>711</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134230934</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\..\components\device\spi_mfrc522.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../../../components/device/spi_mfrc522.c\711</Expression>
+        </Bp>
+        <Bp>
+          <Number>5</Number>
+          <Type>0</Type>
+          <LineNumber>712</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134230958</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\..\components\device\spi_mfrc522.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\demo\../../../components/device/spi_mfrc522.c\712</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

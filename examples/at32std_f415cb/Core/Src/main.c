@@ -47,8 +47,8 @@ int main(void)
 
     DbgUartInit(115200);
     DelayInit();
-	RC522_Test();
-	MCP2515_Test();
+    RC522_Test();
+    MCP2515_Test();
 
 #if 0  // eeprom demo
 
@@ -66,7 +66,7 @@ int main(void)
 #endif
 
 #if 1  // lcd demo
-		ST7735_Test();
+    ST7735_Test();
 #endif
 
     while (1)
