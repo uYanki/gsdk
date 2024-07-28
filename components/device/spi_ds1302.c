@@ -18,7 +18,6 @@
  * @brief registers
  * @note  burst mode: 从地址0开始，单次读/写多个连续的寄存器
  */
-
 #define REG_SEC        0x00 /* second, 秒 0-59 */
 #define REG_MIN        0x01 /* minute, 分 0-59 */
 #define REG_HOUR       0x02 /* hour, 时 1-12/1-24 */

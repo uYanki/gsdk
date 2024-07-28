@@ -93,25 +93,25 @@
       <flags>2</flags>
       <showCmd>3</showCmd>
       <MinPosition>
-        <xPos>-1</xPos>
-        <yPos>-1</yPos>
+        <xPos>-32000</xPos>
+        <yPos>-32000</yPos>
       </MinPosition>
       <MaxPosition>
         <xPos>-1</xPos>
         <yPos>-1</yPos>
       </MaxPosition>
       <NormalPosition>
-        <Top>165</Top>
-        <Left>-59</Left>
-        <Right>1232</Right>
-        <Bottom>886</Bottom>
+        <Top>138</Top>
+        <Left>-196</Left>
+        <Right>1095</Right>
+        <Bottom>859</Bottom>
       </NormalPosition>
     </WindowPosition>
     <MDIClientArea>
       <RegID>0</RegID>
       <MDITabState>
-        <Len>244</Len>
-        <Data>01000000040000000100000001000000010000000100000000000000020000000000000001000000010000000000000028000000280000000100000001000000000000000100000030463A5C6773646B5C6578616D706C65735C73746D333268616C5F6634303776655C436F72655C5372635C6D61696E2E6300000000066D61696E2E6300000000BCA8E100FFFFFFFF0100000010000000C5D4F200FFDC7800BECEA100F0A0A100BCA8E1009CC1B600F7B88600D9ADC200A5C2D700B3A6BE00EAD6A300F6FA7D00B5E99D005FC3CF00C1838300CACAD5000100000000000000020000003301000066000000AB0600007E020000</Data>
+        <Len>700</Len>
+        <Data>01000000040000000100000001000000010000000100000000000000020000000000000001000000010000000100000028000000280000000200000005000000020000000000000030463A5C6773646B5C6578616D706C65735C73746D333268616C5F6634303776655C436F72655C5372635C6D61696E2E6300000000066D61696E2E6301000000BCA8E100FFFFFFFF27463A5C6773646B5C636F6D706F6E656E74735C6465766963655C7370695F6D6672633532322E63000000000D7370695F6D6672633532322E6301000000FFDC7800FFFFFFFF26463A5C6773646B5C636F6D706F6E656E74735C6465766963655C7370695F7374373733352E63000000000C7370695F7374373733352E6301000000BECEA100FFFFFFFF26463A5C6773646B5C636F6D706F6E656E74735C6465766963655C7370695F6473313330322E63000000000C7370695F6473313330322E6301000000F0A0A100FFFFFFFF26463A5C6773646B5C636F6D706F6E656E74735C6465766963655C6932635F6268313735302E63000000000C6932635F6268313735302E6301000000BCA8E100FFFFFFFF0100000010000000C5D4F200FFDC7800BECEA100F0A0A100BCA8E1009CC1B600F7B88600D9ADC200A5C2D700B3A6BE00EAD6A300F6FA7D00B5E99D005FC3CF00C1838300CACAD5000100000000000000020000003301000066000000EF0300007E02000001000000000000000100000027463A5C6773646B5C636F6D706F6E656E74735C6465766963655C7370695F6D6370323531352E63000000000D7370695F6D6370323531352E6300000000C5D4F200FFFFFFFF0100000010000000C5D4F200FFDC7800BECEA100F0A0A100BCA8E1009CC1B600F7B88600D9ADC200A5C2D700B3A6BE00EAD6A300F6FA7D00B5E99D005FC3CF00C1838300CACAD500010000000000000002000000EF03000066000000AB0600007E020000</Data>
       </MDITabState>
     </MDIClientArea>
     <ViewEx>
@@ -3599,16 +3599,65 @@
   </WinLayoutEx>
 
   <MDIGroups>
-    <Orientation>1</Orientation>
-    <ActiveMDIGroup>0</ActiveMDIGroup>
+    <Orientation>3</Orientation>
+    <ActiveMDIGroup>1</ActiveMDIGroup>
     <MDIGroup>
-      <Size>100</Size>
-      <ActiveTab>0</ActiveTab>
+      <Size>50</Size>
+      <ActiveTab>2</ActiveTab>
       <Doc>
         <Name>../Core/Src/main.c</Name>
         <ColumnNumber>0</ColumnNumber>
-        <TopLine>129</TopLine>
-        <CurrentLine>137</CurrentLine>
+        <TopLine>59</TopLine>
+        <CurrentLine>175</CurrentLine>
+        <Folding>1</Folding>
+        <ContractedFolders></ContractedFolders>
+        <PaneID>0</PaneID>
+      </Doc>
+      <Doc>
+        <Name>..\..\..\components\device\spi_mfrc522.c</Name>
+        <ColumnNumber>13</ColumnNumber>
+        <TopLine>1</TopLine>
+        <CurrentLine>1</CurrentLine>
+        <Folding>1</Folding>
+        <ContractedFolders></ContractedFolders>
+        <PaneID>0</PaneID>
+      </Doc>
+      <Doc>
+        <Name>..\..\..\components\device\spi_st7735.c</Name>
+        <ColumnNumber>38</ColumnNumber>
+        <TopLine>438</TopLine>
+        <CurrentLine>467</CurrentLine>
+        <Folding>1</Folding>
+        <ContractedFolders></ContractedFolders>
+        <PaneID>0</PaneID>
+      </Doc>
+      <Doc>
+        <Name>..\..\..\components\device\spi_ds1302.c</Name>
+        <ColumnNumber>21</ColumnNumber>
+        <TopLine>52</TopLine>
+        <CurrentLine>68</CurrentLine>
+        <Folding>1</Folding>
+        <ContractedFolders></ContractedFolders>
+        <PaneID>0</PaneID>
+      </Doc>
+      <Doc>
+        <Name>..\..\..\components\device\i2c_bh1750.c</Name>
+        <ColumnNumber>0</ColumnNumber>
+        <TopLine>1</TopLine>
+        <CurrentLine>1</CurrentLine>
+        <Folding>1</Folding>
+        <ContractedFolders></ContractedFolders>
+        <PaneID>0</PaneID>
+      </Doc>
+    </MDIGroup>
+    <MDIGroup>
+      <Size>50</Size>
+      <ActiveTab>0</ActiveTab>
+      <Doc>
+        <Name>..\..\..\components\device\spi_mcp2515.c</Name>
+        <ColumnNumber>34</ColumnNumber>
+        <TopLine>897</TopLine>
+        <CurrentLine>902</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

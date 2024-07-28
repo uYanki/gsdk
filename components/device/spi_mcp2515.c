@@ -899,7 +899,7 @@ void MCP2515_Test(void)
 #if defined(BOARD_STM32F407VET6_XWS)
 
     spi_mst_t spi = {
-        .MISO = {GPIOA, GPIO_PIN_4},
+        .MISO = {GPIOB, GPIO_PIN_7},
         .MOSI = {GPIOA, GPIO_PIN_5},
         .SCLK = {GPIOA, GPIO_PIN_6},
         .CS   = {GPIOA, GPIO_PIN_3},

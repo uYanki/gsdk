@@ -252,11 +252,11 @@ err_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8SnrNum)
     uint16_t u16Length;
     uint8_t  au8Buffer[MAXRLEN];
 
-    // 清MFCryptol On位 只有成功执行MFAuthent命令后，该位才能置位
+    // 清 MFCryptol On 位 只有成功执行 FAuthent 命令后，该位才能置位
     _RC522_ClearBitMask(pHandle, REG_STATUS2, 0x08);
     // 清理寄存器 停止收发
     _RC522_WriteRegister(pHandle, REG_BIT_FRAMING, 0x00);
-    // 清ValuesAfterColl所有接收的位在冲突后被清除
+    // 清 ValuesAfterColl 所有接收的位在冲突后被清除
     _RC522_ClearBitMask(pHandle, REG_COLLISION, 0x80);
 
     au8Buffer[0] = PICC_ANTICOLL1;  // 卡片防冲突命令
@@ -281,7 +281,7 @@ err_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8SnrNum)
 }
 
 /**
- * @brief  选定卡片
+ * @brief 选定卡片
  */
 err_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8SnrNum)
 {
@@ -313,12 +313,12 @@ err_t RC522_Select(spi_rc522_t* pHandle, uint8_t* pu8SnrNum)
 }
 
 /**
- * @brief  验证卡片密码
+ * @brief 验证卡片密码
  * @param[in] u8AuthMode 密码验证模式= 0x60，验证A密钥，
  *                       密码验证模式= 0x61，验证B密钥
  * @param[in] u8BlockAddr  块地址
  * @param[in] pu8Sectorkey 密码
- * @param[in] pSnr 卡片序列号，4字节
+ * @param[in] pu8SnrNum    卡片序列号，4字节
  */
 err_t RC522_AuthState(spi_rc522_t* pHandle, uint8_t u8AuthMode, uint8_t u8BlockAddr, uint8_t* pu8Sectorkey, uint8_t* pu8SnrNum)
 {
@@ -342,9 +342,9 @@ err_t RC522_AuthState(spi_rc522_t* pHandle, uint8_t u8AuthMode, uint8_t u8BlockA
 }
 
 /**
- * @brief  读取M1卡一块数据
+ * @brief 读取M1卡一块数据
  * @param[in] u8BlockAddr 块地址（0-63）。M1卡总共有16个扇区(每个扇区有：3个数据块+1个控制块), 共64个块
- * @param[in] pData       读出的数据，16字节
+ * @param[in] pu8Data     读出的数据，16字节
  */
 err_t RC522_Read(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pu8Data)
 {
@@ -366,11 +366,11 @@ err_t RC522_Read(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pu8Data)
 }
 
 /**
- * @brief  写数据到M1卡一块
+ * @brief 写数据到M1卡一块
  * @param[in] u8BlockAddr 块地址（0-63）。M1卡总共有16个扇区(每个扇区有：3个数据块+1个控制块),共64个块
- * @param[in] pData       写入的数据，16字节
+ * @param[in] pu8Data       写入的数据，16字节
  */
-err_t RC522_Write(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pData)
+err_t RC522_Write(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pu8Data)
 {
     uint16_t u16Length;
     uint8_t  au8Buffer[MAXRLEN];
@@ -387,7 +387,7 @@ err_t RC522_Write(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pData)
     }
 
     // data to the FIFO
-    memcpy(&au8Buffer[0], &pData[0], 16);
+    memcpy(&au8Buffer[0], &pu8Data[0], 16);
     _RC522_CRC(pHandle, au8Buffer, 16, &au8Buffer[16]);
     ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 18, au8Buffer, &u16Length));
 
@@ -399,82 +399,8 @@ err_t RC522_Write(spi_rc522_t* pHandle, uint8_t u8BlockAddr, uint8_t* pData)
     return ERR_NONE;
 }
 
-err_t RC522_Value(spi_rc522_t* pHandle, uint8_t u8Mode, uint8_t u8BlockAddr, uint8_t* pu8Value)
-{
-    uint16_t u16Length;
-    uint8_t  au8Buffer[MAXRLEN];
-
-    au8Buffer[0] = u8Mode;
-    au8Buffer[1] = u8BlockAddr;
-    _RC522_CRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
-
-    ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
-
-    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
-    {
-        return ERR_FAIL;
-    }
-
-    memcpy(&au8Buffer[0], &pu8Value[0], 16);
-
-    _RC522_CRC(pHandle, au8Buffer, 4, &au8Buffer[4]);
-    u16Length = 0;
-    ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 6, au8Buffer, &u16Length));
-
-    au8Buffer[0] = PICC_TRANSFER;
-    au8Buffer[1] = u8BlockAddr;
-    _RC522_CRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
-
-    ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
-
-    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
-    {
-        return ERR_FAIL;
-    }
-
-    return ERR_NONE;
-}
-
-err_t RC522_BakValue(spi_rc522_t* pHandle, uint8_t u8SrcAddr, uint8_t u8DstAddr)
-{
-    uint16_t u16Length;
-    uint8_t  au8Buffer[MAXRLEN];
-
-    au8Buffer[0] = PICC_RESTORE;
-    au8Buffer[1] = u8SrcAddr;
-    _RC522_CRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
-
-    ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
-
-    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
-    {
-        return ERR_FAIL;
-    }
-
-    au8Buffer[0] = 0;
-    au8Buffer[1] = 0;
-    au8Buffer[2] = 0;
-    au8Buffer[3] = 0;
-    _RC522_CRC(pHandle, au8Buffer, 4, &au8Buffer[4]);
-
-    ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 6, au8Buffer, &u16Length));
-
-    au8Buffer[0] = PICC_TRANSFER;
-    au8Buffer[1] = u8DstAddr;
-    _RC522_CRC(pHandle, au8Buffer, 2, &au8Buffer[2]);
-
-    ERRCHK_RETURN(_RC522_ToCard(pHandle, PCD_TRANSCEIVE, au8Buffer, 4, au8Buffer, &u16Length));
-
-    if ((u16Length != 4) || ((au8Buffer[0] & 0x0F) != 0x0A))
-    {
-        return ERR_FAIL;
-    }
-
-    return ERR_NONE;
-}
-
 /**
- * @brief  命令卡片进入休眠状态
+ * @brief 命令卡片进入休眠状态
  */
 err_t RC522_Halt(spi_rc522_t* pHandle)
 {
@@ -519,19 +445,14 @@ void _RC522_CRC(spi_rc522_t* pHandle, uint8_t* pu8Indata, uint8_t u8Length, uint
 }
 
 /**
- * @brief  通过RC522和ISO14443卡通讯
- * @param  Command，RC522命令字
- * @param  pInData，通过RC522发送到卡片的数据
- * @param  ucInLenByte，发送数据的字节长度
- * @param  pOutData，接收到的卡片返回数据
- * @param  pOutLenBit，返回数据的位长度
+ * @brief 通过RC522和ISO14443卡通讯
+ * @param[in]  u8Command    命令字
+ * @param[in]  pu8InData    发送到卡片的数据
+ * @param[in]  u8InLenByte  发送数据的字节长度
+ * @param[out] pu8OutData   接收到的卡片返回数据
+ * @param[out] pu8OutLenBit 返回数据的位长度
  */
-uint8_t _RC522_ToCard(spi_rc522_t* pHandle,
-                      uint8_t      u8Command,
-                      uint8_t*     pu8InData,
-                      uint8_t      u8InLenByte,
-                      uint8_t*     pu8OutData,
-                      uint16_t*    pu16OutLenBit)
+static uint8_t _RC522_ToCard(spi_rc522_t* pHandle, uint8_t u8Command, uint8_t* pu8InData, uint8_t u8InLenByte, uint8_t* pu8OutData, uint16_t* pu16OutLenBit)
 {
     uint8_t  irqEn   = 0x00;
     uint8_t  waitFor = 0x00;
@@ -654,9 +575,9 @@ void RC522_AntennaOff(spi_rc522_t* pHandle)
 
 /**
  * @brief 判断地址是否数据块
- * @param[in] u8Addr，块绝对地址（0-63）
- * @retval 0:非数据块
- * @retval 1:是数据块
+ * @param[in] u8BlockAddr 块地址（0-63）
+ * @retval false 非数据块
+ * @retval true  数据块
  */
 bool RC522_IsDataBlock(spi_rc522_t* pHandle, uint8_t u8BlockAddr)
 {
@@ -703,7 +624,7 @@ static bool CompareID(uint8_t* au8CardID, uint8_t* au8CompareID)
     return true;
 }
 
-static void ReadWriteTest(spi_rc522_t* pHandle)
+static void ReadWriteBlock(spi_rc522_t* pHandle)
 {
     uint8_t u8Addr = 5;
     uint8_t au8SerNum[5];
@@ -735,13 +656,11 @@ static void Read64Block(spi_rc522_t* pHandle)
         if (RC522_Request(pHandle, PICC_REQALL, m_au8TempBuf) == ERR_NONE &&
             RC522_Anticoll(pHandle, au8SerNum) == ERR_NONE &&
             RC522_Select(pHandle, au8SerNum) == ERR_NONE &&
-            RC522_AuthState(pHandle, PICC_AUTHENT1A, u8BlockAddr, m_au8DefaultKeyA, au8SerNum) == ERR_NONE)
+            RC522_AuthState(pHandle, PICC_AUTHENT1A, u8BlockAddr, m_au8DefaultKeyA, au8SerNum) == ERR_NONE &&
+            RC522_Read(pHandle, u8BlockAddr, au8Data) == ERR_NONE)
         {
-            if (RC522_Read(pHandle, u8BlockAddr, au8Data) == ERR_NONE)
-            {
-                hexdump(au8Data, 16, 16, 1, false, "%03d: ", u8BlockAddr);
-                RC522_Halt(pHandle);
-            }
+            hexdump(au8Data, 16, 16, 1, false, "%03d: ", u8BlockAddr);
+            RC522_Halt(pHandle);
         }
     }
 }
@@ -756,10 +675,12 @@ void RC522_Test(void)
         .SCLK = {GPIOA, GPIO_PIN_6}, // SCK
         .CS   = {GPIOA, GPIO_PIN_3}, // SDA
     };
+		
     spi_rc522_t rc522 = {
         .hSPI = &spi,
-        .RST  = {GPIOA, GPIO_PIN_1},
+        .RST  = {GPIOA, GPIO_PIN_0},
     };
+		
 #elif defined(BOARD_AT32F415CB_DEV)
 
     spi_mst_t spi = {
@@ -767,17 +688,19 @@ void RC522_Test(void)
         .MISO = {GPIOB, GPIO_PINS_14}, /*MISO*/
         .SCLK = {GPIOB, GPIO_PINS_13}, /*SCLK*/
         .CS   = {GPIOB, GPIO_PINS_12}, /*CS*/
-                                       //  .SPIx = SPI2,
+    //  .SPIx = SPI2,
     };
+		
     spi_rc522_t rc522 = {
         .hSPI = &spi,
         .RST  = {GPIOA, GPIO_PINS_1},
     };
+		
 #endif
 
-    uint8_t au8MyID[5] = {0x2c, 0xff, 0xd3, 0x21};
+    uint8_t au8MyID[5] = {0x2C, 0xFF, 0xD3, 0x21};
 
-    SPI_Master_Init(&spi, 1000000, SPI_DUTYCYCLE_33_67, RC522_SPI_TIMING | SPI_FLAG_SOFT_CS);  // clk spd
+    SPI_Master_Init(&spi, 1000000, SPI_DUTYCYCLE_33_67, RC522_SPI_TIMING | SPI_FLAG_SOFT_CS); 
 
     RC522_Init(&rc522);
 
@@ -801,13 +724,10 @@ void RC522_Test(void)
 
             RC522_Halt(&rc522);
 
-#if 1
-            LOGI("Read 64 sectors\r\n");
+            LOGI("rw block");
+            ReadWriteBlock(&rc522);
+            LOGI("hexdump");
             Read64Block(&rc522);
-#else
-            LOGI("Read Write Block");
-            ReadWriteTest(&rc522);
-#endif
 
             bDetected = true;
         }
