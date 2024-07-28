@@ -68,21 +68,21 @@ typedef enum {
 // Functions
 //---------------------------------------------------------------------------
 
-void MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
+void MCP2515_Init(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock);
 
-void  MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
+void  MCP2515_Init(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock);
 err_t MCP2515_Reset(spi_mcp2515_t* pHandle);
-err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e eMode);
-err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock);
+err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, mcp2515_mode_e eMode);
+err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock);
 
 uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle);
 
-err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e eDivisor);
+err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkout_e eDivisor);
 
-err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const mcp2515_filter_mask_e eMask, const bool bExt, const uint32_t u32Data);
-err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, const bool bExt, const uint32_t u32Data);
+err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask, bool bExtFrame, uint32_t u32Data);
+err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool bExtFrame, uint32_t u32Data);
 
-err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame);
+err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame);
 err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame);
 bool  MCP2515_CheckReceive(spi_mcp2515_t* pHandle);  // 检测接收状态
 

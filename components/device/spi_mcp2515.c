@@ -319,102 +319,74 @@
 #define RXB0CTRL_FILHIT      0x00
 #define RXB1CTRL_FILHIT      0x01
 
-//
+/**
+ * @brief mcp2515 frame byte offset
+ */
+#define MCP2515_FRAME_SIDH  0
+#define MCP2515_FRAME_SIDL  1
+#define MCP2515_FRAME_EID8  2
+#define MCP2515_FRAME_EID0  3
+#define MCP2515_FRAME_DLC   4
+#define MCP2515_FRAME_DATA0 5
+#define MCP2515_FRAME_DATA1 6
+#define MCP2515_FRAME_DATA2 7
+#define MCP2515_FRAME_DATA3 8
+#define MCP2515_FRAME_DATA4 9
+#define MCP2515_FRAME_DATA5 10
+#define MCP2515_FRAME_DATA6 11
+#define MCP2515_FRAME_DATA7 12
 
-#define MCP2515_SIDH   0
-#define MCP2515_SIDL   1
-#define MCP2515_EID8   2
-#define MCP2515_EID0   3
-#define MCP2515_DLC    4
-#define MCP2515_DATA   5
+/**
+ * @brief CANINTF regmsk
+ */
+#define CANINTF_RX0IF 0x01
+#define CANINTF_RX1IF 0x02
+#define CANINTF_TX0IF 0x04
+#define CANINTF_TX1IF 0x08
+#define CANINTF_TX2IF 0x10
+#define CANINTF_ERRIF 0x20
+#define CANINTF_WAKIF 0x40
+#define CANINTF_MERRF 0x80
+
+/**
+ * @brief STAT regmsk
+ */
+#define STAT_RX0IF     BV(0)
+#define STAT_RX1IF     BV(1)
 
 #define STAT_RXIF_MASK (STAT_RX0IF | STAT_RX1IF)
 
-typedef enum {
-    MCP2515_RX_BUFFER_0 = 0,
-    MCP2515_RX_BUFFER_1 = 1,
-} mcp2515_rx_buffer_e;
-
-typedef enum {
-    MCP2515_TX_BUFFER_0 = 0,
-    MCP2515_TX_BUFFER_1 = 1,
-    MCP2515_TX_BUFFER_2 = 2,
-} mcp2515_tx_buffer_e;
-
-typedef enum {
-    CANINTF_RX0IF = 0x01,
-    CANINTF_RX1IF = 0x02,
-    CANINTF_TX0IF = 0x04,
-    CANINTF_TX1IF = 0x08,
-    CANINTF_TX2IF = 0x10,
-    CANINTF_ERRIF = 0x20,
-    CANINTF_WAKIF = 0x40,
-    CANINTF_MERRF = 0x80
-} CANINTF;
-
-typedef enum {
-    STAT_RX0IF = (1 << 0),
-    STAT_RX1IF = (1 << 1)
-} STAT;
-
-typedef enum {
-    TXB_ABTF  = 0x40,
-    TXB_MLOA  = 0x20,
-    TXB_TXERR = 0x10,
-    TXB_TXREQ = 0x08,
-    TXB_TXIE  = 0x04,
-    TXB_TXP   = 0x03
-} TXBnCTRL;
-
-struct TXBn_REGS {
-    uint8_t CTRL;
-    uint8_t SIDH;
-    uint8_t DATA;
-};
-
-struct RXBn_REGS {
-    uint8_t CTRL;
-    uint8_t SIDH;
-    uint8_t DATA;
-    CANINTF CANINTF_RXnIF;
-};
+/**
+ * @brief TXBnCTRL regmsk
+ */
+#define TXB_ABTF  0x40
+#define TXB_MLOA  0x20
+#define TXB_TXERR 0x10
+#define TXB_TXREQ 0x08
+#define TXB_TXIE  0x04
+#define TXB_TXP   0x03
 
 //---------------------------------------------------------------------------
 // Prototypes
 //---------------------------------------------------------------------------
 
-static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr);
-static void    _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, uint8_t pu8Data[], const uint8_t u8Count);
-static void    _MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Data);
-static void    _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t cpu8Data[], const uint8_t u8Count);
-static void    _MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Mask, const uint8_t u8Data);
+static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, uint8_t u8Addr);
+static void    _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, uint8_t u8Addr, uint8_t* pu8Data, uint8_t u8Count);
+static void    _MCP2515_SetRegister(spi_mcp2515_t* pHandle, uint8_t u8Addr, uint8_t u8Data);
+static void    _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, uint8_t u8Addr, const uint8_t* cpu8Data, uint8_t u8Count);
+static void    _MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, uint8_t u8Addr, uint8_t u8Mask, uint8_t u8Data);
 
-static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool ext, const uint32_t u32ID);
+static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* pBuffer, bool ext, uint32_t u32ID);
 
 //---------------------------------------------------------------------------
 // Variables
 //---------------------------------------------------------------------------
 
-static const struct TXBn_REGS TXB[] = {
-    {MCP2515_REG_TXB0CTRL, MCP2515_REG_TXB0SIDH, MCP2515_REG_TXB0DATA},
-    {MCP2515_REG_TXB1CTRL, MCP2515_REG_TXB1SIDH, MCP2515_REG_TXB1DATA},
-    {MCP2515_REG_TXB2CTRL, MCP2515_REG_TXB2SIDH, MCP2515_REG_TXB2DATA}
-};
-
-static const struct RXBn_REGS RXB[] = {
-    {MCP2515_REG_RXB0CTRL, MCP2515_REG_RXB0SIDH, MCP2515_REG_RXB0DATA, CANINTF_RX0IF},
-    {MCP2515_REG_RXB1CTRL, MCP2515_REG_RXB1SIDH, MCP2515_REG_RXB1DATA, CANINTF_RX1IF}
-};
-
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
 
-#define MCP2515_ERROR_FAIL      1
-#define MCP2515_ERROR_ALLTXBUSY 2
-#define MCP2515_ERROR_FAILTX    4
-
-void MCP2515_Init(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock)
+void MCP2515_Init(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock)
 {
     MCP2515_Reset(pHandle);
     MCP2515_SetBitrate(pHandle, eBitrate, eClock);
@@ -428,10 +400,10 @@ err_t MCP2515_Reset(spi_mcp2515_t* pHandle)
 
     DelayBlockMs(10);
 
-    uint8_t zeros[14] = {0};
-    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB0CTRL, zeros, 14);
-    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB1CTRL, zeros, 14);
-    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB2CTRL, zeros, 14);
+    uint8_t aNullByte[14] = {0};
+    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB0CTRL, aNullByte, 14);
+    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB1CTRL, aNullByte, 14);
+    _MCP2515_SetRegisters(pHandle, MCP2515_REG_TXB2CTRL, aNullByte, 14);
 
     _MCP2515_SetRegister(pHandle, MCP2515_REG_RXB0CTRL, 0);
     _MCP2515_SetRegister(pHandle, MCP2515_REG_RXB1CTRL, 0);
@@ -459,32 +431,25 @@ err_t MCP2515_Reset(spi_mcp2515_t* pHandle)
         MCP2515_FILTER_5,
     };
 
-    for (int i = 0; i < ARRAY_SIZE(aFilters); i++)
+    mcp2515_filter_mask_e aMask[] = {
+        MCP2515_FILTER_MASK_0,
+        MCP2515_FILTER_MASK_1,
+    };
+
+    for (uint8_t i = 0; i < ARRAY_SIZE(aFilters); i++)
     {
-        bool  bExt   = (i == 1);
-        err_t result = MCP2515_SetFilter(pHandle, aFilters[i], bExt, 0);
-        if (result != ERR_NONE)
-        {
-            return result;
-        }
+        ERROR_CHECK_RETURN(MCP2515_SetFilter(pHandle, aFilters[i], i == 1, 0));
     }
 
-    mcp2515_filter_mask_e aMask[] = {MCP2515_FILTER_MASK_0, MCP2515_FILTER_MASK_1};
-
-    for (int i = 0; i < ARRAY_SIZE(aMask); i++)
+    for (uint8_t i = 0; i < ARRAY_SIZE(aMask); i++)
     {
-        err_t result = MCP2515_SetFilterMask(pHandle, aMask[i], true, 0);
-
-        if (result != ERR_NONE)
-        {
-            return result;
-        }
+        ERROR_CHECK_RETURN(MCP2515_SetFilterMask(pHandle, aMask[i], true, 0));
     }
 
     return ERR_NONE;
 }
 
-static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr)
+static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, uint8_t u8Addr)
 {
     uint8_t u8Data;
 
@@ -497,7 +462,7 @@ static uint8_t _MCP2515_ReadRegister(spi_mcp2515_t* pHandle, const uint8_t u8Add
     return u8Data;
 }
 
-static void _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, uint8_t pu8Data[], const uint8_t u8Count)
+static void _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, uint8_t u8Addr, uint8_t* pu8Data, uint8_t u8Count)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_READ);
@@ -506,7 +471,7 @@ static void _MCP2515_ReadRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr,
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-static void _MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Data)
+static void _MCP2515_SetRegister(spi_mcp2515_t* pHandle, uint8_t u8Addr, uint8_t u8Data)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_WRITE);
@@ -515,7 +480,7 @@ static void _MCP2515_SetRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, c
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-static void _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t cpu8Data[], const uint8_t u8Count)
+static void _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, uint8_t u8Addr, const uint8_t* cpu8Data, uint8_t u8Count)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_WRITE);
@@ -524,7 +489,7 @@ static void _MCP2515_SetRegisters(spi_mcp2515_t* pHandle, const uint8_t u8Addr, 
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-static void _MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, const uint8_t u8Addr, const uint8_t u8Mask, const uint8_t u8Data)
+static void _MCP2515_ModifyRegister(spi_mcp2515_t* pHandle, uint8_t u8Addr, uint8_t u8Mask, uint8_t u8Data)
 {
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, MCP2515_INST_BITMOD);
@@ -544,40 +509,31 @@ uint8_t MCP2515_GetStatus(spi_mcp2515_t* pHandle)
     return u8Status;
 }
 
-err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, const mcp2515_mode_e eMode)
+err_t MCP2515_SetMode(spi_mcp2515_t* pHandle, mcp2515_mode_e eMode)
 {
     _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANCTRL, CANCTRL_REQOP, eMode);
 
-    unsigned long endTime   = GetTickMs() + 10;
-    bool          modeMatch = false;
+    tick_t tEnd = GetTickMs() + 10;
 
-    while (GetTickMs() < endTime)
+    while (GetTickMs() < tEnd)
     {
-        uint8_t newmode = _MCP2515_ReadRegister(pHandle, MCP2515_REG_CANSTAT);
-        newmode &= CANSTAT_OPMOD;
+        mcp2515_mode_e eNewMode = (mcp2515_mode_e)(_MCP2515_ReadRegister(pHandle, MCP2515_REG_CANSTAT) & CANSTAT_OPMOD);
 
-        modeMatch = newmode == eMode;
-
-        if (modeMatch)
+        if (eNewMode == eMode)
         {
-            break;
+            return ERR_NONE;
         }
     }
 
-    return modeMatch ? ERR_NONE : MCP2515_ERROR_FAIL;
+    return MakeError(ERR_FAIL, "fail to change mode");
 }
 
-err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp2515_clkin_e eClock)
+err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, can_bps_e eBitrate, mcp2515_clkin_e eClock)
 {
-    err_t eError = MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG);
-
-    if (eError != ERR_NONE)
-    {
-        return eError;
-    }
+    ERROR_CHECK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     bool    bMatched = true;
-    uint8_t CFG[3];
+    uint8_t aCFG[3]  = {0};
 
     // clang-format off
     switch (eClock)
@@ -586,20 +542,20 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp25
         {
             switch (eBitrate)
             {
-                case CAN_5KBPS:    CFG[0] = MCP2515_8MHz_5kBPS_CFG1,    CFG[1] = MCP2515_8MHz_5kBPS_CFG2,    CFG[2] = MCP2515_8MHz_5kBPS_CFG3;    break;
-                case CAN_10KBPS:   CFG[0] = MCP2515_8MHz_10kBPS_CFG1,   CFG[1] = MCP2515_8MHz_10kBPS_CFG2,   CFG[2] = MCP2515_8MHz_10kBPS_CFG3;   break;
-                case CAN_20KBPS:   CFG[0] = MCP2515_8MHz_20kBPS_CFG1,   CFG[1] = MCP2515_8MHz_20kBPS_CFG2,   CFG[2] = MCP2515_8MHz_20kBPS_CFG3;   break;
-                case CAN_31K25BPS: CFG[0] = MCP2515_8MHz_31k25BPS_CFG1, CFG[1] = MCP2515_8MHz_31k25BPS_CFG2, CFG[2] = MCP2515_8MHz_31k25BPS_CFG3; break;
-                case CAN_33KBPS:   CFG[0] = MCP2515_8MHz_33k3BPS_CFG1,  CFG[1] = MCP2515_8MHz_33k3BPS_CFG2,  CFG[2] = MCP2515_8MHz_33k3BPS_CFG3;  break;
-                case CAN_40KBPS:   CFG[0] = MCP2515_8MHz_40kBPS_CFG1,   CFG[1] = MCP2515_8MHz_40kBPS_CFG2,   CFG[2] = MCP2515_8MHz_40kBPS_CFG3;   break;
-                case CAN_50KBPS:   CFG[0] = MCP2515_8MHz_50kBPS_CFG1,   CFG[1] = MCP2515_8MHz_50kBPS_CFG2,   CFG[2] = MCP2515_8MHz_50kBPS_CFG3;   break;
-                case CAN_80KBPS:   CFG[0] = MCP2515_8MHz_80kBPS_CFG1,   CFG[1] = MCP2515_8MHz_80kBPS_CFG2,   CFG[2] = MCP2515_8MHz_80kBPS_CFG3;   break;
-                case CAN_100KBPS:  CFG[0] = MCP2515_8MHz_100kBPS_CFG1,  CFG[1] = MCP2515_8MHz_100kBPS_CFG2,  CFG[2] = MCP2515_8MHz_100kBPS_CFG3;  break;
-                case CAN_125KBPS:  CFG[0] = MCP2515_8MHz_125kBPS_CFG1,  CFG[1] = MCP2515_8MHz_125kBPS_CFG2,  CFG[2] = MCP2515_8MHz_125kBPS_CFG3;  break;
-                case CAN_200KBPS:  CFG[0] = MCP2515_8MHz_200kBPS_CFG1,  CFG[1] = MCP2515_8MHz_200kBPS_CFG2,  CFG[2] = MCP2515_8MHz_200kBPS_CFG3;  break;
-                case CAN_250KBPS:  CFG[0] = MCP2515_8MHz_250kBPS_CFG1,  CFG[1] = MCP2515_8MHz_250kBPS_CFG2,  CFG[2] = MCP2515_8MHz_250kBPS_CFG3;  break;
-                case CAN_500KBPS:  CFG[0] = MCP2515_8MHz_500kBPS_CFG1,  CFG[1] = MCP2515_8MHz_500kBPS_CFG2,  CFG[2] = MCP2515_8MHz_500kBPS_CFG3;  break;
-                case CAN_1000KBPS: CFG[0] = MCP2515_8MHz_1000kBPS_CFG1, CFG[1] = MCP2515_8MHz_1000kBPS_CFG2, CFG[2] = MCP2515_8MHz_1000kBPS_CFG3; break;
+                case CAN_5KBPS:    aCFG[0] = MCP2515_8MHz_5kBPS_CFG1,    aCFG[1] = MCP2515_8MHz_5kBPS_CFG2,    aCFG[2] = MCP2515_8MHz_5kBPS_CFG3;    break;
+                case CAN_10KBPS:   aCFG[0] = MCP2515_8MHz_10kBPS_CFG1,   aCFG[1] = MCP2515_8MHz_10kBPS_CFG2,   aCFG[2] = MCP2515_8MHz_10kBPS_CFG3;   break;
+                case CAN_20KBPS:   aCFG[0] = MCP2515_8MHz_20kBPS_CFG1,   aCFG[1] = MCP2515_8MHz_20kBPS_CFG2,   aCFG[2] = MCP2515_8MHz_20kBPS_CFG3;   break;
+                case CAN_31K25BPS: aCFG[0] = MCP2515_8MHz_31k25BPS_CFG1, aCFG[1] = MCP2515_8MHz_31k25BPS_CFG2, aCFG[2] = MCP2515_8MHz_31k25BPS_CFG3; break;
+                case CAN_33KBPS:   aCFG[0] = MCP2515_8MHz_33k3BPS_CFG1,  aCFG[1] = MCP2515_8MHz_33k3BPS_CFG2,  aCFG[2] = MCP2515_8MHz_33k3BPS_CFG3;  break;
+                case CAN_40KBPS:   aCFG[0] = MCP2515_8MHz_40kBPS_CFG1,   aCFG[1] = MCP2515_8MHz_40kBPS_CFG2,   aCFG[2] = MCP2515_8MHz_40kBPS_CFG3;   break;
+                case CAN_50KBPS:   aCFG[0] = MCP2515_8MHz_50kBPS_CFG1,   aCFG[1] = MCP2515_8MHz_50kBPS_CFG2,   aCFG[2] = MCP2515_8MHz_50kBPS_CFG3;   break;
+                case CAN_80KBPS:   aCFG[0] = MCP2515_8MHz_80kBPS_CFG1,   aCFG[1] = MCP2515_8MHz_80kBPS_CFG2,   aCFG[2] = MCP2515_8MHz_80kBPS_CFG3;   break;
+                case CAN_100KBPS:  aCFG[0] = MCP2515_8MHz_100kBPS_CFG1,  aCFG[1] = MCP2515_8MHz_100kBPS_CFG2,  aCFG[2] = MCP2515_8MHz_100kBPS_CFG3;  break;
+                case CAN_125KBPS:  aCFG[0] = MCP2515_8MHz_125kBPS_CFG1,  aCFG[1] = MCP2515_8MHz_125kBPS_CFG2,  aCFG[2] = MCP2515_8MHz_125kBPS_CFG3;  break;
+                case CAN_200KBPS:  aCFG[0] = MCP2515_8MHz_200kBPS_CFG1,  aCFG[1] = MCP2515_8MHz_200kBPS_CFG2,  aCFG[2] = MCP2515_8MHz_200kBPS_CFG3;  break;
+                case CAN_250KBPS:  aCFG[0] = MCP2515_8MHz_250kBPS_CFG1,  aCFG[1] = MCP2515_8MHz_250kBPS_CFG2,  aCFG[2] = MCP2515_8MHz_250kBPS_CFG3;  break;
+                case CAN_500KBPS:  aCFG[0] = MCP2515_8MHz_500kBPS_CFG1,  aCFG[1] = MCP2515_8MHz_500kBPS_CFG2,  aCFG[2] = MCP2515_8MHz_500kBPS_CFG3;  break;
+                case CAN_1000KBPS: aCFG[0] = MCP2515_8MHz_1000kBPS_CFG1, aCFG[1] = MCP2515_8MHz_1000kBPS_CFG2, aCFG[2] = MCP2515_8MHz_1000kBPS_CFG3; break;
                 default: bMatched = false; break;
             }
             break;
@@ -609,21 +565,21 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp25
         {
             switch (eBitrate)
             {
-                case CAN_5KBPS:    CFG[0] = MCP2515_16MHz_5kBPS_CFG1,    CFG[1] = MCP2515_16MHz_5kBPS_CFG2,    CFG[2] = MCP2515_16MHz_5kBPS_CFG3;    break;
-                case CAN_10KBPS:   CFG[0] = MCP2515_16MHz_10kBPS_CFG1,   CFG[1] = MCP2515_16MHz_10kBPS_CFG2,   CFG[2] = MCP2515_16MHz_10kBPS_CFG3;   break;
-                case CAN_20KBPS:   CFG[0] = MCP2515_16MHz_20kBPS_CFG1,   CFG[1] = MCP2515_16MHz_20kBPS_CFG2,   CFG[2] = MCP2515_16MHz_20kBPS_CFG3;   break;
-                case CAN_33KBPS:   CFG[0] = MCP2515_16MHz_33k3BPS_CFG1,  CFG[1] = MCP2515_16MHz_33k3BPS_CFG2,  CFG[2] = MCP2515_16MHz_33k3BPS_CFG3;  break;
-                case CAN_40KBPS:   CFG[0] = MCP2515_16MHz_40kBPS_CFG1,   CFG[1] = MCP2515_16MHz_40kBPS_CFG2,   CFG[2] = MCP2515_16MHz_40kBPS_CFG3;   break;
-                case CAN_50KBPS:   CFG[0] = MCP2515_16MHz_50kBPS_CFG1,   CFG[1] = MCP2515_16MHz_50kBPS_CFG2,   CFG[2] = MCP2515_16MHz_50kBPS_CFG3;   break;
-                case CAN_80KBPS:   CFG[0] = MCP2515_16MHz_80kBPS_CFG1,   CFG[1] = MCP2515_16MHz_80kBPS_CFG2,   CFG[2] = MCP2515_16MHz_80kBPS_CFG3;   break;
-                case CAN_83K3BPS:  CFG[0] = MCP2515_16MHz_83k3BPS_CFG1,  CFG[1] = MCP2515_16MHz_83k3BPS_CFG2,  CFG[2] = MCP2515_16MHz_83k3BPS_CFG3;  break;
-                case CAN_95KBPS:   CFG[0] = MCP2515_16MHz_95kBPS_CFG1,   CFG[1] = MCP2515_16MHz_95kBPS_CFG2,   CFG[2] = MCP2515_16MHz_95kBPS_CFG3;   break;
-                case CAN_100KBPS:  CFG[0] = MCP2515_16MHz_100kBPS_CFG1,  CFG[1] = MCP2515_16MHz_100kBPS_CFG2,  CFG[2] = MCP2515_16MHz_100kBPS_CFG3;  break;
-                case CAN_125KBPS:  CFG[0] = MCP2515_16MHz_125kBPS_CFG1,  CFG[1] = MCP2515_16MHz_125kBPS_CFG2,  CFG[2] = MCP2515_16MHz_125kBPS_CFG3;  break;
-                case CAN_200KBPS:  CFG[0] = MCP2515_16MHz_200kBPS_CFG1,  CFG[1] = MCP2515_16MHz_200kBPS_CFG2,  CFG[2] = MCP2515_16MHz_200kBPS_CFG3;  break;
-                case CAN_250KBPS:  CFG[0] = MCP2515_16MHz_250kBPS_CFG1,  CFG[1] = MCP2515_16MHz_250kBPS_CFG2,  CFG[2] = MCP2515_16MHz_250kBPS_CFG3;  break;
-                case CAN_500KBPS:  CFG[0] = MCP2515_16MHz_500kBPS_CFG1,  CFG[1] = MCP2515_16MHz_500kBPS_CFG2,  CFG[2] = MCP2515_16MHz_500kBPS_CFG3;  break;
-                case CAN_1000KBPS: CFG[0] = MCP2515_16MHz_1000kBPS_CFG1, CFG[1] = MCP2515_16MHz_1000kBPS_CFG2, CFG[2] = MCP2515_16MHz_1000kBPS_CFG3; break;
+                case CAN_5KBPS:    aCFG[0] = MCP2515_16MHz_5kBPS_CFG1,    aCFG[1] = MCP2515_16MHz_5kBPS_CFG2,    aCFG[2] = MCP2515_16MHz_5kBPS_CFG3;    break;
+                case CAN_10KBPS:   aCFG[0] = MCP2515_16MHz_10kBPS_CFG1,   aCFG[1] = MCP2515_16MHz_10kBPS_CFG2,   aCFG[2] = MCP2515_16MHz_10kBPS_CFG3;   break;
+                case CAN_20KBPS:   aCFG[0] = MCP2515_16MHz_20kBPS_CFG1,   aCFG[1] = MCP2515_16MHz_20kBPS_CFG2,   aCFG[2] = MCP2515_16MHz_20kBPS_CFG3;   break;
+                case CAN_33KBPS:   aCFG[0] = MCP2515_16MHz_33k3BPS_CFG1,  aCFG[1] = MCP2515_16MHz_33k3BPS_CFG2,  aCFG[2] = MCP2515_16MHz_33k3BPS_CFG3;  break;
+                case CAN_40KBPS:   aCFG[0] = MCP2515_16MHz_40kBPS_CFG1,   aCFG[1] = MCP2515_16MHz_40kBPS_CFG2,   aCFG[2] = MCP2515_16MHz_40kBPS_CFG3;   break;
+                case CAN_50KBPS:   aCFG[0] = MCP2515_16MHz_50kBPS_CFG1,   aCFG[1] = MCP2515_16MHz_50kBPS_CFG2,   aCFG[2] = MCP2515_16MHz_50kBPS_CFG3;   break;
+                case CAN_80KBPS:   aCFG[0] = MCP2515_16MHz_80kBPS_CFG1,   aCFG[1] = MCP2515_16MHz_80kBPS_CFG2,   aCFG[2] = MCP2515_16MHz_80kBPS_CFG3;   break;
+                case CAN_83K3BPS:  aCFG[0] = MCP2515_16MHz_83k3BPS_CFG1,  aCFG[1] = MCP2515_16MHz_83k3BPS_CFG2,  aCFG[2] = MCP2515_16MHz_83k3BPS_CFG3;  break;
+                case CAN_95KBPS:   aCFG[0] = MCP2515_16MHz_95kBPS_CFG1,   aCFG[1] = MCP2515_16MHz_95kBPS_CFG2,   aCFG[2] = MCP2515_16MHz_95kBPS_CFG3;   break;
+                case CAN_100KBPS:  aCFG[0] = MCP2515_16MHz_100kBPS_CFG1,  aCFG[1] = MCP2515_16MHz_100kBPS_CFG2,  aCFG[2] = MCP2515_16MHz_100kBPS_CFG3;  break;
+                case CAN_125KBPS:  aCFG[0] = MCP2515_16MHz_125kBPS_CFG1,  aCFG[1] = MCP2515_16MHz_125kBPS_CFG2,  aCFG[2] = MCP2515_16MHz_125kBPS_CFG3;  break;
+                case CAN_200KBPS:  aCFG[0] = MCP2515_16MHz_200kBPS_CFG1,  aCFG[1] = MCP2515_16MHz_200kBPS_CFG2,  aCFG[2] = MCP2515_16MHz_200kBPS_CFG3;  break;
+                case CAN_250KBPS:  aCFG[0] = MCP2515_16MHz_250kBPS_CFG1,  aCFG[1] = MCP2515_16MHz_250kBPS_CFG2,  aCFG[2] = MCP2515_16MHz_250kBPS_CFG3;  break;
+                case CAN_500KBPS:  aCFG[0] = MCP2515_16MHz_500kBPS_CFG1,  aCFG[1] = MCP2515_16MHz_500kBPS_CFG2,  aCFG[2] = MCP2515_16MHz_500kBPS_CFG3;  break;
+                case CAN_1000KBPS: aCFG[0] = MCP2515_16MHz_1000kBPS_CFG1, aCFG[1] = MCP2515_16MHz_1000kBPS_CFG2, aCFG[2] = MCP2515_16MHz_1000kBPS_CFG3; break;
                 default: bMatched = false; break;
             }
             break;
@@ -633,17 +589,17 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp25
         {
             switch (eBitrate)
             {
-                case CAN_33KBPS:   CFG[0] = MCP2515_20MHz_33k3BPS_CFG1,   CFG[1] = MCP2515_20MHz_33k3BPS_CFG2,  CFG[2] = MCP2515_20MHz_33k3BPS_CFG3;  break;
-                case CAN_40KBPS:   CFG[0] = MCP2515_20MHz_40kBPS_CFG1,    CFG[1] = MCP2515_20MHz_40kBPS_CFG2,   CFG[2] = MCP2515_20MHz_40kBPS_CFG3;   break;
-                case CAN_50KBPS:   CFG[0] = MCP2515_20MHz_50kBPS_CFG1,    CFG[1] = MCP2515_20MHz_50kBPS_CFG2,   CFG[2] = MCP2515_20MHz_50kBPS_CFG3;   break;
-                case CAN_80KBPS:   CFG[0] = MCP2515_20MHz_80kBPS_CFG1,    CFG[1] = MCP2515_20MHz_80kBPS_CFG2,   CFG[2] = MCP2515_20MHz_80kBPS_CFG3;   break;
-                case CAN_83K3BPS:  CFG[0] = MCP2515_20MHz_83k3BPS_CFG1,   CFG[1] = MCP2515_20MHz_83k3BPS_CFG2,  CFG[2] = MCP2515_20MHz_83k3BPS_CFG3;  break;
-                case CAN_100KBPS:  CFG[0] = MCP2515_20MHz_100kBPS_CFG1,   CFG[1] = MCP2515_20MHz_100kBPS_CFG2,  CFG[2] = MCP2515_20MHz_100kBPS_CFG3;  break;
-                case CAN_125KBPS:  CFG[0] = MCP2515_20MHz_125kBPS_CFG1,   CFG[1] = MCP2515_20MHz_125kBPS_CFG2,  CFG[2] = MCP2515_20MHz_125kBPS_CFG3;  break;
-                case CAN_200KBPS:  CFG[0] = MCP2515_20MHz_200kBPS_CFG1,   CFG[1] = MCP2515_20MHz_200kBPS_CFG2,  CFG[2] = MCP2515_20MHz_200kBPS_CFG3;  break;
-                case CAN_250KBPS:  CFG[0] = MCP2515_20MHz_250kBPS_CFG1,   CFG[1] = MCP2515_20MHz_250kBPS_CFG2,  CFG[2] = MCP2515_20MHz_250kBPS_CFG3;  break;
-                case CAN_500KBPS:  CFG[0] = MCP2515_20MHz_500kBPS_CFG1,   CFG[1] = MCP2515_20MHz_500kBPS_CFG2,  CFG[2] = MCP2515_20MHz_500kBPS_CFG3;  break;
-                case CAN_1000KBPS: CFG[0] = MCP2515_20MHz_1000kBPS_CFG1,  CFG[1] = MCP2515_20MHz_1000kBPS_CFG2, CFG[2] = MCP2515_20MHz_1000kBPS_CFG3; break;
+                case CAN_33KBPS:   aCFG[0] = MCP2515_20MHz_33k3BPS_CFG1,   aCFG[1] = MCP2515_20MHz_33k3BPS_CFG2,  aCFG[2] = MCP2515_20MHz_33k3BPS_CFG3;  break;
+                case CAN_40KBPS:   aCFG[0] = MCP2515_20MHz_40kBPS_CFG1,    aCFG[1] = MCP2515_20MHz_40kBPS_CFG2,   aCFG[2] = MCP2515_20MHz_40kBPS_CFG3;   break;
+                case CAN_50KBPS:   aCFG[0] = MCP2515_20MHz_50kBPS_CFG1,    aCFG[1] = MCP2515_20MHz_50kBPS_CFG2,   aCFG[2] = MCP2515_20MHz_50kBPS_CFG3;   break;
+                case CAN_80KBPS:   aCFG[0] = MCP2515_20MHz_80kBPS_CFG1,    aCFG[1] = MCP2515_20MHz_80kBPS_CFG2,   aCFG[2] = MCP2515_20MHz_80kBPS_CFG3;   break;
+                case CAN_83K3BPS:  aCFG[0] = MCP2515_20MHz_83k3BPS_CFG1,   aCFG[1] = MCP2515_20MHz_83k3BPS_CFG2,  aCFG[2] = MCP2515_20MHz_83k3BPS_CFG3;  break;
+                case CAN_100KBPS:  aCFG[0] = MCP2515_20MHz_100kBPS_CFG1,   aCFG[1] = MCP2515_20MHz_100kBPS_CFG2,  aCFG[2] = MCP2515_20MHz_100kBPS_CFG3;  break;
+                case CAN_125KBPS:  aCFG[0] = MCP2515_20MHz_125kBPS_CFG1,   aCFG[1] = MCP2515_20MHz_125kBPS_CFG2,  aCFG[2] = MCP2515_20MHz_125kBPS_CFG3;  break;
+                case CAN_200KBPS:  aCFG[0] = MCP2515_20MHz_200kBPS_CFG1,   aCFG[1] = MCP2515_20MHz_200kBPS_CFG2,  aCFG[2] = MCP2515_20MHz_200kBPS_CFG3;  break;
+                case CAN_250KBPS:  aCFG[0] = MCP2515_20MHz_250kBPS_CFG1,   aCFG[1] = MCP2515_20MHz_250kBPS_CFG2,  aCFG[2] = MCP2515_20MHz_250kBPS_CFG3;  break;
+                case CAN_500KBPS:  aCFG[0] = MCP2515_20MHz_500kBPS_CFG1,   aCFG[1] = MCP2515_20MHz_500kBPS_CFG2,  aCFG[2] = MCP2515_20MHz_500kBPS_CFG3;  break;
+                case CAN_1000KBPS: aCFG[0] = MCP2515_20MHz_1000kBPS_CFG1,  aCFG[1] = MCP2515_20MHz_1000kBPS_CFG2, aCFG[2] = MCP2515_20MHz_1000kBPS_CFG3; break;
                 default: bMatched = false; break;
             }
             break;
@@ -656,16 +612,16 @@ err_t MCP2515_SetBitrate(spi_mcp2515_t* pHandle, const can_bps_e eBitrate, mcp25
 
     if (bMatched)
     {
-        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF1, CFG[0]);
-        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF2, CFG[1]);
-        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF3, CFG[2]);
+        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF1, aCFG[0]);
+        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF2, aCFG[1]);
+        _MCP2515_SetRegister(pHandle, MCP2515_REG_CNF3, aCFG[2]);
         return ERR_NONE;
     }
 
-    return MCP2515_ERROR_FAIL;
+    return MakeError(ERR_FAIL, "fail to set bitrate");
 }
 
-err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e eDivisor)
+err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, mcp2515_clkout_e eDivisor)
 {
     if (eDivisor == MCP2515_CLKOUT_DISABLE)
     {
@@ -689,63 +645,55 @@ err_t MCP2515_SetClkOut(spi_mcp2515_t* pHandle, const mcp2515_clkout_e eDivisor)
     return ERR_NONE;
 }
 
-static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, uint8_t* buffer, const bool bExt, const uint32_t u32ID)
+static void _MCP2515_PrepareId(spi_mcp2515_t* pHandle, __OUT uint8_t* pu8Buffer, bool bExtFrame, uint32_t u32FrameID)
 {
-    uint16_t canid = (uint16_t)(u32ID & 0x0FFFF);
+    uint16_t u16FrameID = (uint16_t)(u32FrameID & 0x0FFFF);
 
-    if (bExt)
+    if (bExtFrame)
     {
-        buffer[MCP2515_EID0] = (uint8_t)(canid & 0xFF);
-        buffer[MCP2515_EID8] = (uint8_t)(canid >> 8);
-        canid                = (uint16_t)(u32ID >> 16);
-        buffer[MCP2515_SIDL] = (uint8_t)(canid & 0x03);
-        buffer[MCP2515_SIDL] += (uint8_t)((canid & 0x1C) << 3);
-        buffer[MCP2515_SIDL] |= TXB_EXIDE_MASK;
-        buffer[MCP2515_SIDH] = (uint8_t)(canid >> 5);
+        pu8Buffer[MCP2515_FRAME_EID0] = (uint8_t)(u16FrameID & 0xFF);
+        pu8Buffer[MCP2515_FRAME_EID8] = (uint8_t)(u16FrameID >> 8);
+        u16FrameID                    = (uint16_t)(u32FrameID >> 16);
+        pu8Buffer[MCP2515_FRAME_SIDL] = (uint8_t)(u16FrameID & 0x03);
+        pu8Buffer[MCP2515_FRAME_SIDL] += (uint8_t)((u16FrameID & 0x1C) << 3);
+        pu8Buffer[MCP2515_FRAME_SIDL] |= TXB_EXIDE_MASK;
+        pu8Buffer[MCP2515_FRAME_SIDH] = (uint8_t)(u16FrameID >> 5);
     }
     else
     {
-        buffer[MCP2515_SIDH] = (uint8_t)(canid >> 3);
-        buffer[MCP2515_SIDL] = (uint8_t)((canid & 0x07) << 5);
-        buffer[MCP2515_EID0] = 0;
-        buffer[MCP2515_EID8] = 0;
+        pu8Buffer[MCP2515_FRAME_SIDH] = (uint8_t)(u16FrameID >> 3);
+        pu8Buffer[MCP2515_FRAME_SIDL] = (uint8_t)((u16FrameID & 0x07) << 5);
+        pu8Buffer[MCP2515_FRAME_EID0] = 0;
+        pu8Buffer[MCP2515_FRAME_EID8] = 0;
     }
 }
 
-err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, const mcp2515_filter_mask_e eMask, const bool bExt, const uint32_t u32Data)
+err_t MCP2515_SetFilterMask(spi_mcp2515_t* pHandle, mcp2515_filter_mask_e eMask, bool bExtFrame, uint32_t u32Data)
 {
-    err_t res = MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG);
-
-    if (res != ERR_NONE)
-    {
-        return res;
-    }
-
-    uint8_t tbufdata[4];
-    _MCP2515_PrepareId(pHandle, tbufdata, bExt, u32Data);
+    ERROR_CHECK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     uint8_t u8Addr;
+    uint8_t au8Data[4];
+
     switch (eMask)
     {
         case MCP2515_FILTER_MASK_0: u8Addr = MCP2515_REG_RXM0SIDH; break;
         case MCP2515_FILTER_MASK_1: u8Addr = MCP2515_REG_RXM1SIDH; break;
-        default: return MCP2515_ERROR_FAIL;
+        default: return MakeError(ERR_INVALID_VALUE, "invaild value");
     }
 
-    _MCP2515_SetRegisters(pHandle, u8Addr, tbufdata, 4);
+    _MCP2515_PrepareId(pHandle, au8Data, bExtFrame, u32Data);
+    _MCP2515_SetRegisters(pHandle, u8Addr, au8Data, 4);
 
     return ERR_NONE;
 }
 
-err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, const bool bExt, const uint32_t u32Data)
+err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, mcp2515_filter_e eFliter, bool bExtFrame, uint32_t u32Data)
 {
-    err_t res = MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG);
-    if (res != ERR_NONE)
-    {
-        return res;
-    }
+    ERROR_CHECK_RETURN(MCP2515_SetMode(pHandle, MCP2515_MODE_CONFIG));
 
     uint8_t u8Addr;
+    uint8_t au8Data[4];
 
     switch (eFliter)
     {
@@ -755,18 +703,28 @@ err_t MCP2515_SetFilter(spi_mcp2515_t* pHandle, const mcp2515_filter_e eFliter, 
         case MCP2515_FILTER_3: u8Addr = MCP2515_REG_RXF3SIDH; break;
         case MCP2515_FILTER_4: u8Addr = MCP2515_REG_RXF4SIDH; break;
         case MCP2515_FILTER_5: u8Addr = MCP2515_REG_RXF5SIDH; break;
-        default: return MCP2515_ERROR_FAIL;
+        default: return MakeError(ERR_INVALID_VALUE, "invaild value");
     }
 
-    uint8_t tbufdata[4];
-    _MCP2515_PrepareId(pHandle, tbufdata, bExt, u32Data);
-    _MCP2515_SetRegisters(pHandle, u8Addr, tbufdata, 4);
+    _MCP2515_PrepareId(pHandle, au8Data, bExtFrame, u32Data);
+    _MCP2515_SetRegisters(pHandle, u8Addr, au8Data, 4);
 
     return ERR_NONE;
 }
 
-err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame)
+err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 {
+    // tx buffer register
+    static struct {
+        uint8_t CTRL;
+        uint8_t SIDH;
+        uint8_t DATA;
+    } TXB[] = {
+        {MCP2515_REG_TXB0CTRL, MCP2515_REG_TXB0SIDH, MCP2515_REG_TXB0DATA},
+        {MCP2515_REG_TXB1CTRL, MCP2515_REG_TXB1SIDH, MCP2515_REG_TXB1DATA},
+        {MCP2515_REG_TXB2CTRL, MCP2515_REG_TXB2SIDH, MCP2515_REG_TXB2DATA}
+    };
+
     if (pFrame->u8DLC > CAN_MAX_DLEN)
     {
         return MakeError(ERR_OVERFLOW, "frame length is too long");
@@ -774,33 +732,26 @@ err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame)
 
     for (int i = 0; i < ARRAY_SIZE(TXB); i++)
     {
-        const struct TXBn_REGS* txbuf = &TXB[i];
-
-        uint8_t ctrlval = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
+        uint8_t ctrlval = _MCP2515_ReadRegister(pHandle, TXB[i].CTRL);
 
         if ((ctrlval & TXB_TXREQ) == 0)
         {
-            uint8_t data[13];
+            uint8_t au8Data[13];
 
             bool     bExt  = (pFrame->u32ID & CAN_EFF_FLAG);
-            bool     rtr   = (pFrame->u32ID & CAN_RTR_FLAG);
+            bool     bRtr  = (pFrame->u32ID & CAN_RTR_FLAG);
             uint32_t u32ID = (pFrame->u32ID & (bExt ? CAN_EFF_MASK : CAN_SFF_MASK));
 
-            _MCP2515_PrepareId(pHandle, data, bExt, u32ID);
+            _MCP2515_PrepareId(pHandle, au8Data, bExt, u32ID);
+            au8Data[MCP2515_FRAME_DLC] = bRtr ? (pFrame->u8DLC | RTR_MASK) : pFrame->u8DLC;
+            memcpy(&au8Data[MCP2515_FRAME_DATA0], pFrame->au8Data, pFrame->u8DLC);
 
-            data[MCP2515_DLC] = rtr ? (pFrame->u8DLC | RTR_MASK) : pFrame->u8DLC;
+            _MCP2515_SetRegisters(pHandle, TXB[i].SIDH, au8Data, MCP2515_FRAME_DATA0 + pFrame->u8DLC);
+            _MCP2515_ModifyRegister(pHandle, TXB[i].CTRL, TXB_TXREQ, TXB_TXREQ);
 
-            memcpy(&data[MCP2515_DATA], pFrame->au8Data, pFrame->u8DLC);
-
-            _MCP2515_SetRegisters(pHandle, txbuf->SIDH, data, 5 + pFrame->u8DLC);
-
-            _MCP2515_ModifyRegister(pHandle, txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
-
-            uint8_t u8CtrlRegVal = _MCP2515_ReadRegister(pHandle, txbuf->CTRL);
-
-            if ((u8CtrlRegVal & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0)
+            if ((_MCP2515_ReadRegister(pHandle, TXB[i].CTRL) & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0)
             {
-                return MCP2515_ERROR_FAILTX;
+                return MakeError(ERR_FAIL, "fail to tx");
             }
 
             return ERR_NONE;
@@ -812,48 +763,56 @@ err_t MCP2515_SendMessage(spi_mcp2515_t* pHandle, const can_frame_t* pFrame)
 
 err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
 {
-    err_t   rc;
+    // rx buffer register
+    static struct {
+        uint8_t CTRL;
+        uint8_t SIDH;
+        uint8_t DATA;
+        uint8_t CANINTF_RXnIF;
+    } RXB[] = {
+        {MCP2515_REG_RXB0CTRL, MCP2515_REG_RXB0SIDH, MCP2515_REG_RXB0DATA, CANINTF_RX0IF},
+        {MCP2515_REG_RXB1CTRL, MCP2515_REG_RXB1SIDH, MCP2515_REG_RXB1DATA, CANINTF_RX1IF},
+    };
+
     uint8_t u8Stat = MCP2515_GetStatus(pHandle);
 
-    mcp2515_rx_buffer_e rxbn;
+    uint8_t i = 0;
 
     if (u8Stat & STAT_RX0IF)
     {
-        rxbn = MCP2515_RX_BUFFER_0;
+        i = 0;
     }
     else if (u8Stat & STAT_RX1IF)
     {
-        rxbn = MCP2515_RX_BUFFER_1;
+        i = 1;
     }
     else
     {
         return (ERR_NO_MESSAGE, "no message");
     }
 
-    const struct RXBn_REGS* rxb = &RXB[rxbn];
+    uint8_t au8Data[5];
 
-    uint8_t tbufdata[5];
+    _MCP2515_ReadRegisters(pHandle, RXB[i].SIDH, au8Data, 5);
 
-    _MCP2515_ReadRegisters(pHandle, rxb->SIDH, tbufdata, 5);
+    uint32_t u32ID = (au8Data[MCP2515_FRAME_SIDH] << 3) + (au8Data[MCP2515_FRAME_SIDL] >> 5);
 
-    uint32_t u32ID = (tbufdata[MCP2515_SIDH] << 3) + (tbufdata[MCP2515_SIDL] >> 5);
-
-    if ((tbufdata[MCP2515_SIDL] & TXB_EXIDE_MASK) == TXB_EXIDE_MASK)
+    if ((au8Data[MCP2515_FRAME_SIDL] & TXB_EXIDE_MASK) == TXB_EXIDE_MASK)
     {
-        u32ID = (u32ID << 2) + (tbufdata[MCP2515_SIDL] & 0x03);
-        u32ID = (u32ID << 8) + tbufdata[MCP2515_EID8];
-        u32ID = (u32ID << 8) + tbufdata[MCP2515_EID0];
+        u32ID = (u32ID << 2) + (au8Data[MCP2515_FRAME_SIDL] & 0x03);
+        u32ID = (u32ID << 8) + au8Data[MCP2515_FRAME_EID8];
+        u32ID = (u32ID << 8) + au8Data[MCP2515_FRAME_EID0];
         u32ID |= CAN_EFF_FLAG;
     }
 
-    uint8_t u8DLC = (tbufdata[MCP2515_DLC] & DLC_MASK);
+    uint8_t u8DLC = (au8Data[MCP2515_FRAME_DLC] & DLC_MASK);
 
     if (u8DLC > CAN_MAX_DLEN)
     {
-        return MCP2515_ERROR_FAIL;
+        return MakeError(ERR_OVERFLOW, "frame length is too long");
     }
 
-    if (_MCP2515_ReadRegister(pHandle, rxb->CTRL) & RXBnCTRL_RTR)
+    if (_MCP2515_ReadRegister(pHandle, RXB[i].CTRL) & RXBnCTRL_RTR)
     {
         u32ID |= CAN_RTR_FLAG;
     }
@@ -861,9 +820,9 @@ err_t MCP2515_ReadMessage(spi_mcp2515_t* pHandle, can_frame_t* pFrame)
     pFrame->u32ID = u32ID;
     pFrame->u8DLC = u8DLC;
 
-    _MCP2515_ReadRegisters(pHandle, rxb->DATA, pFrame->au8Data, u8DLC);
+    _MCP2515_ReadRegisters(pHandle, RXB[i].DATA, pFrame->au8Data, u8DLC);
 
-    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, rxb->CANINTF_RXnIF, 0);
+    _MCP2515_ModifyRegister(pHandle, MCP2515_REG_CANINTF, RXB[i].CANINTF_RXnIF, 0);
 
     return ERR_NONE;
 }
@@ -910,9 +869,9 @@ void MCP2515_ClearTXInterrupts(spi_mcp2515_t* pHandle)
 
 void MCP2515_ClearRXnOVR(spi_mcp2515_t* pHandle)
 {
-    uint8_t u8Errors = MCP2515_GetErrorFlags(pHandle);
+    uint8_t u8ErrFlgs = MCP2515_GetErrorFlags(pHandle);
 
-    if (u8Errors != 0)
+    if (u8ErrFlgs != 0)
     {
         MCP2515_ClearRXnOVRFlags(pHandle);
         MCP2515_ClearInterrupts(pHandle);
