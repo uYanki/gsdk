@@ -68,20 +68,17 @@ typedef enum {
 } si5351_r_div_e;
 
 typedef struct {
-    si5351_crystal_freq_e eCrystalFreq;     //!< Crystal frequency
-    si5351_crystal_load_e eCrystalLoad;     //!< Crystal load capacitors
-    uint32_t              u32CrystalPPM;    //!< Frequency synthesis
-    bool                  bPllaConfigured;  //!< Phase-locked loop A configured
-    uint32_t              u32PllaFreq;      //!< Phase-locked loop A frequency
-    bool                  bPllbConfigured;  //!< Phase-locked loop B configured
-    uint32_t              u32PllbFreq;      //!< Phase-locked loop B frequency
-} si5351_config_t;
+    __IN i2c_mst_t*            hI2C;
+    __IN uint8_t               u8SlvAddr;
+    __IN si5351_crystal_freq_e eCrystalFreq;   //!< Crystal frequency
+    __IN si5351_crystal_load_e eCrystalLoad;   //!< Crystal load capacitors
+    __IN uint32_t              u32CrystalPPM;  //!< Frequency synthesis
 
-typedef struct {
-    __IN i2c_mst_t* hI2C;
-    __IN uint8_t    u8SlvAddr;
-    si5351_config_t _sConfig;
-    uint8_t         _au8LastRdivVal[3];
+    uint8_t  _au8LastRdivVal[3];
+    bool     _bPllaConfigured;  //!< Phase-locked loop A configured
+    uint32_t _u32PllaFreq;      //!< Phase-locked loop A frequency
+    bool     _bPllbConfigured;  //!< Phase-locked loop B configured
+    uint32_t _u32PllbFreq;      //!< Phase-locked loop B frequency
 } i2c_si5351_t;
 
 //---------------------------------------------------------------------------

@@ -238,10 +238,6 @@ err_t SI5351_Init(i2c_si5351_t* pHandle)
         return ERR_NOT_EXIST;  // device doesn't exist
     }
 
-    pHandle->_sConfig.eCrystalFreq  = SI5351_CRYSTAL_FREQ_25MHZ;
-    pHandle->_sConfig.eCrystalLoad  = SI5351_CRYSTAL_LOAD_10PF;
-    pHandle->_sConfig.u32CrystalPPM = 30;
-
     for (uint8_t i = 0; i < 3; i++)
     {
         pHandle->_au8LastRdivVal[i] = 0;
@@ -261,7 +257,7 @@ err_t SI5351_Init(i2c_si5351_t* pHandle)
     SI5351_WriteByte(pHandle, REG_23_CLK7_CONTROL, BV(7));
 
     /* Set the load capacitance for the XTAL */
-    SI5351_WriteByte(pHandle, REG_183_CRYSTAL_INTERNAL_LOAD_CAPACITANCE, pHandle->_sConfig.eCrystalLoad);
+    SI5351_WriteByte(pHandle, REG_183_CRYSTAL_INTERNAL_LOAD_CAPACITANCE, pHandle->eCrystalLoad);
 
     /* Disable spread spectrum output. */
     SI5351_EnableSpreadSpectrum(pHandle, false);
@@ -272,10 +268,10 @@ err_t SI5351_Init(i2c_si5351_t* pHandle)
        significant nibble may be modified to suit your needs. */
 
     /* Reset the PLL config fields just in case we call init again */
-    pHandle->_sConfig.bPllaConfigured = false;
-    pHandle->_sConfig.u32PllaFreq     = 0;
-    pHandle->_sConfig.bPllbConfigured = false;
-    pHandle->_sConfig.u32PllbFreq     = 0;
+    pHandle->_bPllaConfigured = false;
+    pHandle->_u32PllaFreq     = 0;
+    pHandle->_bPllbConfigured = false;
+    pHandle->_u32PllbFreq     = 0;
 
     return ERR_NONE;
 }
@@ -418,17 +414,17 @@ err_t SI5351_SetupPLL(i2c_si5351_t* pHandle, si5351_pll_e ePll, uint8_t u8Multip
 
     /* Store the frequency settings for use with the Multisynth helper */
 
-    float fvco = pHandle->_sConfig.eCrystalFreq * (u8Multiplier + ((float)u32Numerator / (float)u32Denominator));
+    float fvco = pHandle->eCrystalFreq * (u8Multiplier + ((float)u32Numerator / (float)u32Denominator));
 
     if (ePll == SI5351_PLL_A)
     {
-        pHandle->_sConfig.bPllaConfigured = true;
-        pHandle->_sConfig.u32PllaFreq     = (uint32_t)floor(fvco);
+        pHandle->_bPllaConfigured = true;
+        pHandle->_u32PllaFreq     = (uint32_t)floor(fvco);
     }
     else  // if(ePll == SI5351_PLL_B)
     {
-        pHandle->_sConfig.bPllbConfigured = true;
-        pHandle->_sConfig.u32PllbFreq     = (uint32_t)floor(fvco);
+        pHandle->_bPllbConfigured = true;
+        pHandle->_u32PllbFreq     = (uint32_t)floor(fvco);
     }
 
     return ERR_NONE;
@@ -536,7 +532,7 @@ err_t SI5351_SetupMultisynth(i2c_si5351_t* pHandle, si5351_channel_e eChannel, s
     {
         case SI5351_PLL_A:
         {
-            if (pHandle->_sConfig.bPllaConfigured == false)
+            if (pHandle->_bPllaConfigured == false)
             {
                 return ERR_NOT_ALLOWED;
             }
@@ -545,7 +541,7 @@ err_t SI5351_SetupMultisynth(i2c_si5351_t* pHandle, si5351_channel_e eChannel, s
         }
         case SI5351_PLL_B:
         {
-            if (pHandle->_sConfig.bPllbConfigured == false)
+            if (pHandle->_bPllbConfigured == false)
             {
                 return ERR_NOT_ALLOWED;
             }
@@ -683,8 +679,11 @@ err_t SI5351_EnableSpreadSpectrum(i2c_si5351_t* pHandle, bool bEnabled)
 void SI5351_Test(i2c_mst_t* hI2C)
 {
     i2c_si5351_t si5351 = {
-        .hI2C      = hI2C,
-        .u8SlvAddr = SI5351_ADDRESS,
+        .hI2C          = hI2C,
+        .u8SlvAddr     = SI5351_ADDRESS,
+        .eCrystalFreq  = SI5351_CRYSTAL_FREQ_25MHZ,
+        .eCrystalLoad  = SI5351_CRYSTAL_LOAD_10PF,
+        .u32CrystalPPM = 30,
     };
 
     /* Initialise the sensor */
