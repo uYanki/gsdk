@@ -536,7 +536,6 @@ err_t SI5351_SetupMultisynth(i2c_si5351_t* pHandle, si5351_channel_e eChannel, s
             {
                 return ERR_NOT_ALLOWED;
             }
-
             break;
         }
         case SI5351_PLL_B:
@@ -545,10 +544,8 @@ err_t SI5351_SetupMultisynth(i2c_si5351_t* pHandle, si5351_channel_e eChannel, s
             {
                 return ERR_NOT_ALLOWED;
             }
-
             break;
         }
-
         default: return ERR_INVALID_VALUE;
     }
 
