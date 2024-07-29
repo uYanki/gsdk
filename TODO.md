@@ -50,7 +50,7 @@
 * [x] device-mcp2515
 * [ ] device-st7789
 * [x] device-mfrc522
-* [ ] device-si5351
+* [x] device-si5351
 * [ ] device-ws2812b
 * [ ] device-lis3dh
 * [ ] device-ads1292
