@@ -34,7 +34,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define I2C_IF              0
+#define I2C_IF              1
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -138,7 +138,7 @@ int main(void)
     DelayInit();
     // MX_TIM1_Init();
     // AD7705_Test();
-    RC522_Test();
+    // RC522_Test();
 
     /* USER CODE END 2 */
 
@@ -170,6 +170,8 @@ int main(void)
 
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
+		
+		SI5351_Test(&i2c);
 
 //		 QRCode_Test();
 
