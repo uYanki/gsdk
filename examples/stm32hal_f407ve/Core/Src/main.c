@@ -171,39 +171,38 @@ int main(void)
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
     INA219_Test(&i2c);
-    SI5351_Test(&i2c);
-
-    //		 QRCode_Test();
-
-    //		 EEFS_Test();
-    //		 FlexBtn_Test();
+    // QRCode_Test();
+    // EEFS_Test();
+    // FlexBtn_Test();
 
 #if CONFIG_DEMOS_SW
-//		 EEPROM_Test(&i2c);
-//		 SSD1306_Test(&i2c);
-//		 LCD1602_Test(&i2c);
-//		 LM75_Test(&i2c);
-//		 MPU6050_Test(&i2c);
-//		 TCA9548A_Test(&i2c);
-//		 BH1750_Test(&i2c);
-//		 PCF8574_Test(&i2c);
-//		 AS5600_Test(&i2c);
-//		 PCA9685_Test(&i2c); // !
+    // EEPROM_Test(&i2c);
+    // SSD1306_Test(&i2c);
+    // LCD1602_Test(&i2c);
+    // MPU6050_Test(&i2c);
+    // TCA9548A_Test(&i2c);
+    BH1750_Test(&i2c);
+    // PCF8574_Test(&i2c);
+    // AS5600_Test(&i2c);
+    // PCA9685_Test(&i2c);
+    // LM75_Test(&i2c);
+    // INA219_Test(&i2c);
+    // SI5351_Test(&i2c);
 #endif
 
 #if CONFIG_DEMOS_SW
-//		 DHT11_Test();
-//		 DS18B20_Test(); // !
-//		 HCSR04_Test();
+    // DHT11_Test();
+    // DS18B20_Test(); // !
+    // HCSR04_Test();
 #endif
 
 #if CONFIG_DEMOS_SW
-//		 AD9833_Test();
-//		 TM1638_Test();
-//		 DS1302_Test();
-//		 AD7705_Test();  // !
-//		 ST7735_Test();
-//    MCP2515_Test();
+    // AD9833_Test();
+    // TM1638_Test();
+    // DS1302_Test();
+    // AD7705_Test();  // !
+    // ST7735_Test();
+    // MCP2515_Test();
 #endif
 
     while (1)

@@ -86,7 +86,7 @@ static uint8_t u8x8_byte_hw_i2c(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void
         }
         case U8X8_MSG_BYTE_END_TRANSFER:
         {
-            if (I2C_Master_TransmitBlock(&i2c, 0x3C, buffer, length, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR) != ERR_NONE)
+            if (I2C_Master_TransmitBlock(&i2c, 0x3C, buffer, length, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT) != ERR_NONE)
             {
                 return 0;
             }

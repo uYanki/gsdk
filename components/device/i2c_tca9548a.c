@@ -21,7 +21,7 @@
 
 err_t TCA9548A_Init(i2c_tca9548a_t* pHandle)
 {
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }
@@ -34,7 +34,7 @@ err_t TCA9548A_Init(i2c_tca9548a_t* pHandle)
  */
 err_t TCA9548A_SelectChannel(i2c_tca9548a_t* pHandle, uint8_t u8ChannelMask)
 {
-    return I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8ChannelMask, I2C_FLAG_7BIT_SLVADDR);
+    return I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8ChannelMask, I2C_FLAG_SLVADDR_7BIT);
 }
 
 err_t TCA9548A_ScanAddress(i2c_tca9548a_t* pHandle)

@@ -7,14 +7,12 @@
 #define LOG_LOCAL_TAG    "ina219"
 #define LOG_LOCAL_LEVEL  LOG_LEVEL_DEBUG
 
-#define CMD_READ         (0x01)
-
-#define REG_CONFIG       (0x00)
-#define REG_SHUNTVOLTAGE (0x01)
-#define REG_BUSVOLTAGE   (0x02)
-#define REG_POWER        (0x03)
-#define REG_CURRENT      (0x04)
-#define REG_CALIBRATION  (0x05)
+#define REG_CONFIG       0x00  // configuration 配置
+#define REG_SHUNTVOLTAGE 0x01  // shunt voltage 分流电阻两端电压
+#define REG_BUSVOLTAGE   0x02  // bus voltage 总线电压(IN-和GND间的压差)
+#define REG_POWER        0x03  // power 功率
+#define REG_CURRENT      0x04  // current 电流
+#define REG_CALIBRATION  0x05  // calibration 基准值
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -22,6 +20,7 @@
 
 static err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data);
 static err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data);
+static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue);
 
 //---------------------------------------------------------------------------
 // Variables
@@ -31,24 +30,24 @@ static err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t
 // Functions
 //---------------------------------------------------------------------------
 
-static err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* u16Data)
+static err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data)
 {
-    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR | I2C_FLAG_WORD_LITTLE_ENDIAN);
+    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT| I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
 static err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
 {
-    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR | I2C_FLAG_WORD_LITTLE_ENDIAN);
+    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT| I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
-static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint16_t u16MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue)
+static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue)
 {
-    return I2C_Master_ReadWordBits(pHandle->hI2C, pHandle->u8SlvAddr, u16MemAddr, u8StartBit, u8BitsCount, pu16BitsValue, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR | I2C_FLAG_WORD_LITTLE_ENDIAN);
+    return I2C_Master_ReadWordBits(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8StartBit, u8BitsCount, pu16BitsValue, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
 err_t INA219_Init(i2c_ina219_t* pHandle)
 {
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }
@@ -58,80 +57,54 @@ err_t INA219_Init(i2c_ina219_t* pHandle)
 
 err_t INA219_Configure(i2c_ina219_t* pHandle, ina219_range_e eRange, ina219_gain_e eGain, ina219_bus_res_e eBusRes, ina219_shunt_res_e eShuntRes, ina219_mode_e eMode)
 {
-    uint16_t u16Config = 0;
-
-    u16Config |= (eRange << 13 | eGain << 11 | eBusRes << 7 | eShuntRes << 3 | eMode);
-
     switch (eRange)
     {
-        case INA219_RANGE_32V: pHandle->vBusMax = 32.0f; break;
-        case INA219_RANGE_16V: pHandle->vBusMax = 16.0f; break;
+        case INA219_RANGE_32V: pHandle->_f32VbusMax = 32.0f; break;
+        case INA219_RANGE_16V: pHandle->_f32VbusMax = 16.0f; break;
         default: return ERR_INVALID_VALUE;
     }
 
     switch (eGain)
     {
-        case INA219_GAIN_320MV: pHandle->vShuntMax = 0.32f; break;
-        case INA219_GAIN_160MV: pHandle->vShuntMax = 0.16f; break;
-        case INA219_GAIN_80MV: pHandle->vShuntMax = 0.08f; break;
-        case INA219_GAIN_40MV: pHandle->vShuntMax = 0.04f; break;
+        case INA219_GAIN_320MV: pHandle->_f32VshuntMax = 0.32f; break;
+        case INA219_GAIN_160MV: pHandle->_f32VshuntMax = 0.16f; break;
+        case INA219_GAIN_80MV: pHandle->_f32VshuntMax = 0.08f; break;
+        case INA219_GAIN_40MV: pHandle->_f32VshuntMax = 0.04f; break;
         default: return ERR_INVALID_VALUE;
     }
 
+    uint16_t u16Config = (eRange << 13) | (eGain << 11) | (eBusRes << 7) | (eShuntRes << 3) | (eMode << 0);
+
     INA219_WriteWord(pHandle, REG_CONFIG, u16Config);
 
-    return ERR_NONE;
-}
+    pHandle->_f32CurrentLSB = pHandle->_f32VshuntMax / pHandle->f32ShuntOhm / 32768.f;
+    pHandle->_f32PowerLSB   = pHandle->_f32CurrentLSB * 20;
 
-err_t INA219_Calibrate(i2c_ina219_t* pHandle, float32_t f32RShuntValue, float32_t f32IMaxExpected)
-{
-    uint16_t u16CalibrationValue;
-    pHandle->rShunt = f32RShuntValue;
-
-    float32_t iMaxPossible, minimumLSB;
-
-    iMaxPossible = pHandle->vShuntMax / pHandle->rShunt;
-
-    minimumLSB = f32IMaxExpected / 32767;
-
-    pHandle->currentLSB = (uint16_t)(minimumLSB * 100000000.f);
-    pHandle->currentLSB /= 100000000.f;
-    pHandle->currentLSB /= 0.0001f;
-    pHandle->currentLSB = ceil(pHandle->currentLSB);
-    pHandle->currentLSB *= 0.0001f;
-
-    pHandle->powerLSB = pHandle->currentLSB * 20;
-
-    u16CalibrationValue = (uint16_t)((0.04096f) / (pHandle->currentLSB * pHandle->rShunt));
+    uint16_t u16CalibrationValue = (uint16_t)(0.04096f * 32768.0f / pHandle->_f32VshuntMax);
 
     INA219_WriteWord(pHandle, REG_CALIBRATION, u16CalibrationValue);
 
     return ERR_NONE;
 }
 
-float32_t INA219_GetMaxPossibleCurrent(i2c_ina219_t* pHandle)
-{
-    return (pHandle->vShuntMax / pHandle->rShunt);
-}
-
 float32_t INA219_GetMaxCurrent(i2c_ina219_t* pHandle)
 {
-    float32_t f32MaxCurrent  = (pHandle->currentLSB * 32767);
-    float32_t f32MaxPossible = INA219_GetMaxPossibleCurrent(pHandle);
+    float32_t f32MaxCurrent  = pHandle->_f32CurrentLSB * 32767;
+    float32_t f32MaxPossible = pHandle->_f32VshuntMax / pHandle->f32ShuntOhm;
 
     return MIN(f32MaxCurrent, f32MaxPossible);
 }
 
 float32_t INA219_GetMaxShuntVoltage(i2c_ina219_t* pHandle)
 {
-    float32_t f32MaxVoltage = INA219_GetMaxCurrent(pHandle) * pHandle->rShunt;
+    float32_t f32MaxVoltage = INA219_GetMaxCurrent(pHandle) * pHandle->f32ShuntOhm;
 
-    return MIN(f32MaxVoltage, pHandle->vShuntMax);
+    return MIN(f32MaxVoltage, pHandle->_f32VshuntMax);
 }
 
 float32_t INA219_GetMaxPower(i2c_ina219_t* pHandle)
 {
-    return INA219_GetMaxCurrent(pHandle) * pHandle->vBusMax;
+    return INA219_GetMaxCurrent(pHandle) * pHandle->_f32VbusMax;
 }
 
 float32_t INA219_ReadBusPower(i2c_ina219_t* pHandle)
@@ -140,7 +113,7 @@ float32_t INA219_ReadBusPower(i2c_ina219_t* pHandle)
 
     INA219_ReadWord(pHandle, REG_POWER, &u16Data);
 
-    return u16Data * pHandle->powerLSB;
+    return u16Data * pHandle->_f32PowerLSB;
 }
 
 float32_t INA219_ReadShuntCurrent(i2c_ina219_t* pHandle)
@@ -149,7 +122,7 @@ float32_t INA219_ReadShuntCurrent(i2c_ina219_t* pHandle)
 
     INA219_ReadWord(pHandle, REG_CURRENT, &u16Data);
 
-    return u16Data * pHandle->currentLSB;
+    return (f32)(s16)u16Data * pHandle->_f32CurrentLSB;
 }
 
 float32_t INA219_ReadShuntVoltage(i2c_ina219_t* pHandle)
@@ -224,18 +197,17 @@ ina219_mode_e INA219_GetMode(i2c_ina219_t* pHandle)
 void INA219_Test(i2c_mst_t* hI2C)
 {
     i2c_ina219_t ina219 = {
-        .hI2C      = hI2C,
-        .u8SlvAddr = INA219_ADDRESS,
+        .hI2C        = hI2C,
+        .u8SlvAddr   = INA219_ADDRESS_0,
+        .f32ShuntOhm = 0.1f,  // 0.1 ohm
     };
 
-    // Default INA219 address is 0x40
+    I2C_Master_Hexdump(ina219.hI2C, ina219.u8SlvAddr, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_BIG_ENDIAN | I2C_FLAG_MEMUNIT_16BIT);
+
     INA219_Init(&ina219);
 
     // Configure INA219
-    INA219_Configure(&ina219, INA219_RANGE_32V, INA219_GAIN_320MV, INA219_BUS_RES_12BIT, INA219_SHUNT_RES_12BIT_1S, INA219_MODE_BUS_CONT);
-
-    // Calibrate INA219. Rshunt = 0.1 ohm, Max excepted current = 2A
-    INA219_Calibrate(&ina219, 0.1f, 2.f);
+    INA219_Configure(&ina219, INA219_RANGE_16V, INA219_GAIN_160MV, INA219_BUS_RES_12BIT, INA219_SHUNT_RES_12BIT_128S, INA219_MODE_SHUNT_BUS_CONT);
 
     // Display configuration
     PRINTF("Mode:                 ");
@@ -297,7 +269,6 @@ void INA219_Test(i2c_mst_t* hI2C)
         default: PRINTLN("unknown"); break;
     }
 
-    PRINTLN("Max possible current: %.5f A", INA219_GetMaxPossibleCurrent(&ina219));
     PRINTLN("Max current:          %.5f A", INA219_GetMaxCurrent(&ina219));
     PRINTLN("Max shunt voltage:    %.5f V", INA219_GetMaxShuntVoltage(&ina219));
     PRINTLN("Max power:            %.5f W", INA219_GetMaxPower(&ina219));

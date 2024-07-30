@@ -50,37 +50,37 @@ static inline err_t AS5600_ReadBits(i2c_as5600_t* pHandle, uint16_t u8MemAddr, u
 
 static inline err_t AS5600_ReadByte(i2c_as5600_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data)
 {
-    return I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu8Data, 1, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    return I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu8Data, 1, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 static inline err_t AS5600_WriteByte(i2c_as5600_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
 {
-    return I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    return I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 static inline err_t AS5600_ReadWord(i2c_as5600_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data)
 {
-    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR | I2C_FLAG_WORD_BIG_ENDIAN);
+    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
 static inline err_t AS5600_WriteWord(i2c_as5600_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
 {
-    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR | I2C_FLAG_WORD_BIG_ENDIAN);
+    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
 static inline err_t AS5600_WriteBits(i2c_as5600_t* pHandle, uint16_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t u8BitsValue)
 {
-    return I2C_Master_WriteByteBits(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8StartBit, u8BitsCount, u8BitsValue, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    return I2C_Master_WriteByteBits(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8StartBit, u8BitsCount, u8BitsValue, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 static inline err_t AS5600_ReadBits(i2c_as5600_t* pHandle, uint16_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint8_t* pu8BitsValue)
 {
-    return I2C_Master_ReadByteBits(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8StartBit, u8BitsCount, pu8BitsValue, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    return I2C_Master_ReadByteBits(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8StartBit, u8BitsCount, pu8BitsValue, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 err_t AS5600_Init(i2c_as5600_t* pHandle)
 {
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }
@@ -290,7 +290,7 @@ void AS5600_Test(i2c_mst_t* hI2C)
 
     // AS5600_SetOutputStage(&as5600, AS5600_OUTPUT_STAGE_ANALOG_FULL);
 
-    I2C_Master_Hexdump(as5600.hI2C, as5600.u8SlvAddr, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    I2C_Master_Hexdump(as5600.hI2C, as5600.u8SlvAddr, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 
     LOGI("magnet detecting");
 

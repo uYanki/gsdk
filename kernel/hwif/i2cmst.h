@@ -64,6 +64,7 @@ err_t I2C_Master_WriteWordBits(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t
 bool    I2C_Master_IsDeviceReady(i2c_mst_t* pHandle, uint8_t u16SlvAddr, uint16_t u16Flags);
 uint8_t I2C_Master_ScanAddress(i2c_mst_t* pHandle);
 err_t   I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Flags);
+err_t   I2C_Master_HexdumpWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Flags);
 
 #ifdef __cplusplus
 }

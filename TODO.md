@@ -51,6 +51,7 @@
 * [ ] device-st7789
 * [x] device-mfrc522
 * [x] device-si5351
+* [x] device-ina219
 * [ ] device-ws2812b
 * [ ] device-lis3dh
 * [ ] device-ads1292
@@ -86,3 +87,4 @@ BUG
 
   
 
+9E39

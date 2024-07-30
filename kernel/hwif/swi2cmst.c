@@ -246,7 +246,7 @@ static err_t SWI2C_Master_ReadBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uin
         goto __exit;
     }
 
-    if (u16Flags & I2C_FLAG_16BIT_MEMADDR)
+    if (u16Flags & I2C_FLAG_MEMADDR_16BIT)
     {
         SWI2C_Master_TransmitByte(pHandle, u16MemAddr >> 8);
 
@@ -304,7 +304,7 @@ static err_t SWI2C_Master_WriteBlock(i2c_mst_t* pHandle, uint16_t u16SlvAddr, ui
         }
     }
 
-    if (u16Flags & I2C_FLAG_16BIT_MEMADDR)
+    if (u16Flags & I2C_FLAG_MEMADDR_16BIT)
     {
         SWI2C_Master_TransmitByte(pHandle, u16MemAddr >> 8);
 

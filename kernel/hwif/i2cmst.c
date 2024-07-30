@@ -123,12 +123,12 @@ err_t I2C_Master_ReceiveWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t* 
         default:
         case I2C_FLAG_WORD_BIG_ENDIAN:
         {
-            *pu16Data = be16(au8Data);
+            *pu16Data = ((u16)au8Data[0] << 8) | (u16)au8Data[1];
             break;
         }
         case I2C_FLAG_WORD_LITTLE_ENDIAN:
         {
-            *pu16Data = le16(au8Data);
+            *pu16Data = (u16)au8Data[0] | ((u16)au8Data[1] << 8);
             break;
         }
     }
@@ -171,12 +171,12 @@ err_t I2C_Master_ReadWord(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16M
         default:
         case I2C_FLAG_WORD_BIG_ENDIAN:
         {
-            *pu16Data = be16(au8Data);
+            *pu16Data = ((u16)au8Data[0] << 8) | (u16)au8Data[1];
             break;
         }
         case I2C_FLAG_WORD_LITTLE_ENDIAN:
         {
-            *pu16Data = le16(au8Data);
+            *pu16Data = (u16)au8Data[0] | ((u16)au8Data[1] << 8);
             break;
         }
     }
@@ -303,12 +303,10 @@ uint8_t I2C_Master_ScanAddress(i2c_mst_t* pHandle)
 
 err_t I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Flags)
 {
-    uint8_t u8Data;
     uint8_t u8MemAddr = 0;
     uint8_t u8Step    = 0;
 
     PRINTLN("i2c 7-bit slave memory hexdump:");
-    PRINTLN("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
 
     do
     {
@@ -320,13 +318,39 @@ err_t I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Fl
         {
             // 有些设备不支持连读，这里就单个单个读
 
-            if (I2C_Master_ReadBlock(pHandle, u16SlvAddr, u8MemAddr, &u8Data, 1, u16Flags) == ERR_NONE)
+            switch (u16Flags & I2C_FLAG_MEMUNIT_SIZE_Msk)
             {
-                PRINTF("%02X ", u8Data);
-            }
-            else
-            {
-                PRINTF("-- ");  // none
+                default:
+                case I2C_FLAG_MEMUNIT_8BIT:
+                {
+                    uint16_t u8Data;
+
+                    if (I2C_Master_ReadByte(pHandle, u16SlvAddr, u8MemAddr, &u8Data, u16Flags) == ERR_NONE)
+                    {
+                        PRINTF("%02X ", u8Data);
+                    }
+                    else
+                    {
+                        PRINTF("-- ");  // none
+                    }
+
+                    break;
+                }
+                case I2C_FLAG_MEMUNIT_16BIT:
+                {
+                    uint16_t u16Data;
+
+                    if (I2C_Master_ReadWord(pHandle, u16SlvAddr, u8MemAddr, &u16Data, u16Flags) == ERR_NONE)
+                    {
+                        PRINTF("%04X ", u16Data);
+                    }
+                    else
+                    {
+                        PRINTF("-- ");  // none
+                    }
+
+                    break;
+                }
             }
 
             ++u8MemAddr;

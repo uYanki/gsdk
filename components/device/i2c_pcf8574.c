@@ -22,7 +22,7 @@
 
 err_t PCF8574_Init(i2c_pcf8574_t* pHandle)
 {
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }
@@ -32,12 +32,12 @@ err_t PCF8574_Init(i2c_pcf8574_t* pHandle)
 
 err_t PCF8574_ReadPort(i2c_pcf8574_t* pHandle, uint8_t* pu8InputState)
 {
-    return I2C_Master_ReceiveByte(pHandle->hI2C, pHandle->u8SlvAddr, pu8InputState, I2C_FLAG_7BIT_SLVADDR);
+    return I2C_Master_ReceiveByte(pHandle->hI2C, pHandle->u8SlvAddr, pu8InputState, I2C_FLAG_SLVADDR_7BIT);
 }
 
 err_t PCF8574_WritePort(i2c_pcf8574_t* pHandle, uint8_t u8OutputState)
 {
-    ERRCHK_RETURN(I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8OutputState, I2C_FLAG_7BIT_SLVADDR));
+    ERRCHK_RETURN(I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8OutputState, I2C_FLAG_SLVADDR_7BIT));
     pHandle->_u8OutputState = u8OutputState;
     return ERR_NONE;
 }

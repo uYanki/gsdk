@@ -32,7 +32,7 @@ static bool EEPROM_WaitReady(i2c_eeprom_t* pHandle, uint16_t u16SlvAddr, uint8_t
 {
     while (u8TimeoutMs > 0)
     {
-        if (I2C_Master_IsDeviceReady(pHandle->hI2C, u16SlvAddr, I2C_FLAG_7BIT_SLVADDR) == true)
+        if (I2C_Master_IsDeviceReady(pHandle->hI2C, u16SlvAddr, I2C_FLAG_SLVADDR_7BIT) == true)
         {
             return true;
         }
@@ -100,14 +100,14 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
             u16SlvAddr = pHandle->u8SlvAddr;
             u16SlvAddr |= (u32MemAddr >> 8) & 0x07;
             u16MemAddr = u32MemAddr & 0x000000FF;
-            u16Flags   = I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR;
+            u16Flags   = I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT;
         }
         else  // u8MemAddrSize == 16
         {
             u16SlvAddr = pHandle->u8SlvAddr;
             u16SlvAddr |= (u32MemAddr >> 16) & 0x07;
             u16MemAddr = u32MemAddr & 0x0000FFFF;
-            u16Flags   = I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_16BIT_MEMADDR;
+            u16Flags   = I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_16BIT;
         }
 
         // wait for ready
@@ -155,14 +155,14 @@ err_t EEPROM_ReadBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint8_t* pu8B
         u16SlvAddr = pHandle->u8SlvAddr;
         u16SlvAddr |= (u32MemAddr >> 8) & 0x07;
         u16MemAddr = u32MemAddr & 0x000000FF;
-        u16Flags   = I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR;
+        u16Flags   = I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT;
     }
     else
     {
         u16SlvAddr = pHandle->u8SlvAddr;
         u16SlvAddr |= (u32MemAddr >> 16) & 0x07;
         u16MemAddr = u32MemAddr & 0x0000FFFF;
-        u16Flags   = I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_16BIT_MEMADDR;
+        u16Flags   = I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_16BIT;
     }
 
     // wait for ready

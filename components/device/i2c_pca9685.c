@@ -42,22 +42,22 @@
 
 static inline err_t PCA9685_ReadByte(i2c_pca9685_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data)
 {
-    return I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu8Data, 1, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    return I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu8Data, 1, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 static inline err_t PCA9685_WriteByte(i2c_pca9685_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
 {
-    return I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    return I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 static inline err_t PCA9685_WriteWord(i2c_pca9685_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
 {
-    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR | I2C_FLAG_WORD_LITTLE_ENDIAN);
+    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_LITTLE_ENDIAN);
 }
 
 err_t PCA9685_Init(i2c_pca9685_t* pHandle)
 {
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }
@@ -73,15 +73,15 @@ err_t PCA9685_Init(i2c_pca9685_t* pHandle)
 
 err_t PCA9685_SetDuty(i2c_pca9685_t* pHandle, pca9685_channel_e eChannel, uint16_t u16PulseOn, uint16_t u16PulseOff)
 {
-    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_LED0_ON_L + 4 * eChannel, u16PulseOn));
-    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_LED0_OFF_L + 4 * eChannel, u16PulseOff));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_LED0_ON_L + 4 * eChannel, u16PulseOn & 0x0FFF));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_LED0_OFF_L + 4 * eChannel, u16PulseOff & 0x0FFF));
     return ERR_NONE;
 }
 
 err_t PCA9685_SetAllDuty(i2c_pca9685_t* pHandle, uint16_t u16PulseOn, uint16_t u16PulseOff)
 {
-    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_ALLLED_ON_L, u16PulseOn));
-    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_ALLLED_OFF_L, u16PulseOff));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_ALLLED_ON_L, u16PulseOn & 0x0FFF));
+    ERRCHK_RETURN(PCA9685_WriteWord(pHandle, REG_ALLLED_OFF_L, u16PulseOff & 0x0FFF));
     return ERR_NONE;
 }
 
@@ -114,10 +114,9 @@ err_t PCA9685_SetFreq(i2c_pca9685_t* pHandle, float32_t f32PwmFreq)
     // setup normal mode (bit4: 1-sleep, 0-normal)
     ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode));
     DelayBlockMs(5);
-    // PCA9685_WriteByte(pHandle,REG_MODE1, oldmode | 0xa1);
+    // set the MODE1 register to turn on auto increment.
+    // ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode | 0xA1));
     ERRCHK_RETURN(PCA9685_WriteByte(pHandle, REG_MODE1, u8OldMode | 0x80));
-    // pHandle sets the MODE1 register to turn on auto increment.
-    // pHandle is why the beginTransmission below was not working.
 
     return ERR_NONE;
 }
@@ -193,9 +192,9 @@ void PCA9685_Test(i2c_mst_t* hI2C)
     uint16_t u16PulseStart = 0;
     uint16_t u16PulseWidth = 400;
 
-    PCA9685_SetFreq(&pca9685, 600);  // 上限频率 1.5k
+    PCA9685_SetFreq(&pca9685, 1000);  // 上限频率 1.5k
 
-    for (pca9685_channel_e u8Channel = 0; u8Channel < 16; u8Channel++)
+    for (pca9685_channel_e u8Channel = PCA9685_CHANNEL_0; u8Channel < PCA9685_CHANNEL_15; u8Channel++)
     {
         PCA9685_SetDuty(&pca9685, u8Channel, u16PulseStart, u16PulseStart + u16PulseWidth);
         u16PulseStart += u16PhaseOffset;

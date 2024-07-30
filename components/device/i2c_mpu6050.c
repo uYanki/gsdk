@@ -99,25 +99,25 @@ err_t MPU6050_Init(i2c_mpu6050_t* pHandle, mpu6050_accel_sen_e eAccelSen, mpu605
 
 #endif
 
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // there is no device with valid slave address
     }
 
     /* Reset */
 
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_PWR_MGMT_1, 0x80, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_PWR_MGMT_1, 0x80, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     DelayBlockMs(1000);
 
     /* Wakeup */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_PWR_MGMT_1, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_PWR_MGMT_1, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Check who I am */
 
     uint8_t u8WhoAmI = 0x00;
 
-    ERRCHK_RETURN(I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, REG_WHO_AM_I, &u8WhoAmI, 1, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, REG_WHO_AM_I, &u8WhoAmI, 1, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     if (u8WhoAmI != MPU6050_I_AM)
     {
@@ -125,7 +125,7 @@ err_t MPU6050_Init(i2c_mpu6050_t* pHandle, mpu6050_accel_sen_e eAccelSen, mpu605
     }
 
     /* Config accelerometer */
-    ERRCHK_RETURN(I2C_Master_WriteByteBits(pHandle->hI2C, pHandle->u8SlvAddr, REG_ACCEL_CONFIG, 3, 2, eAccelSen, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByteBits(pHandle->hI2C, pHandle->u8SlvAddr, REG_ACCEL_CONFIG, 3, 2, eAccelSen, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     switch (eAccelSen)
     {
@@ -137,7 +137,7 @@ err_t MPU6050_Init(i2c_mpu6050_t* pHandle, mpu6050_accel_sen_e eAccelSen, mpu605
     }
 
     /* Config gyroscope */
-    ERRCHK_RETURN(I2C_Master_WriteByteBits(pHandle->hI2C, pHandle->u8SlvAddr, REG_GYRO_CONFIG, 3, 2, eGyroSen, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByteBits(pHandle->hI2C, pHandle->u8SlvAddr, REG_GYRO_CONFIG, 3, 2, eGyroSen, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     switch (eGyroSen)
     {
@@ -149,22 +149,22 @@ err_t MPU6050_Init(i2c_mpu6050_t* pHandle, mpu6050_accel_sen_e eAccelSen, mpu605
     }
 
     /* Sampling rate without frequency division */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_SMPLRT_DIV, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_SMPLRT_DIV, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Lowpass filter: 256Hz~260Hz */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_CONFIG, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_CONFIG, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Disable fifo */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_FIFO_EN, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_FIFO_EN, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Disable interrupt */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_INT_ENABLE, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_INT_ENABLE, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Disable i2c master */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_USER_CTRL, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_USER_CTRL, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Enable accel & gyro */
-    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_PWR_MGMT_2, 0x00, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, REG_PWR_MGMT_2, 0x00, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     return ERR_NONE;
 }
@@ -174,7 +174,7 @@ err_t MPU6050_GetRawData(i2c_mpu6050_t* pHandle)
     uint8_t aRawData[14];
 
     /* Read full raw data, 14bytes */
-    ERRCHK_RETURN(I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, REG_ACCEL_XOUT_H, &aRawData[0], ARRAY_SIZE(aRawData), I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR));
+    ERRCHK_RETURN(I2C_Master_ReadBlock(pHandle->hI2C, pHandle->u8SlvAddr, REG_ACCEL_XOUT_H, &aRawData[0], ARRAY_SIZE(aRawData), I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT));
 
     /* Accelerometer */
     pHandle->s16AccelX = (int16_t)((aRawData[0] << 8) | aRawData[1]);
@@ -307,7 +307,7 @@ void MPU6050_Test(i2c_mst_t* hI2C)
 
     MPU6050_Init(&mpu6050, MPU6050_ACCELEROMETER_2G, MPU6050_GYROSCOPE_250S);
 
-    I2C_Master_Hexdump(mpu6050.hI2C, mpu6050.u8SlvAddr, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    I2C_Master_Hexdump(mpu6050.hI2C, mpu6050.u8SlvAddr, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 
     while (1)
     {

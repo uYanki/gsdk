@@ -55,7 +55,7 @@
  */
 static void SSD1306_WriteCmd(i2c_ssd1306_t* pHandle, uint8_t u8Cmd)
 {
-    I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, 0x00, u8Cmd, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, 0x00, u8Cmd, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 /**
@@ -63,7 +63,7 @@ static void SSD1306_WriteCmd(i2c_ssd1306_t* pHandle, uint8_t u8Cmd)
  */
 static void SSD1306_WriteData(i2c_ssd1306_t* pHandle, uint8_t u8Data)
 {
-    I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, 0x40, u8Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, 0x40, u8Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 /**
@@ -71,7 +71,7 @@ static void SSD1306_WriteData(i2c_ssd1306_t* pHandle, uint8_t u8Data)
  */
 static void SSD1306_WriteBlockData(i2c_ssd1306_t* pHandle, const uint8_t* cpu8Data, uint16_t u16Length)
 {
-    I2C_Master_WriteBlock(pHandle->hI2C, pHandle->u8SlvAddr, 0x40, (uint8_t*)cpu8Data, u16Length, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
+    I2C_Master_WriteBlock(pHandle->hI2C, pHandle->u8SlvAddr, 0x40, (uint8_t*)cpu8Data, u16Length, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT);
 }
 
 #define oled_write_cmd(a) SSD1306_WriteCmd(pHandle, a)
@@ -81,7 +81,7 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
     ASSERT(pHandle->u8Rows, "rows must greate than 0");
     ASSERT(pHandle->u8Cols, "cols must greate than 0");
 
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }

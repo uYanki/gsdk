@@ -139,7 +139,7 @@ static inline err_t LCD1602_WriteData(i2c_lcd1602_t* pHandle, uint8_t u8Data)
 
 err_t LCD1602_Init(i2c_lcd1602_t* pHandle)
 {
-    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_7BIT_SLVADDR) == false)
+    if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
         return ERR_NOT_EXIST;  // device doesn't exist
     }
