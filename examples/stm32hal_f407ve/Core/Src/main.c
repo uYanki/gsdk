@@ -34,7 +34,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define I2C_IF              1
+#define I2C_IF 1
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -145,12 +145,12 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
 
-		// Game2048();
-		// GameSnake();
+    // Game2048();
+    // GameSnake();
 
-		// FlexBtn_Test();
-		// Shell_Test();
-		// foc();
+    // FlexBtn_Test();
+    // Shell_Test();
+    // foc();
 
     i2c_mst_t i2c = {
 #if I2C_IF == 0
@@ -170,13 +170,13 @@ int main(void)
 
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
-		
-		SI5351_Test(&i2c);
+    INA219_Test(&i2c);
+    SI5351_Test(&i2c);
 
-//		 QRCode_Test();
+    //		 QRCode_Test();
 
-//		 EEFS_Test();
-//		 FlexBtn_Test();
+    //		 EEFS_Test();
+    //		 FlexBtn_Test();
 
 #if CONFIG_DEMOS_SW
 //		 EEPROM_Test(&i2c);

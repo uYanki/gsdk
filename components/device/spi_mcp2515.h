@@ -14,10 +14,6 @@ extern "C" {
 
 #define MCP2515_SPI_TIMING (SPI_FLAG_4WIRE | SPI_FLAG_CPOL_LOW | SPI_FLAG_CPHA_1EDGE | SPI_FLAG_MSBFIRST | SPI_FLAG_DATAWIDTH_8B | SPI_FLAG_CS_ACTIVE_LOW)
 
-typedef struct {
-    __IN spi_mst_t* hSPI;
-} spi_mcp2515_t;
-
 typedef enum {
     MCP2515_CLKIN_20MHZ,
     MCP2515_CLKIN_16MHZ,
@@ -63,6 +59,10 @@ typedef enum {
     MCP2515_FILTER_MASK_0,
     MCP2515_FILTER_MASK_1,
 } mcp2515_filter_mask_e;
+
+typedef struct {
+    __IN spi_mst_t* hSPI;
+} spi_mcp2515_t;
 
 //---------------------------------------------------------------------------
 // Functions

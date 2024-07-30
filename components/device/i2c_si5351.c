@@ -7,8 +7,7 @@
 #define LOG_LOCAL_TAG   "si5351"
 #define LOG_LOCAL_LEVEL LOG_LEVEL_DEBUG
 
-/* See http://www.silabs.com/Support%20Documents/TechnicalDocs/AN619.pdf for
- * registers 26..41 */
+/* See http://www.silabs.com/Support%20Documents/TechnicalDocs/AN619.pdf for registers 26..41 */
 #define REG_0_DEVICE_STATUS                       0
 #define REG_1_INTERRUPT_STATUS_STICKY             1
 #define REG_2_INTERRUPT_STATUS_MASK               2
@@ -106,110 +105,110 @@ static err_t SI5351_ReadByte(i2c_si5351_t* pHandle, uint8_t u8MemAddr, uint8_t* 
  * Channel 2: 13.56  MHz
  */
 static const uint8_t m_si5351_regs_15to92_149to170[100][2] = {
-    {15,  0x00 }, /* Input source = crystal for PLLA and PLLB */
-    {16,  0x4F }, /* CLK0 Control: 8mA drive, Multisynth 0 as CLK0 source, Clock not inverted, Source = PLLA, Multisynth 0 in integer mode, clock powered up */
-    {17,  0x4F }, /* CLK1 Control: 8mA drive, Multisynth 1 as CLK1 source, Clock not inverted, Source = PLLA, Multisynth 1 in integer mode, clock powered up */
-    {18,  0x6F }, /* CLK2 Control: 8mA drive, Multisynth 2 as CLK2 source, Clock not inverted, Source = PLLB, Multisynth 2 in integer mode, clock powered up */
-    {19,  BV(7)}, /* CLK3 Control: Not used ... clock powered down */
-    {20,  BV(7)}, /* CLK4 Control: Not used ... clock powered down */
-    {21,  BV(7)}, /* CLK5 Control: Not used ... clock powered down */
-    {22,  BV(7)}, /* CLK6 Control: Not used ... clock powered down */
-    {23,  BV(7)}, /* CLK7 Control: Not used ... clock powered down */
-    {24,  0x00 }, /* Clock disable state 0..3 (low when disabled) */
-    {25,  0x00 }, /* Clock disable state 4..7 (low when disabled) */
+    {15,  0x00}, /* Input source = crystal for PLLA and PLLB */
+    {16,  0x4F}, /* CLK0 Control: 8mA drive, Multisynth 0 as CLK0 source, Clock not inverted, Source = PLLA, Multisynth 0 in integer mode, clock powered up */
+    {17,  0x4F}, /* CLK1 Control: 8mA drive, Multisynth 1 as CLK1 source, Clock not inverted, Source = PLLA, Multisynth 1 in integer mode, clock powered up */
+    {18,  0x6F}, /* CLK2 Control: 8mA drive, Multisynth 2 as CLK2 source, Clock not inverted, Source = PLLB, Multisynth 2 in integer mode, clock powered up */
+    {19,  0x80}, /* CLK3 Control: Not used ... clock powered down */
+    {20,  0x80}, /* CLK4 Control: Not used ... clock powered down */
+    {21,  0x80}, /* CLK5 Control: Not used ... clock powered down */
+    {22,  0x80}, /* CLK6 Control: Not used ... clock powered down */
+    {23,  0x80}, /* CLK7 Control: Not used ... clock powered down */
+    {24,  0x00}, /* Clock disable state 0..3 (low when disabled) */
+    {25,  0x00}, /* Clock disable state 4..7 (low when disabled) */
     /* PLL_A Setup */
-    {26,  0x00 },
-    {27,  0x05 },
-    {28,  0x00 },
-    {29,  0x0C },
-    {30,  0x66 },
-    {31,  0x00 },
-    {32,  0x00 },
-    {33,  0x02 },
+    {26,  0x00},
+    {27,  0x05},
+    {28,  0x00},
+    {29,  0x0C},
+    {30,  0x66},
+    {31,  0x00},
+    {32,  0x00},
+    {33,  0x02},
     /* PLL_B Setup */
-    {34,  0x02 },
-    {35,  0x71 },
-    {36,  0x00 },
-    {37,  0x0C },
-    {38,  0x1A },
-    {39,  0x00 },
-    {40,  0x00 },
-    {41,  0x86 },
+    {34,  0x02},
+    {35,  0x71},
+    {36,  0x00},
+    {37,  0x0C},
+    {38,  0x1A},
+    {39,  0x00},
+    {40,  0x00},
+    {41,  0x86},
     /* Multisynth Setup */
-    {42,  0x00 },
-    {43,  0x01 },
-    {44,  0x00 },
-    {45,  0x01 },
-    {46,  0x00 },
-    {47,  0x00 },
-    {48,  0x00 },
-    {49,  0x00 },
-    {50,  0x00 },
-    {51,  0x01 },
-    {52,  0x00 },
-    {53,  0x1C },
-    {54,  0x00 },
-    {55,  0x00 },
-    {56,  0x00 },
-    {57,  0x00 },
-    {58,  0x00 },
-    {59,  0x01 },
-    {60,  0x00 },
-    {61,  0x18 },
-    {62,  0x00 },
-    {63,  0x00 },
-    {64,  0x00 },
-    {65,  0x00 },
-    {66,  0x00 },
-    {67,  0x00 },
-    {68,  0x00 },
-    {69,  0x00 },
-    {70,  0x00 },
-    {71,  0x00 },
-    {72,  0x00 },
-    {73,  0x00 },
-    {74,  0x00 },
-    {75,  0x00 },
-    {76,  0x00 },
-    {77,  0x00 },
-    {78,  0x00 },
-    {79,  0x00 },
-    {80,  0x00 },
-    {81,  0x00 },
-    {82,  0x00 },
-    {83,  0x00 },
-    {84,  0x00 },
-    {85,  0x00 },
-    {86,  0x00 },
-    {87,  0x00 },
-    {88,  0x00 },
-    {89,  0x00 },
-    {90,  0x00 },
-    {91,  0x00 },
-    {92,  0x00 },
+    {42,  0x00},
+    {43,  0x01},
+    {44,  0x00},
+    {45,  0x01},
+    {46,  0x00},
+    {47,  0x00},
+    {48,  0x00},
+    {49,  0x00},
+    {50,  0x00},
+    {51,  0x01},
+    {52,  0x00},
+    {53,  0x1C},
+    {54,  0x00},
+    {55,  0x00},
+    {56,  0x00},
+    {57,  0x00},
+    {58,  0x00},
+    {59,  0x01},
+    {60,  0x00},
+    {61,  0x18},
+    {62,  0x00},
+    {63,  0x00},
+    {64,  0x00},
+    {65,  0x00},
+    {66,  0x00},
+    {67,  0x00},
+    {68,  0x00},
+    {69,  0x00},
+    {70,  0x00},
+    {71,  0x00},
+    {72,  0x00},
+    {73,  0x00},
+    {74,  0x00},
+    {75,  0x00},
+    {76,  0x00},
+    {77,  0x00},
+    {78,  0x00},
+    {79,  0x00},
+    {80,  0x00},
+    {81,  0x00},
+    {82,  0x00},
+    {83,  0x00},
+    {84,  0x00},
+    {85,  0x00},
+    {86,  0x00},
+    {87,  0x00},
+    {88,  0x00},
+    {89,  0x00},
+    {90,  0x00},
+    {91,  0x00},
+    {92,  0x00},
     /* Misc Config Register */
-    {149, 0x00 },
-    {150, 0x00 },
-    {151, 0x00 },
-    {152, 0x00 },
-    {153, 0x00 },
-    {154, 0x00 },
-    {155, 0x00 },
-    {156, 0x00 },
-    {157, 0x00 },
-    {158, 0x00 },
-    {159, 0x00 },
-    {160, 0x00 },
-    {161, 0x00 },
-    {162, 0x00 },
-    {163, 0x00 },
-    {164, 0x00 },
-    {165, 0x00 },
-    {166, 0x00 },
-    {167, 0x00 },
-    {168, 0x00 },
-    {169, 0x00 },
-    {170, 0x00 }
+    {149, 0x00},
+    {150, 0x00},
+    {151, 0x00},
+    {152, 0x00},
+    {153, 0x00},
+    {154, 0x00},
+    {155, 0x00},
+    {156, 0x00},
+    {157, 0x00},
+    {158, 0x00},
+    {159, 0x00},
+    {160, 0x00},
+    {161, 0x00},
+    {162, 0x00},
+    {163, 0x00},
+    {164, 0x00},
+    {165, 0x00},
+    {166, 0x00},
+    {167, 0x00},
+    {168, 0x00},
+    {169, 0x00},
+    {170, 0x00}
 };
 
 //---------------------------------------------------------------------------
@@ -218,17 +217,17 @@ static const uint8_t m_si5351_regs_15to92_149to170[100][2] = {
 
 static err_t SI5351_WriteByte(i2c_si5351_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
 {
-    return I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8Data, 0);
+    return I2C_Master_WriteByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
 }
 
 static err_t SI5351_WriteBlock(i2c_si5351_t* pHandle, uint8_t u8MemAddr, const uint8_t* cpu8Data, uint8_t u8Size)
 {
-    return I2C_Master_WriteBlock(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, cpu8Data, u8Size, 0);
+    return I2C_Master_WriteBlock(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, cpu8Data, u8Size, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
 }
 
 static err_t SI5351_ReadByte(i2c_si5351_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data)
 {
-    return I2C_Master_ReadByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu8Data, 0);
+    return I2C_Master_ReadByte(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu8Data, I2C_FLAG_7BIT_SLVADDR | I2C_FLAG_8BIT_MEMADDR);
 }
 
 err_t SI5351_Init(i2c_si5351_t* pHandle)
