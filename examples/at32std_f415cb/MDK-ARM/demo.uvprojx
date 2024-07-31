@@ -714,6 +714,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\spi_mfrc522.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_ad770x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\spi_ad770x.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

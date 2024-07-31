@@ -33,15 +33,15 @@ extern "C" {
 #define INA219_ADDRESS_F 0x4F  // A0 = SCL, A1 = SCL
 
 /**
- * @brief 最大检测电压
+ * @brief 检测电压范围
  */
 typedef enum {
-    INA219_RANGE_16V = 0b0,  // ±16V
-    INA219_RANGE_32V = 0b1,  // ±32V
-} ina219_range_e;
+    INA219_BUS_RANGE_16V = 0b0,  // ±16V
+    INA219_BUS_RANGE_32V = 0b1,  // ±32V
+} ina219_bus_range_e;
 
 /**
- * @brief 总线分流电阻最大电压
+ * @brief PGA gain
  */
 typedef enum {
     INA219_GAIN_40MV  = 0b00,  // ±40 mV
@@ -58,17 +58,17 @@ typedef enum {
 } ina219_bus_res_e;
 
 typedef enum {
-    INA219_SHUNT_RES_9BIT_1S    = 0b0000,  // 9 bit / 1 samples
-    INA219_SHUNT_RES_10BIT_1S   = 0b0001,  // 10 bit / 1 samples
-    INA219_SHUNT_RES_11BIT_1S   = 0b0010,  // 11 bit / 1 samples
-    INA219_SHUNT_RES_12BIT_1S   = 0b0011,  // 12 bit / 1 samples
-    INA219_SHUNT_RES_12BIT_2S   = 0b1001,  // 12 bit / 2 samples
-    INA219_SHUNT_RES_12BIT_4S   = 0b1010,  // 12 bit / 4 samples
-    INA219_SHUNT_RES_12BIT_8S   = 0b1011,  // 12 bit / 8 samples
-    INA219_SHUNT_RES_12BIT_16S  = 0b1100,  // 12 bit / 16 samples
-    INA219_SHUNT_RES_12BIT_32S  = 0b1101,  // 12 bit / 32 samples
-    INA219_SHUNT_RES_12BIT_64S  = 0b1110,  // 12 bit / 64 samples
-    INA219_SHUNT_RES_12BIT_128S = 0b1111,  // 12 bit / 128 samples
+    INA219_SHUNT_RES_9_BIT_1_SAMPLES    = 0b0000,  // 9 bit / 1 samples
+    INA219_SHUNT_RES_10_BIT_1_SAMPLES   = 0b0001,  // 10 bit / 1 samples
+    INA219_SHUNT_RES_11_BIT_1_SAMPLES   = 0b0010,  // 11 bit / 1 samples
+    INA219_SHUNT_RES_12_BIT_1_SAMPLES   = 0b0011,  // 12 bit / 1 samples
+    INA219_SHUNT_RES_12_BIT_2_SAMPLES   = 0b1001,  // 12 bit / 2 samples
+    INA219_SHUNT_RES_12_BIT_4_SAMPLES   = 0b1010,  // 12 bit / 4 samples
+    INA219_SHUNT_RES_12_BIT_8_SAMPLES   = 0b1011,  // 12 bit / 8 samples
+    INA219_SHUNT_RES_12_BIT_16_SAMPLES  = 0b1100,  // 12 bit / 16 samples
+    INA219_SHUNT_RES_12_BIT_32_SAMPLES  = 0b1101,  // 12 bit / 32 samples
+    INA219_SHUNT_RES_12_BIT_64_SAMPLES  = 0b1110,  // 12 bit / 64 samples
+    INA219_SHUNT_RES_12_BIT_128_SAMPLES = 0b1111,  // 12 bit / 128 samples
 } ina219_shunt_res_e;
 
 typedef enum {
@@ -97,7 +97,7 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 err_t INA219_Init(i2c_ina219_t* pHandle);
-err_t INA219_Configure(i2c_ina219_t* pHandle, ina219_range_e eRange, ina219_gain_e eGain, ina219_bus_res_e eBusRes, ina219_shunt_res_e eShuntRes, ina219_mode_e eMode);
+err_t INA219_Configure(i2c_ina219_t* pHandle, ina219_bus_range_e eRange, ina219_gain_e eGain, ina219_bus_res_e eBusRes, ina219_shunt_res_e eShuntRes, ina219_mode_e eMode);
 
 float32_t INA219_GetMaxCurrent(i2c_ina219_t* pHandle);       // A
 float32_t INA219_GetMaxShuntVoltage(i2c_ina219_t* pHandle);  // V
@@ -107,7 +107,7 @@ float32_t INA219_ReadShuntCurrent(i2c_ina219_t* pHandle);    // A
 float32_t INA219_ReadShuntVoltage(i2c_ina219_t* pHandle);    // V
 float32_t INA219_ReadBusVoltage(i2c_ina219_t* pHandle);      // V
 
-ina219_range_e     INA219_GetRange(i2c_ina219_t* pHandle);
+ina219_bus_range_e INA219_GetRange(i2c_ina219_t* pHandle);
 ina219_gain_e      INA219_GetGain(i2c_ina219_t* pHandle);
 ina219_bus_res_e   INA219_GetBusRes(i2c_ina219_t* pHandle);
 ina219_shunt_res_e INA219_GetShuntRes(i2c_ina219_t* pHandle);

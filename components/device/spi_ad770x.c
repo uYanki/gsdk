@@ -51,7 +51,7 @@ static inline void AD770x_Reset(spi_ad770x_t* pHandle)
 }
 
 /**
- * @brief 同步 spi 接口，以防模块失步
+ * @brief 同步 spi 接口, 以防模块失步
  */
 static inline void AD770x_SyncSpi(spi_ad770x_t* pHandle)
 {
@@ -82,10 +82,10 @@ static inline void AD770x_SetOperation(
 err_t AD770x_Init(spi_ad770x_t* pHandle)
 {
     PIN_SetMode(&pHandle->RST, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_UP);
-	
+
     AD770x_Reset(pHandle);
     AD770x_SyncSpi(pHandle);
-	
+
     return ERR_NONE;
 }
 
@@ -119,20 +119,13 @@ bool AD770x_IsDataReady(spi_ad770x_t* pHandle, ad770x_channel_e eChannel)
     return (u8State & 0x80) ? false : true;
 }
 
-/**
- * @brief 读取满标度寄存器
- * @note  数据是自动采集? 还是在发送读 REG_DATA 才开始采集的？
- *
- */
 err_t AD770x_ReadAdc(spi_ad770x_t* pHandle, ad770x_channel_e eChannel, uint16_t* pu16Value)
 {
     uint8_t au8Buff[2];
 
-	  while (AD770x_IsDataReady(pHandle, eChannel) == false);
-
-    AD770x_SetOperation(pHandle, eChannel, AD770X_REG_DATA, AD770X_READ);
+    while (AD770x_IsDataReady(pHandle, eChannel) == false);
+    AD770x_SetOperation(pHandle, eChannel, AD770X_REG_DATA, AD770X_READ);  // select channel
     AD770x_ReadBlock(pHandle, au8Buff, 2);
-
     *pu16Value = be16(au8Buff);
 
     return ERR_NONE;
@@ -166,9 +159,12 @@ err_t AD770x_ReadFullCal(spi_ad770x_t* pHandle, ad770x_channel_e eChannel, uint3
 // Example
 //---------------------------------------------------------------------------
 
-#if CONFIG_DEMOS_SW // 未测
+#if CONFIG_DEMOS_SW
 
-#define CONFIG_AD770X_VREF        2.5f // 5V 输入
+// 基准电压为2.5V时
+// - 在单极性信号下, 输入范围是     0V 到 2.5V
+// - 在双极性输入下, 输入范围是 -1.25V 到 +1.25V
+#define CONFIG_AD770X_VREF 2.5f  // @5V 输入
 
 void AD7705_Test(void)
 {
@@ -186,29 +182,44 @@ void AD7705_Test(void)
         .RST  = {GPIOA, GPIO_PIN_0},
     };
 
+#elif defined(BOARD_AT32F415CB_DEV)
+
+    spi_mst_t spi = {
+        .MOSI = {GPIOB, GPIO_PINS_15}, /*MOSI*/
+        .MISO = {GPIOB, GPIO_PINS_14}, /*MISO*/
+        .SCLK = {GPIOB, GPIO_PINS_13}, /*SCLK*/
+        .CS   = {GPIOB, GPIO_PINS_12}, /*CS*/
+    };
+
+    spi_ad770x_t ad770x = {
+        .hSPI = &spi,
+        .RST  = {GPIOA, GPIO_PINS_1},
+    };
+
 #endif
 
     SPI_Master_Init(&spi, 100000, SPI_DUTYCYCLE_33_67, AD770X_SPI_TIMING | SPI_FLAG_SOFT_CS);
 
     AD770x_Init(&ad770x);
 
+    // 开单通道, 采集结果OK
     AD770x_ConfigChannel(
         &ad770x,
         AD7705_CHANNEL_AIN1P_AIN1N,
         AD770X_MODE_CALIBRATION_SELF,
         AD770X_CLOCK_4_9152_MHZ,
-        AD770X_GAIN_2,
-        AD770X_POLARITY_BIPOLAR,
-        AD770X_UPDATE_RATE_500_HZ);
-		
-    AD770x_ConfigChannel(
-        &ad770x,
-        AD7705_CHANNEL_AIN2P_AIN2N,
-        AD770X_MODE_CALIBRATION_SELF,
-        AD770X_CLOCK_4_9152_MHZ,
-        AD770X_GAIN_8,
-        AD770X_POLARITY_BIPOLAR,
-        AD770X_UPDATE_RATE_500_HZ);
+        AD770X_GAIN_1,
+        AD770X_POLARITY_UNIPOLAR,
+        AD770X_UPDATE_RATE_50_HZ);
+
+    // AD770x_ConfigChannel(
+    //     &ad770x,
+    //     AD7705_CHANNEL_AIN2P_AIN2N,
+    //     AD770X_MODE_CALIBRATION_SELF,
+    //     AD770X_CLOCK_4_9152_MHZ,
+    //     AD770X_GAIN_1,
+    //     AD770X_POLARITY_BIPOLAR,
+    //     AD770X_UPDATE_RATE_500_HZ);
 
     while (1)
     {
@@ -216,14 +227,14 @@ void AD7705_Test(void)
         float32_t f32ChannelData[2] = {0.f};
 
         AD770x_ReadAdc(&ad770x, AD7705_CHANNEL_AIN1P_AIN1N, &u16ChannelData[0]);
-       // AD770x_ReadAdc(&ad770x, AD7705_CHANNEL_AIN2P_AIN2N, &u16ChannelData[1]);
-				
-        f32ChannelData[0] = u16ChannelData[0] * CONFIG_AD770X_VREF / 65535.f;
-        f32ChannelData[1] = u16ChannelData[1] * CONFIG_AD770X_VREF / 65535.f;
+        // AD770x_ReadAdc(&ad770x, AD7705_CHANNEL_AIN2P_AIN2N, &u16ChannelData[1]);
 
-        PRINTLN("%.2f,%.2f", f32ChannelData[0], f32ChannelData[1]);
-				
-				DelayBlockMs(100);
+        f32ChannelData[0] = u16ChannelData[0] * CONFIG_AD770X_VREF / 32768.f;
+        f32ChannelData[1] = u16ChannelData[1] * CONFIG_AD770X_VREF / 32768.f;
+
+        PRINTLN("%d, %.5f, %.5f", u16ChannelData[0], f32ChannelData[0], f32ChannelData[1]);
+
+        DelayBlockMs(100);
     }
 }
 

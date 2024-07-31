@@ -32,12 +32,12 @@ static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8
 
 static err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data)
 {
-    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT| I2C_FLAG_WORD_BIG_ENDIAN);
+    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
 static err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
 {
-    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT| I2C_FLAG_WORD_BIG_ENDIAN);
+    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
 static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue)
@@ -55,12 +55,12 @@ err_t INA219_Init(i2c_ina219_t* pHandle)
     return ERR_NONE;
 }
 
-err_t INA219_Configure(i2c_ina219_t* pHandle, ina219_range_e eRange, ina219_gain_e eGain, ina219_bus_res_e eBusRes, ina219_shunt_res_e eShuntRes, ina219_mode_e eMode)
+err_t INA219_Configure(i2c_ina219_t* pHandle, ina219_bus_range_e eRange, ina219_gain_e eGain, ina219_bus_res_e eBusRes, ina219_shunt_res_e eShuntRes, ina219_mode_e eMode)
 {
     switch (eRange)
     {
-        case INA219_RANGE_32V: pHandle->_f32VbusMax = 32.0f; break;
-        case INA219_RANGE_16V: pHandle->_f32VbusMax = 16.0f; break;
+        case INA219_BUS_RANGE_32V: pHandle->_f32VbusMax = 32.0f; break;
+        case INA219_BUS_RANGE_16V: pHandle->_f32VbusMax = 16.0f; break;
         default: return ERR_INVALID_VALUE;
     }
 
@@ -143,13 +143,13 @@ float32_t INA219_ReadBusVoltage(i2c_ina219_t* pHandle)
     return (u16Data >> 3) * 0.004f;
 }
 
-ina219_range_e INA219_GetRange(i2c_ina219_t* pHandle)
+ina219_bus_range_e INA219_GetRange(i2c_ina219_t* pHandle)
 {
     uint16_t u16Data;
 
     INA219_ReadWordBits(pHandle, REG_CONFIG, 13, 1, &u16Data);
 
-    return (ina219_range_e)u16Data;
+    return (ina219_bus_range_e)u16Data;
 }
 
 ina219_gain_e INA219_GetGain(i2c_ina219_t* pHandle)
@@ -207,7 +207,7 @@ void INA219_Test(i2c_mst_t* hI2C)
     INA219_Init(&ina219);
 
     // Configure INA219
-    INA219_Configure(&ina219, INA219_RANGE_16V, INA219_GAIN_160MV, INA219_BUS_RES_12BIT, INA219_SHUNT_RES_12BIT_128S, INA219_MODE_SHUNT_BUS_CONT);
+    INA219_Configure(&ina219, INA219_BUS_RANGE_16V, INA219_GAIN_160MV, INA219_BUS_RES_12BIT, INA219_SHUNT_RES_12_BIT_128_SAMPLES, INA219_MODE_SHUNT_BUS_CONT);
 
     // Display configuration
     PRINTF("Mode:                 ");
@@ -227,8 +227,8 @@ void INA219_Test(i2c_mst_t* hI2C)
     PRINTF("Range:                ");
     switch (INA219_GetRange(&ina219))
     {
-        case INA219_RANGE_16V: PRINTLN("16V"); break;
-        case INA219_RANGE_32V: PRINTLN("32V"); break;
+        case INA219_BUS_RANGE_16V: PRINTLN("16V"); break;
+        case INA219_BUS_RANGE_32V: PRINTLN("32V"); break;
         default: PRINTLN("unknown"); break;
     }
 
@@ -255,17 +255,17 @@ void INA219_Test(i2c_mst_t* hI2C)
     PRINTF("Shunt resolution:     ");
     switch (INA219_GetShuntRes(&ina219))
     {
-        case INA219_SHUNT_RES_9BIT_1S: PRINTLN("9-bit / 1 sample"); break;
-        case INA219_SHUNT_RES_10BIT_1S: PRINTLN("10-bit / 1 sample"); break;
-        case INA219_SHUNT_RES_11BIT_1S: PRINTLN("11-bit / 1 sample"); break;
-        case INA219_SHUNT_RES_12BIT_1S: PRINTLN("12-bit / 1 sample"); break;
-        case INA219_SHUNT_RES_12BIT_2S: PRINTLN("12-bit / 2 samples"); break;
-        case INA219_SHUNT_RES_12BIT_4S: PRINTLN("12-bit / 4 samples"); break;
-        case INA219_SHUNT_RES_12BIT_8S: PRINTLN("12-bit / 8 samples"); break;
-        case INA219_SHUNT_RES_12BIT_16S: PRINTLN("12-bit / 16 samples"); break;
-        case INA219_SHUNT_RES_12BIT_32S: PRINTLN("12-bit / 32 samples"); break;
-        case INA219_SHUNT_RES_12BIT_64S: PRINTLN("12-bit / 64 samples"); break;
-        case INA219_SHUNT_RES_12BIT_128S: PRINTLN("12-bit / 128 samples"); break;
+        case INA219_SHUNT_RES_9_BIT_1_SAMPLES: PRINTLN("9-bit / 1 sample"); break;
+        case INA219_SHUNT_RES_10_BIT_1_SAMPLES: PRINTLN("10-bit / 1 sample"); break;
+        case INA219_SHUNT_RES_11_BIT_1_SAMPLES: PRINTLN("11-bit / 1 sample"); break;
+        case INA219_SHUNT_RES_12_BIT_1_SAMPLES: PRINTLN("12-bit / 1 sample"); break;
+        case INA219_SHUNT_RES_12_BIT_2_SAMPLES: PRINTLN("12-bit / 2 samples"); break;
+        case INA219_SHUNT_RES_12_BIT_4_SAMPLES: PRINTLN("12-bit / 4 samples"); break;
+        case INA219_SHUNT_RES_12_BIT_8_SAMPLES: PRINTLN("12-bit / 8 samples"); break;
+        case INA219_SHUNT_RES_12_BIT_16_SAMPLES: PRINTLN("12-bit / 16 samples"); break;
+        case INA219_SHUNT_RES_12_BIT_32_SAMPLES: PRINTLN("12-bit / 32 samples"); break;
+        case INA219_SHUNT_RES_12_BIT_64_SAMPLES: PRINTLN("12-bit / 64 samples"); break;
+        case INA219_SHUNT_RES_12_BIT_128_SAMPLES: PRINTLN("12-bit / 128 samples"); break;
         default: PRINTLN("unknown"); break;
     }
 

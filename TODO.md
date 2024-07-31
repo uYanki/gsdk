@@ -56,7 +56,7 @@
 * [ ] device-lis3dh
 * [ ] device-ads1292
 * [ ] device-ov7670
-* [ ] device-ad7705 (to test)
+* [x] device-ad7705 
 * [ ] CherryUSB
 * [ ] tinyusb
 * [ ] shell
