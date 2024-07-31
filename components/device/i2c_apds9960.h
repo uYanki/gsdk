@@ -357,34 +357,34 @@ typedef struct {
 // Functions
 //---------------------------------------------------------------------------
 
-err_t               APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMS, apds9960_als_gain_e eAdcGain);
-void                APDS9960_SetADCIntegrationTime(i2c_apds9960_t* pHandle, uint16_t iTimeMS);
+err_t               APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_gain_e eAGain);
+void                APDS9960_SetADCIntegrationTime(i2c_apds9960_t* pHandle, uint16_t u16TimeMs);
 float               APDS9960_GetADCIntegrationTime(i2c_apds9960_t* pHandle);
-void                APDS9960_SetADCGain(i2c_apds9960_t* pHandle, apds9960_als_gain_e gain);
-apds9960_als_gain_e APDS9960_GetADCGain(i2c_apds9960_t* pHandle);
-void                APDS9960_SetLED(i2c_apds9960_t* pHandle, apds9960_led_drive_e drive, apds9960_led_boost_e boost);
+void                APDS9960_SetAlsGain(i2c_apds9960_t* pHandle, apds9960_als_gain_e eAGain);
+apds9960_als_gain_e APDS9960_GetAlsGain(i2c_apds9960_t* pHandle);
+void                APDS9960_SetLED(i2c_apds9960_t* pHandle, apds9960_led_drive_e eLedDrive, apds9960_led_boost_e eLedBoost);
 
 // proximity
 void                     APDS9960_EnableProximity(i2c_apds9960_t* pHandle, bool bEnable);
-void                     APDS9960_SetProxGain(i2c_apds9960_t* pHandle, apds9960_proxmity_gain_e gain);
+void                     APDS9960_SetProxGain(i2c_apds9960_t* pHandle, apds9960_proxmity_gain_e ePGain);
 apds9960_proxmity_gain_e APDS9960_GetProxGain(i2c_apds9960_t* pHandle);
-void                     APDS9960_SetProxPulse(i2c_apds9960_t* pHandle, apds9960_proxmity_pulse_length_e pLen, uint8_t pulses);
+void                     APDS9960_SetProxPulse(i2c_apds9960_t* pHandle, apds9960_proxmity_pulse_length_e ePulseLen, uint8_t u8Pulses);
 void                     APDS9960_EnableProximityInterrupt(i2c_apds9960_t* pHandle);
 void                     APDS9960_DisableProximityInterrupt(i2c_apds9960_t* pHandle);
 uint8_t                  APDS9960_ReadProximity(i2c_apds9960_t* pHandle);
-void                     APDS9960_SetProximityInterruptThreshold(i2c_apds9960_t* pHandle, uint8_t low, uint8_t high, uint8_t persistence);
+void                     APDS9960_SetProximityInterruptThreshold(i2c_apds9960_t* pHandle, uint8_t u8LowThresh, uint8_t u8HighThresh, uint8_t u8Persistence);
 bool                     APDS9960_GetProximityInterrupt(i2c_apds9960_t* pHandle);
 
 // gesture
-void    APDS9960_EnableGesture(i2c_apds9960_t* pHandle, bool bEnable);
-bool    APDS9960_GestureValid(i2c_apds9960_t* pHandle);
-void    APDS9960_SetGestureDimensions(i2c_apds9960_t* pHandle, uint8_t dims);
-void    APDS9960_SetGestureFIFOThreshold(i2c_apds9960_t* pHandle, uint8_t thresh);
-void    APDS9960_SetGestureGain(i2c_apds9960_t* pHandle, uint8_t gain);
-void    APDS9960_SetGestureProximityThreshold(i2c_apds9960_t* pHandle, uint8_t thresh);
-void    APDS9960_SetGestureOffset(i2c_apds9960_t* pHandle, uint8_t offset_up, uint8_t offset_down, uint8_t offset_left, uint8_t offset_right);
-uint8_t APDS9960_ReadGesture(i2c_apds9960_t* pHandle);
-void    APDS9960_ResetCounts(i2c_apds9960_t* pHandle);
+void               APDS9960_EnableGesture(i2c_apds9960_t* pHandle, bool bEnable);
+bool               APDS9960_GestureValid(i2c_apds9960_t* pHandle);
+void               APDS9960_SetGestureDimensions(i2c_apds9960_t* pHandle, uint8_t u8Dims);
+void               APDS9960_SetGestureFifoThreshold(i2c_apds9960_t* pHandle, uint8_t u8Thresh);
+void               APDS9960_SetGestureGain(i2c_apds9960_t* pHandle, uint8_t u8Gain);
+void               APDS9960_SetGestureProximityThreshold(i2c_apds9960_t* pHandle, uint8_t u8Thresh);
+void               APDS9960_SetGestureOffset(i2c_apds9960_t* pHandle, uint8_t u8OffsetUp, uint8_t u8OffsetDown, uint8_t u8OffsetLeft, uint8_t u8OffsetRight);
+apds9960_gesture_e APDS9960_ReadGesture(i2c_apds9960_t* pHandle);
+void               APDS9960_ResetCounts(i2c_apds9960_t* pHandle);
 
 // light & color
 void     APDS9960_EnableColor(i2c_apds9960_t* pHandle, bool bEnable);

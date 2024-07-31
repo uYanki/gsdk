@@ -231,7 +231,7 @@ err_t APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_ga
 
     /* Set default integration time and gain */
     APDS9960_SetADCIntegrationTime(pHandle, u16TimeMs);
-    APDS9960_SetADCGain(pHandle, eAGain);
+    APDS9960_SetAlsGain(pHandle, eAGain);
 
     // disable everything to start
     APDS9960_EnableGesture(pHandle, false);
@@ -250,7 +250,7 @@ err_t APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_ga
 
     // default to all gesture dimensions
     APDS9960_SetGestureDimensions(pHandle, APDS9960_DIMENSIONS_ALL);
-    APDS9960_SetGestureFIFOThreshold(pHandle, APDS9960_GFIFO_4);
+    APDS9960_SetGestureFifoThreshold(pHandle, APDS9960_GFIFO_4);
     APDS9960_SetGestureGain(pHandle, APDS9960_GGAIN_4);
     APDS9960_SetGestureProximityThreshold(pHandle, 50);
     APDS9960_ResetCounts(pHandle);
@@ -293,19 +293,19 @@ void APDS9960_SetADCIntegrationTime(i2c_apds9960_t* pHandle, uint16_t u16TimeMs)
  */
 float APDS9960_GetADCIntegrationTime(i2c_apds9960_t* pHandle)
 {
-    uint8_t u16Data;
+    uint8_t u8Data;
 
-    APDS9960_ReadByte(pHandle, APDS9960_ATIME, &u16Data);
+    APDS9960_ReadByte(pHandle, APDS9960_ATIME, &u8Data);
 
     // convert to units of 2.78 ms
-    return (256 - u16Data) * 2.78f;
+    return (256 - u8Data) * 2.78f;
 }
 
 /**
  *  @brief  Adjusts the color/ALS gain on the APDS9960 (adjusts the sensitivity to light)
  *  @param  eAGain Gain
  */
-void APDS9960_SetADCGain(i2c_apds9960_t* pHandle, apds9960_als_gain_e eAGain)
+void APDS9960_SetAlsGain(i2c_apds9960_t* pHandle, apds9960_als_gain_e eAGain)
 {
     pHandle->_control.AGAIN = eAGain;
 
@@ -317,13 +317,13 @@ void APDS9960_SetADCGain(i2c_apds9960_t* pHandle, apds9960_als_gain_e eAGain)
  *  @brief  Returns the ADC gain
  *  @return ADC gain
  */
-apds9960_als_gain_e _APDS9960_GetADCGain(i2c_apds9960_t* pHandle)
+apds9960_als_gain_e APDS9960_GetAlsGain(i2c_apds9960_t* pHandle)
 {
-    uint16_t u16Data;
+    uint8_t u8Data;
 
-    APDS9960_ReadByte(pHandle, APDS9960_CONTROL, &u16Data);
+    APDS9960_ReadByte(pHandle, APDS9960_CONTROL, &u8Data);
 
-    return (apds9960_als_gain_e)(u16Data & 0x03);
+    return (apds9960_als_gain_e)(u8Data & 0x03);
 }
 
 /**
@@ -344,11 +344,11 @@ void APDS9960_SetProxGain(i2c_apds9960_t* pHandle, apds9960_proxmity_gain_e ePGa
  */
 apds9960_proxmity_gain_e APDS9960_GetProxGain(i2c_apds9960_t* pHandle)
 {
-    uint16_t u16Data;
+    uint8_t u8Data;
 
-    APDS9960_ReadByte(pHandle, APDS9960_CONTROL, &u16Data);
+    APDS9960_ReadByte(pHandle, APDS9960_CONTROL, &u8Data);
 
-    return (apds9960_proxmity_gain_e)((u16Data & 0x0C) >> 2);
+    return (apds9960_proxmity_gain_e)((u8Data & 0x0C) >> 2);
 }
 
 /**
@@ -432,9 +432,9 @@ void APDS9960_SetProximityInterruptThreshold(i2c_apds9960_t* pHandle, uint8_t u8
  */
 bool APDS9960_GetProximityInterrupt(i2c_apds9960_t* pHandle)
 {
-    uint16_t u16Data;
-    APDS9960_ReadByte(pHandle, APDS9960_STATUS, &u16Data);
-    _APDS9960_SetSTATUS(pHandle, u16Data);
+    uint8_t u8Data;
+    APDS9960_ReadByte(pHandle, APDS9960_STATUS, &u8Data);
+    _APDS9960_SetSTATUS(pHandle, u8Data);
     return pHandle->_status.PINT;
 };
 
@@ -444,7 +444,9 @@ bool APDS9960_GetProximityInterrupt(i2c_apds9960_t* pHandle)
  */
 uint8_t APDS9960_ReadProximity(i2c_apds9960_t* pHandle)
 {
-    return APDS9960_ReadByte(pHandle, APDS9960_PDATA);
+    uint8_t u8Data;
+    APDS9960_ReadByte(pHandle, APDS9960_PDATA, &u8Data);
+    return u8Data;
 }
 
 /**
@@ -453,9 +455,9 @@ uint8_t APDS9960_ReadProximity(i2c_apds9960_t* pHandle)
  */
 bool APDS9960_GestureValid(i2c_apds9960_t* pHandle)
 {
-    uint16_t u16Data;
-    APDS9960_ReadByte(pHandle, APDS9960_GSTATUS, &u16Data);
-    _APDS9960_SetGSTATUS(pHandle, u16Data);
+    uint8_t u8Data;
+    APDS9960_ReadByte(pHandle, APDS9960_GSTATUS, &u8Data);
+    _APDS9960_SetGSTATUS(pHandle, u8Data);
     return pHandle->_gstatus.GVALID;
 }
 
@@ -473,7 +475,7 @@ void APDS9960_SetGestureDimensions(i2c_apds9960_t* pHandle, uint8_t u8Dims)
  *  @brief  Sets gesture FIFO Threshold
  *  @param  u8Thresh Threshold (APDS9960_GFIFO_1, APDS9960_GFIFO_4, APDS9960_GFIFO_8, APDS9960_GFIFO_16)
  */
-void APDS9960_SetGestureFIFOThreshold(i2c_apds9960_t* pHandle, uint8_t u8Thresh)
+void APDS9960_SetGestureFifoThreshold(i2c_apds9960_t* pHandle, uint8_t u8Thresh)
 {
     pHandle->_gconf1.GFIFOTH = u8Thresh;
     APDS9960_WriteByte(pHandle, APDS9960_GCONF1, _APDS9960_GetGCONF1(pHandle));
@@ -679,7 +681,9 @@ void APDS9960_EnableColor(i2c_apds9960_t* pHandle, bool bEnable)
  */
 bool APDS9960_ColorDataReady(i2c_apds9960_t* pHandle)
 {
-    _APDS9960_SetSTATUS(pHandle, APDS9960_ReadByte(pHandle, APDS9960_STATUS));
+    uint8_t u8Data;
+    APDS9960_ReadByte(pHandle, APDS9960_STATUS, &u8Data);
+    _APDS9960_SetSTATUS(pHandle, u8Data);
     return pHandle->_status.AVALID;
 }
 
@@ -775,7 +779,8 @@ void APDS9960_DisableColorInterrupt(i2c_apds9960_t* pHandle)
  */
 void APDS9960_ClearInterrupt(i2c_apds9960_t* pHandle)
 {
-    APDS9960_ReadByte(pHandle, APDS9960_AICLEAR);
+    uint8_t u8Data;
+    APDS9960_ReadByte(pHandle, APDS9960_AICLEAR, &u8Data);
 }
 
 /**
