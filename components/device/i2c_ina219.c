@@ -198,7 +198,7 @@ void INA219_Test(i2c_mst_t* hI2C)
 {
     i2c_ina219_t ina219 = {
         .hI2C        = hI2C,
-        .u8SlvAddr   = INA219_ADDRESS_0,
+        .u8SlvAddr   = INA219_ADDRESS_1,
         .f32ShuntOhm = 0.1f,  // 0.1 ohm
     };
 

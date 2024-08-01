@@ -53,10 +53,13 @@ typedef struct {
     __IN uint8_t    u8SlvAddr;
 
     // Shunt resistance in mOhm
-    uint32_t u32ShuntRes[INA3221_CH_NUM];
+    __IN uint32_t u32ShuntRes[INA3221_CH_NUM];
 
     // Series filter resistance in Ohm
-    uint32_t u32FilterRes[INA3221_CH_NUM];
+    __IN uint32_t u32FilterRes[INA3221_CH_NUM];
+
+    // Value of Mask/Enable register. ( set by INA3221_ReadFlags() )
+    uint16_t u16MaskenReg;
 } i2c_ina3221_t;
 
 //---------------------------------------------------------------------------
@@ -65,15 +68,6 @@ typedef struct {
 
 // Initializes INA3221
 err_t INA3221_Init(i2c_ina3221_t* pHandle);
-
-// Sets shunt resistor value in mOhm
-void INA3221_SetShuntRes(i2c_ina3221_t* pHandle, uint32_t res_ch1, uint32_t res_ch2, uint32_t res_ch3);
-
-// Sets filter resistors value in Ohm
-void INA3221_SetFilterRes(i2c_ina3221_t* pHandle, uint32_t res_ch1, uint32_t res_ch2, uint32_t res_ch3);
-
-// Gets a register value.
-uint16_t INA3221_GetReg(i2c_ina3221_t* pHandle, uint8_t reg);
 
 // Resets INA3221
 void INA3221_Reset(i2c_ina3221_t* pHandle);
@@ -87,17 +81,11 @@ void INA3221_SetModeContinious(i2c_ina3221_t* pHandle);
 // Sets operating mode to triggered (single-shot)
 void INA3221_SetModeTriggered(i2c_ina3221_t* pHandle);
 
-// Enables shunt-voltage measurement
-void INA3221_SetShuntMeasEnable(i2c_ina3221_t* pHandle);
+// Enables/Disables shunt-voltage measurement
+void INA3221_SetShuntMeasEnable(i2c_ina3221_t* pHandle, bool bEnable);
 
-// Disables shunt-voltage mesurement
-void INA3221_SetShuntMeasDisable(i2c_ina3221_t* pHandle);
-
-// Enables bus-voltage measurement
-void INA3221_SetBusMeasEnable(i2c_ina3221_t* pHandle);
-
-// Disables bus-voltage measureement
-void INA3221_SetBusMeasDisable(i2c_ina3221_t* pHandle);
+// Enables/Disables bus-voltage measurement
+void INA3221_SetBusMeasEnable(i2c_ina3221_t* pHandle, bool bEnable);
 
 // Sets averaging mode. Sets number of samples that are collected
 // and averaged togehter.
@@ -128,17 +116,11 @@ void INA3221_SetShuntSumAlertLimit(i2c_ina3221_t* pHandle, int32_t s16VoltagemV)
 // value to shunt voltage value.
 void INA3221_SetCurrentSumAlertLimit(i2c_ina3221_t* pHandle, int32_t s32CurrentmA);
 
-// Enables warning alert latch.
-void INA3221_SetWarnAlertLatchEnable(i2c_ina3221_t* pHandle);
+// Enables/Disables warning alert latch.
+void INA3221_SetWarnAlertLatchEnable(i2c_ina3221_t* pHandle, bool bEnable);
 
-// Disables warning alert latch.
-void INA3221_SetWarnAlertLatchDisable(i2c_ina3221_t* pHandle);
-
-// Enables critical alert latch.
-void INA3221_SetCritAlertLatchEnable(i2c_ina3221_t* pHandle);
-
-// Disables critical alert latch.
-void INA3221_SetCritAlertLatchDisable(i2c_ina3221_t* pHandle);
+// Enables/Disables critical alert latch.
+void INA3221_SetCritAlertLatchEnable(i2c_ina3221_t* pHandle, bool bEnable);
 
 // Reads flags from Mask/Enable register.
 // When Mask/Enable register is read, flags are cleared.
@@ -167,11 +149,8 @@ uint16_t INA3221_GetManufID(i2c_ina3221_t* pHandle);
 // Should read 0x3220.
 uint16_t INA3221_GetDieID(i2c_ina3221_t* pHandle);
 
-// Enables channel measurements
-void INA3221_SetChannelEnable(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel);
-
-// Disables channel measurements
-void INA3221_SetChannelDisable(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel);
+// Enables/Disables channel measurements
+void INA3221_SetChannelEnable(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel, bool bEnable);
 
 // Sets warning alert shunt voltage limit
 void INA3221_SetWarnAlertShuntLimit(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel, int32_t s32VoltageuV);
@@ -185,11 +164,8 @@ void INA3221_SetWarnAlertCurrentLimit(i2c_ina3221_t* pHandle, ina3221_ch_e eChan
 // Sets critical alert current limit
 void INA3221_SetCritAlertCurrentLimit(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel, int32_t s32CurrentmA);
 
-// Includes channel to fill Shunt-Voltage Sum register.
-void INA3221_SetCurrentSumEnable(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel);
-
-// Excludes channel from filling Shunt-Voltage Sum register.
-void INA3221_SetCurrentSumDisable(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel);
+// Includes/Excludes channel to fill Shunt-Voltage Sum register.
+void INA3221_SetCurrentSumEnable(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel, bool bEnable);
 
 // Gets shunt voltage in uV.
 int32_t INA3221_GetShuntVoltage(i2c_ina3221_t* pHandle, ina3221_ch_e eChannel);

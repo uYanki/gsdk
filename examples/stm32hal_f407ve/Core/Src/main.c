@@ -171,7 +171,7 @@ int main(void)
 
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
-    // INA219_Test(&i2c);
+   // INA219_Test(&i2c);
 		INA3221_Test(&i2c);
 		APDS9960_Test(&i2c);
     // QRCode_Test();
