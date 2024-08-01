@@ -47,7 +47,7 @@
 // Functions
 //---------------------------------------------------------------------------
 
-static err_t BH1750_WriteCmd(i2c_bh1750_t* pHandle, uint8_t u8Cmd)
+static inline err_t BH1750_WriteCmd(i2c_bh1750_t* pHandle, uint8_t u8Cmd)
 {
     return I2C_Master_TransmitByte(pHandle->hI2C, pHandle->u8SlvAddr, u8Cmd, I2C_FLAG_SLVADDR_7BIT);
 }
@@ -56,7 +56,7 @@ static err_t BH1750_WriteCmd(i2c_bh1750_t* pHandle, uint8_t u8Cmd)
  * @brief 读原始数据
  * @note  在初始化完成后/连续测量模式下，需间隔 180ms 才能读到正确数据
  */
-static uint16_t BH1750_ReadData(i2c_bh1750_t* pHandle, uint16_t* pu16Data)
+static inline uint16_t BH1750_ReadData(i2c_bh1750_t* pHandle, uint16_t* pu16Data)
 {
     return I2C_Master_ReceiveWord(pHandle->hI2C, pHandle->u8SlvAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }

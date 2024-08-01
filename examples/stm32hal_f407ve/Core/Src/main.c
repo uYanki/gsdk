@@ -172,6 +172,7 @@ int main(void)
     I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
     // INA219_Test(&i2c);
+		INA3221_Test(&i2c);
 		APDS9960_Test(&i2c);
     // QRCode_Test();
     // EEFS_Test();
@@ -199,12 +200,12 @@ int main(void)
 #endif
 
 #if CONFIG_DEMOS_SW
-    // AD9833_Test();
-    // TM1638_Test();
-    // DS1302_Test();
-    // AD7705_Test();  // !
-    // ST7735_Test();
-    // MCP2515_Test();
+	// AD9833_Test();
+	// TM1638_Test();
+	// DS1302_Test();
+	// AD7705_Test(); 
+	// ST7735_Test();
+	// MCP2515_Test();
 #endif
 
     while (1)

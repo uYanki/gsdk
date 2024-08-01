@@ -18,9 +18,9 @@
 // Prototypes
 //---------------------------------------------------------------------------
 
-static err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data);
-static err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data);
-static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue);
+static inline err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data);
+static inline err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data);
+static inline err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue);
 
 //---------------------------------------------------------------------------
 // Variables
@@ -30,17 +30,17 @@ static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8
 // Functions
 //---------------------------------------------------------------------------
 
-static err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data)
+static inline err_t INA219_ReadWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data)
 {
     return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
-static err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
+static inline err_t INA219_WriteWord(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
 {
     return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }
 
-static err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue)
+static inline err_t INA219_ReadWordBits(i2c_ina219_t* pHandle, uint8_t u8MemAddr, uint8_t u8StartBit, uint8_t u8BitsCount, uint16_t* pu16BitsValue)
 {
     return I2C_Master_ReadWordBits(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u8StartBit, u8BitsCount, pu16BitsValue, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_MEMUNIT_16BIT | I2C_FLAG_WORD_BIG_ENDIAN);
 }

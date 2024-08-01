@@ -2219,6 +2219,11 @@
               <FilePath>..\..\..\components\device\i2c_ina219.c</FilePath>
             </File>
             <File>
+              <FileName>i2c_ina3221.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\i2c_ina3221.c</FilePath>
+            </File>
+            <File>
               <FileName>i2c_apds9960.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\i2c_apds9960.c</FilePath>
