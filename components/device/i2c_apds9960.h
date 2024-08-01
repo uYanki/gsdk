@@ -319,6 +319,7 @@ typedef enum {
 } apds9960_gwtime_e;
 
 typedef enum {
+    APDS9960_GESTURE_NONE  = 0x00,
     APDS9960_GESTURE_UP    = 0x01, /**< Gesture Up */
     APDS9960_GESTURE_DOWN  = 0x02, /**< Gesture Down */
     APDS9960_GESTURE_LEFT  = 0x03, /**< Gesture Left */
@@ -359,7 +360,7 @@ typedef struct {
 
 err_t               APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_gain_e eAGain);
 void                APDS9960_SetADCIntegrationTime(i2c_apds9960_t* pHandle, uint16_t u16TimeMs);
-float               APDS9960_GetADCIntegrationTime(i2c_apds9960_t* pHandle);
+float32_t           APDS9960_GetADCIntegrationTime(i2c_apds9960_t* pHandle);
 void                APDS9960_SetAlsGain(i2c_apds9960_t* pHandle, apds9960_als_gain_e eAGain);
 apds9960_als_gain_e APDS9960_GetAlsGain(i2c_apds9960_t* pHandle);
 void                APDS9960_SetLED(i2c_apds9960_t* pHandle, apds9960_led_drive_e eLedDrive, apds9960_led_boost_e eLedBoost);

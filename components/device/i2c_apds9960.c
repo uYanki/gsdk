@@ -61,6 +61,8 @@
 #define APDS9960_GFIFO_L    0xFE
 #define APDS9960_GFIFO_R    0xFF
 
+#define FIFO_PAUSE_TIME     30  // Wait period (ms) between FIFO reads
+
 //---------------------------------------------------------------------------
 // Prototypes
 //---------------------------------------------------------------------------
@@ -84,6 +86,7 @@ static inline void    _APDS9960_SetGSTATUS(i2c_apds9960_t* pHandle, uint8_t u8Da
 static inline err_t   APDS9960_WriteByte(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data);
 static inline uint8_t APDS9960_ReadByte(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data);
 static inline err_t   APDS9960_ReadWord(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data);
+static inline err_t   APDS9960_WriteWord(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data);
 static inline err_t   APDS9960_ReadBlock(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data, uint8_t u8Count);
 
 //---------------------------------------------------------------------------
@@ -106,7 +109,12 @@ static inline uint8_t APDS9960_ReadByte(i2c_apds9960_t* pHandle, uint8_t u8MemAd
 
 static inline err_t APDS9960_ReadWord(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint16_t* pu16Data)
 {
-    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_BIG_ENDIAN);
+    return I2C_Master_ReadWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, pu16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_LITTLE_ENDIAN);
+}
+
+static inline err_t APDS9960_WriteWord(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint16_t u16Data)
+{
+    return I2C_Master_WriteWord(pHandle->hI2C, pHandle->u8SlvAddr, u8MemAddr, u16Data, I2C_FLAG_SLVADDR_7BIT | I2C_FLAG_MEMADDR_8BIT | I2C_FLAG_WORD_LITTLE_ENDIAN);
 }
 
 static inline err_t APDS9960_ReadBlock(i2c_apds9960_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data, uint8_t u8Count)
@@ -268,30 +276,21 @@ err_t APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_ga
  */
 void APDS9960_SetADCIntegrationTime(i2c_apds9960_t* pHandle, uint16_t u16TimeMs)
 {
-    float temp;
+    float32_t f32Tmp;
 
     // convert ms into 2.78ms increments
-    temp = u16TimeMs;
-    temp /= 2.78;
-    temp = 256 - temp;
-    if (temp > 255)
-    {
-        temp = 255;
-    }
-    if (temp < 0)
-    {
-        temp = 0;
-    }
+    f32Tmp = 256 - u16TimeMs / 2.78f;
+    f32Tmp = CLAMP(f32Tmp, 0.f, 255.f);
 
     /* Update the timing register */
-    APDS9960_WriteByte(pHandle, APDS9960_ATIME, (uint8_t)temp);
+    APDS9960_WriteByte(pHandle, APDS9960_ATIME, (uint8_t)f32Tmp);
 }
 
 /**
  *  @brief  Returns the integration time for the ADC of the APDS9960, in millis
  *  @return Integration time
  */
-float APDS9960_GetADCIntegrationTime(i2c_apds9960_t* pHandle)
+float32_t APDS9960_GetADCIntegrationTime(i2c_apds9960_t* pHandle)
 {
     uint8_t u8Data;
 
@@ -353,24 +352,13 @@ apds9960_proxmity_gain_e APDS9960_GetProxGain(i2c_apds9960_t* pHandle)
 
 /**
  *  @brief  Sets number of proxmity u8Pulses
- *  @param  ePulseLen Pulse Length
- *  @param  u8Pulses Number of u8Pulses
+ *  @param  ePulseLen Pulse length
+ *  @param  u8Pulses Number of pulses
  */
 void APDS9960_SetProxPulse(i2c_apds9960_t* pHandle, apds9960_proxmity_pulse_length_e ePulseLen, uint8_t u8Pulses)
 {
-    if (u8Pulses < 1)
-    {
-        u8Pulses = 1;
-    }
-    if (u8Pulses > 64)
-    {
-        u8Pulses = 64;
-    }
-
-    u8Pulses--;
-
     pHandle->_ppulse.PPLEN  = ePulseLen;
-    pHandle->_ppulse.PPULSE = u8Pulses;
+    pHandle->_ppulse.PPULSE = CLAMP(u8Pulses, 1, 64) - 1;
 
     APDS9960_WriteByte(pHandle, APDS9960_PPULSE, _APDS9960_GetPPULSE(pHandle));
 }
@@ -422,7 +410,6 @@ void APDS9960_SetProximityInterruptThreshold(i2c_apds9960_t* pHandle, uint8_t u8
     }
 
     pHandle->_pers.PPERS = u8Persistence;
-
     APDS9960_WriteByte(pHandle, APDS9960_PERS, _APDS9960_GetPERS(pHandle));
 }
 
@@ -554,102 +541,113 @@ void APDS9960_ResetCounts(i2c_apds9960_t* pHandle)
  */
 apds9960_gesture_e APDS9960_ReadGesture(i2c_apds9960_t* pHandle)
 {
-    uint8_t       toRead;
-    uint8_t       buf[256];
-    unsigned long t = 0;
-    uint8_t       gestureReceived;
+    uint8_t u8BytesToRead;
+    uint8_t au8Data[256];
+    tick_t  t = GetTickUs();
+
+    uint8_t eGestureReceived = APDS9960_GESTURE_NONE;
+
     while (1)
     {
-        int up_down_diff    = 0;
-        int left_right_diff = 0;
-        gestureReceived     = 0;
+        int32_t up_down_diff    = 0;
+        int32_t left_right_diff = 0;
 
         if (!APDS9960_GestureValid(pHandle))
         {
-            return 0;
+            break;
         }
 
-        DelayBlockMs(30);
-        APDS9960_ReadByte(pHandle, APDS9960_GFLVL, &toRead);
+        DelayBlockMs(FIFO_PAUSE_TIME);
+        APDS9960_ReadByte(pHandle, APDS9960_GFLVL, &u8BytesToRead);
 
-        // produces sideffects needed for readGesture to work
-        APDS9960_ReadBlock(pHandle, APDS9960_GFIFO_U, buf, toRead);
-
-        if (abs((int)buf[0] - (int)buf[1]) > 13)
+        if (u8BytesToRead > 0)
         {
-            up_down_diff += (int)buf[0] - (int)buf[1];
-        }
+            // produces sideffects needed for readGesture to work
+            APDS9960_ReadBlock(pHandle, APDS9960_GFIFO_U, au8Data, u8BytesToRead);
 
-        if (abs((int)buf[2] - (int)buf[3]) > 13)
-        {
-            left_right_diff += (int)buf[2] - (int)buf[3];
-        }
-
-        if (up_down_diff != 0)
-        {
-            if (up_down_diff < 0)
+            if (abs((int32_t)au8Data[0] - (int32_t)au8Data[1]) > 13)
             {
-                if (pHandle->_u8DCount > 0)
+                up_down_diff += (int32_t)au8Data[0] - (int32_t)au8Data[1];
+            }
+
+            if (abs((int32_t)au8Data[2] - (int32_t)au8Data[3]) > 13)
+            {
+                left_right_diff += (int32_t)au8Data[2] - (int32_t)au8Data[3];
+            }
+
+            if (up_down_diff != 0)
+            {
+                if (up_down_diff < 0)
                 {
-                    gestureReceived = APDS9960_GESTURE_UP;
+                    if (pHandle->_u8DCount > 0)
+                    {
+                        eGestureReceived = APDS9960_GESTURE_UP;
+                    }
+                    else
+                    {
+                        pHandle->_u8UCount++;
+                    }
                 }
-                else
+                else if (up_down_diff > 0)
                 {
-                    pHandle->_u8UCount++;
+                    if (pHandle->_u8UCount > 0)
+                    {
+                        eGestureReceived = APDS9960_GESTURE_DOWN;
+                    }
+                    else
+                    {
+                        pHandle->_u8DCount++;
+                    }
                 }
             }
-            else if (up_down_diff > 0)
+
+            if (left_right_diff != 0)
             {
-                if (pHandle->_u8UCount > 0)
+                if (left_right_diff < 0)
                 {
-                    gestureReceived = APDS9960_GESTURE_DOWN;
+                    if (pHandle->_u8RCount > 0)
+                    {
+                        eGestureReceived = APDS9960_GESTURE_LEFT;
+                    }
+                    else
+                    {
+                        pHandle->_u8LCount++;
+                    }
                 }
-                else
+                else if (left_right_diff > 0)
                 {
-                    pHandle->_u8DCount++;
+                    if (pHandle->_u8LCount > 0)
+                    {
+                        eGestureReceived = APDS9960_GESTURE_RIGHT;
+                    }
+                    else
+                    {
+                        pHandle->_u8RCount++;
+                    }
                 }
+            }
+
+            if (eGestureReceived != APDS9960_GESTURE_NONE)
+            {
+                APDS9960_ResetCounts(pHandle);
+                break;
+            }
+
+            if (up_down_diff != 0 || left_right_diff != 0)
+            {
+                t = GetTickUs();
             }
         }
 
-        if (left_right_diff != 0)
-        {
-            if (left_right_diff < 0)
-            {
-                if (pHandle->_u8RCount > 0)
-                {
-                    gestureReceived = APDS9960_GESTURE_LEFT;
-                }
-                else
-                {
-                    pHandle->_u8LCount++;
-                }
-            }
-            else if (left_right_diff > 0)
-            {
-                if (pHandle->_u8LCount > 0)
-                {
-                    gestureReceived = APDS9960_GESTURE_RIGHT;
-                }
-                else
-                {
-                    pHandle->_u8RCount++;
-                }
-            }
-        }
-
-        if (up_down_diff != 0 || left_right_diff != 0)
-        {
-            t = GetTickMs();
-        }
-
-        if (gestureReceived || (GetTickMs() - t) > 300)
+        if (DelayNonBlockMs(t, 300))
         {
             APDS9960_ResetCounts(pHandle);
-            return gestureReceived;
+            break;
         }
     }
-}
 
+    return eGestureReceived;
+}
 /**
  *  @brief  Set LED brightness for proximity/gesture
  *  @param  eLedDrive LED Drive
@@ -711,10 +709,10 @@ void APDS9960_GetColorData(i2c_apds9960_t* pHandle, uint16_t* r, uint16_t* g, ui
  */
 uint16_t APDS9960_CalculateColorTemperature(i2c_apds9960_t* pHandle, uint16_t r, uint16_t g, uint16_t b)
 {
-    float X, Y, Z; /* RGB to XYZ correlation      */
-    float xc, yc;  /* Chromaticity co-ordinates   */
-    float n;       /* McCamy's formula            */
-    float cct;
+    float32_t X, Y, Z; /* RGB to XYZ correlation      */
+    float32_t xc, yc;  /* Chromaticity co-ordinates   */
+    float32_t n;       /* McCamy's formula            */
+    float32_t cct;
 
     /* 1. Map RGB values to their XYZ counterparts.    */
     /* Based on 6500K fluorescent, 3000K fluorescent   */
@@ -747,7 +745,7 @@ uint16_t APDS9960_CalculateColorTemperature(i2c_apds9960_t* pHandle, uint16_t r,
  */
 uint16_t APDS9960_CalculateLux(i2c_apds9960_t* pHandle, uint16_t r, uint16_t g, uint16_t b)
 {
-    float illuminance;
+    float32_t illuminance;
 
     /* This only uses RGB ... how can we integrate clear or calculate lux */
     /* based exclusively on clear since this might be more reliable?      */
@@ -790,10 +788,8 @@ void APDS9960_ClearInterrupt(i2c_apds9960_t* pHandle)
  */
 void APDS9960_SetIntLimits(i2c_apds9960_t* pHandle, uint16_t u16Low, uint16_t u16High)
 {
-    APDS9960_WriteByte(pHandle, APDS9960_AILTIL, u16Low & 0xFF);
-    APDS9960_WriteByte(pHandle, APDS9960_AILTH, u16Low >> 8);
-    APDS9960_WriteByte(pHandle, APDS9960_AIHTL, u16High & 0xFF);
-    APDS9960_WriteByte(pHandle, APDS9960_AIHTH, u16High >> 8);
+    APDS9960_WriteWord(pHandle, APDS9960_AILTIL, u16Low);
+    APDS9960_WriteWord(pHandle, APDS9960_AIHTL, u16High);
 }
 
 //---------------------------------------------------------------------------
@@ -802,16 +798,7 @@ void APDS9960_SetIntLimits(i2c_apds9960_t* pHandle, uint16_t u16Low, uint16_t u1
 
 #if CONFIG_DEMOS_SW
 
-/*
-  APDS9960 - Gesture Sensor
-
-  Gesture directions are as follows:
-  - UP:    from USB connector towards antenna
-  - DOWN:  from antenna towards USB connector
-  - LEFT:  from analog pins side towards digital pins side
-  - RIGHT: from digital pins side towards analog pins side
-
-*/
+#define DEMO 2
 
 void APDS9960_Test(i2c_mst_t* hI2C)
 {
@@ -820,7 +807,7 @@ void APDS9960_Test(i2c_mst_t* hI2C)
         .u8SlvAddr = APDS9960_ADDRESS,
     };
 
-#if 1
+#if DEMO == 0  // gesture_sensor
 
     APDS9960_Init(&apds9960, 10, APDS9960_AGAIN_4X);
     APDS9960_EnableProximity(&apds9960, true);
@@ -842,35 +829,42 @@ void APDS9960_Test(i2c_mst_t* hI2C)
         }
     }
 
-#elif 0
+#elif DEMO == 1  // proximity_sensor
 
-    pinMode(INT_PIN, INPUT_PULLUP);
+    const pin_t INT = {
+#if defined(BOARD_STM32F407VET6_XWS)
+        GPIOA, GPIO_PIN_4
+#endif
+    };
+
+    PIN_SetMode(&INT, PIN_MODE_INPUT_FLOATING, PIN_PULL_UP);
+
     APDS9960_Init(&apds9960, 10, APDS9960_AGAIN_4X);
 
     // enable proximity mode
     APDS9960_EnableProximity(&apds9960, true);
 
-    // set the interrupt threshold to fire when proximity reading goes above 175
-    APDS9960_SetProximityInterruptThreshold(&apds9960, 0, 175);
+    // set the interrupt threshold to fire when proximity reading goes above 30
+    APDS9960_SetProximityInterruptThreshold(&apds9960, 0, 30, 4);
 
     // enable the proximity interrupt
-    APDS9960_EnableProximityInterrupt(&apds9960, );
+    APDS9960_EnableProximityInterrupt(&apds9960);
 
     while (1)
     {
         // print the proximity reading when the interrupt pin goes low
-        if (!digitalRead(INT_PIN))
+        if (PIN_ReadLevel(&INT) == PIN_LEVEL_LOW)
         {
-            Serial.println(APDS9960_ReadProximity(&apds9960, ));
+            LOGI("%d", APDS9960_ReadProximity(&apds9960));
 
             // clear the interrupt
-            APDS9960_ClearInterrupt(&apds9960, );
+            APDS9960_ClearInterrupt(&apds9960);
         }
     }
 
-#else
+#elif DEMO == 2  // color_sensor
 
-    APDS9960_Init(&apds9960, 10, APDS9960_AGAIN_4X);
+    APDS9960_Init(&apds9960, 10, APDS9960_AGAIN_64X);
 
     // enable color sensign mode
     APDS9960_EnableColor(&apds9960, true);
@@ -883,14 +877,15 @@ void APDS9960_Test(i2c_mst_t* hI2C)
         // wait for color data to be ready
         while (!APDS9960_ColorDataReady(&apds9960))
         {
-            delay(5);
+            DelayBlockMs(5);
         }
 
         // get the data and print the different channels
         APDS9960_GetColorData(&apds9960, &r, &g, &b, &c);
+        r /= 16, g /= 16, b /= 16, c /= 16;  // 4096->256
         LOGI("rgbc: %d,%d,%d,%d", r, g, b, c);
 
-        delay(500);
+        DelayBlockMs(500);
     }
 
 #endif
