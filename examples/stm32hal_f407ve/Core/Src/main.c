@@ -152,6 +152,8 @@ int main(void)
     // FlexBtn_Test();
     // Shell_Test();
     // foc();
+		
+		W25Qxx_Test();
 
     i2c_mst_t i2c = {
 #if I2C_IF == 0

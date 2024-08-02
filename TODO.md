@@ -42,7 +42,7 @@
 * [ ] device-max30102
 * [ ] device-aht20
 * [ ] device-sht30
-* [ ] device-w25qxx
+* [x] device-w25qxx
 * [ ] device-mt6816
 * [ ] device-nrf24l01
 * [ ] device-ads1115
@@ -83,8 +83,3 @@ BUG
 
   
 
-  
-
-  
-
-9E39

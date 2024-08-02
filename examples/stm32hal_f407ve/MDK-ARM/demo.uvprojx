@@ -2283,6 +2283,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\onewire_ds18b20.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_w25qxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\spi_w25qxx.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
