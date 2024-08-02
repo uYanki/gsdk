@@ -102,6 +102,58 @@
 #define W25QXX_FSR_WREN ((uint8_t)0x02) /*!< write enable */
 #define W25QXX_FSR_QE   ((uint8_t)0x02) /*!< quad enable */
 
+/**
+ * @brief w25qxx burst wrap enumeration definition
+ */
+typedef enum {
+    W25QXX_BURST_WRAP_NONE    = 0x10, /**< no burst wrap */
+    W25QXX_BURST_WRAP_8_BYTE  = 0x00, /**< 8 byte burst wrap */
+    W25QXX_BURST_WRAP_16_BYTE = 0x20, /**< 16 byte burst wrap */
+    W25QXX_BURST_WRAP_32_BYTE = 0x40, /**< 32 byte burst wrap */
+    W25QXX_BURST_WRAP_64_BYTE = 0x60, /**< 64 byte burst wrap */
+} w25qxx_burst_wrap_e;
+
+/**
+ * @brief w25qxx status 1 enumeration definition
+ */
+typedef enum {
+    W25QXX_STATUS1_STATUS_REGISTER_PROTECT_0             = (1 << 7), /**< status register protect 0 */
+    W25QXX_STATUS1_SECTOR_PROTECT_OR_TOP_BOTTOM_PROTECT  = (1 << 6), /**< sector protect bit or top / bottom protect bit */
+    W25QXX_STATUS1_TOP_BOTTOM_PROTECT_OR_BLOCK_PROTECT_3 = (1 << 5), /**< top / bottom protect bit or block 3 protect bit */
+    W25QXX_STATUS1_BLOCK_PROTECT_2                       = (1 << 4), /**< block 2 protect bit */
+    W25QXX_STATUS1_BLOCK_PROTECT_1                       = (1 << 3), /**< block 1 protect bit */
+    W25QXX_STATUS1_BLOCK_PROTECT_0                       = (1 << 2), /**< block 0 protect bit */
+    W25QXX_STATUS1_WRITE_ENABLE_LATCH                    = (1 << 1), /**< write enable latch */
+    W25QXX_STATUS1_ERASE_WRITE_PROGRESS                  = (1 << 0), /**< erase / write in progress */
+} w25qxx_status1_e;
+
+/**
+ * @brief w25qxx status 2 enumeration definition
+ */
+typedef enum {
+    W25QXX_STATUS2_SUSPEND_STATUS                = (1 << 7), /**< suspend status */
+    W25QXX_STATUS2_COMPLEMENT_PROTECT            = (1 << 6), /**< complement protect */
+    W25QXX_STATUS2_SECURITY_REGISTER_3_LOCK_BITS = (1 << 5), /**< security register 3 lock bits */
+    W25QXX_STATUS2_SECURITY_REGISTER_2_LOCK_BITS = (1 << 4), /**< security register 2 lock bits */
+    W25QXX_STATUS2_SECURITY_REGISTER_1_LOCK_BITS = (1 << 3), /**< security register 1 lock bits */
+    W25QXX_STATUS2_QUAD_ENABLE                   = (1 << 1), /**< quad enable */
+    W25QXX_STATUS2_STATUS_REGISTER_PROTECT_1     = (1 << 0), /**< status register protect 1 */
+} w25qxx_status2_e;
+
+/**
+ * @brief w25qxx status 3 enumeration definition
+ */
+typedef enum {
+    W25QXX_STATUS3_HOLD_RESET_FUNCTION                   = (1 << 7), /**< HOLD or RESET function */
+    W25QXX_STATUS3_OUTPUT_DRIVER_STRENGTH_100_PERCENTAGE = (0 << 5), /**< output driver strength 100% */
+    W25QXX_STATUS3_OUTPUT_DRIVER_STRENGTH_75_PERCENTAGE  = (1 << 5), /**< output driver strength 75% */
+    W25QXX_STATUS3_OUTPUT_DRIVER_STRENGTH_50_PERCENTAGE  = (2 << 5), /**< output driver strength 50% */
+    W25QXX_STATUS3_OUTPUT_DRIVER_STRENGTH_25_PERCENTAGE  = (3 << 5), /**< output driver strength 25% */
+    W25QXX_STATUS3_WRITE_PROTECT_SELECTION               = (1 << 2), /**< write protect selection */
+    W25QXX_STATUS3_POWER_UP_ADDRESS_MODE                 = (1 << 1), /**< power up address mode */
+    W25QXX_STATUS3_CURRENT_ADDRESS_MODE                  = (1 << 0), /**< current address mode */
+} w25qxx_status3_e;
+
 //---------------------------------------------------------------------------
 // Prototypes
 //---------------------------------------------------------------------------
@@ -128,20 +180,15 @@ static inline err_t _W25Qxx_WriteAddr(spi_w25qxx_t* pHandle, uint32_t u32Address
     au8Cmd[2] = (uint8_t)(u32Address >> 8);
     au8Cmd[3] = (uint8_t)(u32Address);
 
-    switch (pHandle->u16ManDevID)
+    switch (pHandle->eAddrMode)
     {
-        case W25Q80_ID:
-        case W25Q16_ID:
-        case W25Q32_ID:
-        case W25Q64_ID:
+        case W25QXX_ADDRESS_MODE_3_BYTE:
         {
             SPI_Master_TransmitBlock(pHandle->hSPI, &au8Cmd[1], 3);
 
             break;
         }
-        case W25Q128_ID:
-        case W25Q256_ID:
-        case W25Q512_ID:
+        case W25QXX_ADDRESS_MODE_4_BYTE:
         {
             au8Cmd[0] = (uint8_t)(u32Address >> 24);
             SPI_Master_TransmitBlock(pHandle->hSPI, &au8Cmd[0], 4);
@@ -240,26 +287,28 @@ err_t W25Qxx_Init(spi_w25qxx_t* pHandle)
     ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
 
     W25Qxx_ReadDeviceID(pHandle, au8ID);
-    pHandle->u16ManDevID = be16(au8ID);
+    uint16_t u16ID = be16(au8ID);
 
-    switch (pHandle->u16ManDevID)
+    switch (u16ID)
     {
-        case W25Q80_ID:
-        case W25Q16_ID:
-        case W25Q32_ID:
-        case W25Q64_ID:
+        case W25Q80_MAN_ID:
+        case W25Q16_MAN_ID:
+        case W25Q32_MAN_ID:
+        case W25Q64_MAN_ID:
         {
             // 3字节地址模式
+            pHandle->eAddrMode = W25QXX_ADDRESS_MODE_3_BYTE;
             SPI_Master_Select(pHandle->hSPI);
             SPI_Master_TransmitByte(pHandle->hSPI, EXIT_4BYTE_ADDR_CMD);
             SPI_Master_Deselect(pHandle->hSPI);
             break;
         }
-        case W25Q128_ID:
-        case W25Q256_ID:
-        case W25Q512_ID:
+        case W25Q128_MAN_ID:
+        case W25Q256_MAN_ID:
+        case W25Q512_MAN_ID:
         {
             // 4字节地址模式(待测试)
+            pHandle->eAddrMode = W25QXX_ADDRESS_MODE_4_BYTE;
             SPI_Master_Select(pHandle->hSPI);
             SPI_Master_TransmitByte(pHandle->hSPI, ENABLE_4BYTE_ADDR_CMD);
             SPI_Master_Deselect(pHandle->hSPI);
@@ -301,6 +350,19 @@ err_t W25Qxx_ReadUniqueID(spi_w25qxx_t* pHandle, uint8_t ID[8])
     SPI_Master_TransmitByte(pHandle->hSPI, READ_UID_CMD);
     SPI_Master_TransmitBlock(pHandle->hSPI, au8Dummy, 4);
     SPI_Master_ReceiveBlock(pHandle->hSPI, ID, 8);
+    SPI_Master_Deselect(pHandle->hSPI);
+
+    return ERR_NONE;
+}
+
+/**
+ * @brief Read jedec ID.
+ */
+err_t W25Qxx_ReadJedecID(spi_w25qxx_t* pHandle, uint8_t ID[3])
+{
+    SPI_Master_Select(pHandle->hSPI);
+    SPI_Master_TransmitByte(pHandle->hSPI, READ_JEDEC_ID_CMD);
+    SPI_Master_ReceiveBlock(pHandle->hSPI, ID, 3);
     SPI_Master_Deselect(pHandle->hSPI);
 
     return ERR_NONE;
@@ -461,12 +523,14 @@ void W25Qxx_Test(void)
     uint32_t u32Address   = 1234;
 
     W25Qxx_ReadDeviceID(&w25qxx, au8Data);
-    PRINTLN("[DeviceID]");
-    hexdump(au8Data, 2, 16, 1, false, nullptr, u32Address);
+
+    hexdump(au8Data, 2, 16, 1, false, "[DeviceID]:", 0);
 
     W25Qxx_ReadUniqueID(&w25qxx, au8Data);
-    PRINTLN("[UniqueID]");
-    hexdump(au8Data, 8, 16, 1, false, nullptr, u32Address);
+    hexdump(au8Data, 8, 16, 1, false, "[UniqueID]:", 0);
+
+    W25Qxx_ReadJedecID(&w25qxx, au8Data);
+    hexdump(au8Data, 3, 16, 1, false, "[JedecID]:", 0);
 
     // 1. read
 
@@ -490,7 +554,7 @@ void W25Qxx_Test(void)
     W25Qxx_WriteData(&w25qxx, u32Address, ARRAY_SIZE(au8Data), au8Data);
     DelayBlockMs(1000);
 
-    // 3. read
+    // 3. read again
 
     for (uint16_t i = 0; i < ARRAY_SIZE(au8Data); ++i)
     {
