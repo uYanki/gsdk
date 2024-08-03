@@ -49,6 +49,15 @@ typedef enum {
 typedef struct {
     __IN spi_mst_t*  hSPI;
     __IN const pin_t CE;  // The pin attached to Chip Enable on the RF module
+
+    bool     bWideBand;               /* 2Mbs data rate in use? */
+    bool     bPlusVer;                /* False for RF24L01 and true for RF24L01P */
+    uint8_t  u8PayloadSize;           /**< Fixed size of payloads */
+    bool     bAckPayloadAvailable;    /**< Whether there is an ack payload waiting */
+    bool     bDynamicPayloadsEnabled; /**< Whether dynamic payloads are enabled. */
+    uint8_t  u8AckPayloadLength;      /**< Dynamic size of pending ack payload. */
+    uint64_t u64Pipe0ReadingAddress;  /**< Last address set on pipe 0 for reading. */
+
 } spi_nrf24l01_t;
 
 //---------------------------------------------------------------------------
