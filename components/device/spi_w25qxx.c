@@ -431,77 +431,131 @@ static bool _W25Qxx_IsNeedErase(const uint8_t* cpu8Data, uint16_t u16Size)
  * @param[in] u32Size: Size of data to write,No more than 256byte.
  * @param[in] cpu8Data: Pointer to data to be written
  */
+err_t W25Qxx_WriteDataNoCheck(spi_w25qxx_t* pHandle, uint32_t u32WriteAddr, uint32_t u32Size, const uint8_t* cpu8Data)
+{
+    uint32_t u32EndAddr, u32CurrSize, u32CurrAddr;
+
+    /* Calculation of the size between the write address and the end of the page */
+    u32CurrAddr = 0;  // in page
+
+    while (u32CurrAddr <= u32WriteAddr)
+    {
+        u32CurrAddr += W25QXX_PAGE_SIZE;
+    }
+
+    u32CurrSize = u32CurrAddr - u32WriteAddr;
+
+    /* Check if the size of the data is less than the remaining place in the page */
+    if (u32CurrSize > u32Size)
+    {
+        u32CurrSize = u32Size;
+    }
+
+    /* Initialize the adress variables */
+    u32CurrAddr = u32WriteAddr;
+    u32EndAddr  = u32WriteAddr + u32Size;
+
+    /* Perform the write page by page */
+    do
+    {
+        ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
+
+        /* Enable write operations */
+        _W25Qxx_WriteEnable(pHandle);
+
+        LOGV("write %4d bytes at 0x%08X", u32CurrSize, u32CurrAddr);
+
+        SPI_Master_Select(pHandle->hSPI);
+        SPI_Master_TransmitByte(pHandle->hSPI, PAGE_PROG_CMD);
+        _W25Qxx_WriteAddr(pHandle, u32CurrAddr);
+        SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
+        SPI_Master_Deselect(pHandle->hSPI);
+
+        /* Update the address and size variables for next page programming */
+        u32CurrAddr += u32CurrSize;
+        cpu8Data += u32CurrSize;
+        u32CurrSize = MIN(W25QXX_PAGE_SIZE, u32EndAddr - u32CurrAddr);
+
+    } while (u32CurrAddr < u32EndAddr);
+
+    return ERR_NONE;
+}
+
+/**
+ * @brief Writes an amount of data to the memory.
+ * @param[in] u32WriteAddr: Write start address
+ * @param[in] u32Size: Size of data to write,No more than 256byte.
+ * @param[in] cpu8Data: Pointer to data to be written
+ */
 err_t W25Qxx_WriteData(spi_w25qxx_t* pHandle, uint32_t u32WriteAddr, uint32_t u32Size, const uint8_t* cpu8Data)
 {
-    uint8_t  au8OldData[W25QXX_SECTOR_SIZE];
-    uint32_t u32CurrSize;
+    uint8_t au8OldData[W25QXX_SECTOR_SIZE];
 
     /* Calculation of the size between the write address and the end of the page */
 
     uint32_t u32StartAddr = u32WriteAddr;
     uint32_t u32EndAddr   = u32StartAddr + u32Size;
 
-    uint32_t u32SectorAddr = (u32StartAddr / W25QXX_PAGE_SIZE) * W25QXX_PAGE_SIZE;
+    uint32_t u32CurrAddr = (u32StartAddr / W25QXX_SECTOR_SIZE) * W25QXX_SECTOR_SIZE;
+    uint32_t u32CurrSize;
 
     /* Perform the write page by page */
     do
     {
-        W25Qxx_ReadData(pHandle, u32SectorAddr, W25QXX_PAGE_SIZE, au8OldData);
+        W25Qxx_ReadData(pHandle, u32CurrAddr, W25QXX_SECTOR_SIZE, au8OldData);
 
-        /* Check if it needs to be erased */
-        if (_W25Qxx_IsNeedErase(au8OldData, W25QXX_PAGE_SIZE))
+        uint16_t u16Offset;  // sector offset
+
+        if (u32CurrAddr < u32StartAddr)
         {
-            LOGV("erase block at 0x%08X", u32SectorAddr);
-
-            W25Qxx_EraseSector(pHandle, u32SectorAddr);
-
-            /* Waiting for erasure to complete */
-            ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
+            u16Offset   = u32StartAddr - u32CurrAddr;
+            u32CurrSize = MIN(W25QXX_SECTOR_SIZE - u16Offset, u32Size);
         }
-
-        /* Enable write operations */
-        _W25Qxx_WriteEnable(pHandle);
-
-        SPI_Master_Select(pHandle->hSPI);
-        SPI_Master_TransmitByte(pHandle->hSPI, PAGE_PROG_CMD);
-        _W25Qxx_WriteAddr(pHandle, u32SectorAddr);
-
-        if (u32SectorAddr < u32StartAddr)  // header
+        else if ((u32CurrAddr + W25QXX_SECTOR_SIZE) > u32EndAddr)
         {
-            u32CurrSize = W25QXX_PAGE_SIZE - (u32StartAddr - u32SectorAddr);
-
-            if (u32CurrSize > u32Size)
-            {
-                u32CurrSize = u32Size;
-            }
-
-            SPI_Master_TransmitBlock(pHandle->hSPI, &au8OldData[0], u32StartAddr - u32SectorAddr);
-            SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
-
-            LOGV("begin  - write %3d bytes at 0x%08X", u32CurrSize, u32StartAddr);
-        }
-        else if ((u32SectorAddr + W25QXX_PAGE_SIZE) > u32EndAddr)  // tail
-        {
-            u32CurrSize = u32EndAddr - u32SectorAddr;
-            SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
-            SPI_Master_TransmitBlock(pHandle->hSPI, &au8OldData[u32CurrSize], W25QXX_PAGE_SIZE - u32CurrSize);
-
-            LOGV("end    - write %3d bytes at 0x%08X", u32CurrSize, u32SectorAddr);
+            u16Offset   = 0;
+            u32CurrSize = u32EndAddr - u32CurrAddr;
         }
         else
         {
-            u32CurrSize = W25QXX_PAGE_SIZE;
-            SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
-
-            LOGV("middle - write %3d bytes at 0x%08X", u32CurrSize, u32SectorAddr);
+            u16Offset   = 0;
+            u32CurrSize = W25QXX_SECTOR_SIZE;
         }
 
-        SPI_Master_Deselect(pHandle->hSPI);
+        LOGV("write %4d bytes at 0x%08X", u32CurrSize, u32CurrAddr + u16Offset);
 
-        /* Update the address and size variables for next page programming */
-        u32SectorAddr += W25QXX_PAGE_SIZE;
+        for (uint16_t i = u16Offset; i < u32CurrSize; i++)
+        {
+            if (au8OldData[i] != 0xFF)
+            {
+                LOGV("erase block at 0x%08X", u32CurrAddr);
+
+                W25Qxx_EraseSector(pHandle, u32CurrAddr);
+
+                /* Waiting for erasure to complete */
+                ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
+
+                break;
+            }
+        }
+
+        if (u16Offset > 0)  // head
+        {
+            W25Qxx_WriteDataNoCheck(pHandle, u32CurrAddr, u16Offset, &au8OldData[0]);
+        }
+
+        W25Qxx_WriteDataNoCheck(pHandle, u32CurrAddr + u16Offset, u32CurrSize, cpu8Data);
+
+        if (u16Offset == 0 && u32CurrSize < W25QXX_SECTOR_SIZE)  // tail
+        {
+            W25Qxx_WriteDataNoCheck(pHandle, u32CurrAddr + u32CurrSize, W25QXX_SECTOR_SIZE - u32CurrSize, &au8OldData[u32CurrSize]);
+        }
+
+        u32CurrAddr += W25QXX_SECTOR_SIZE;
         cpu8Data += u32CurrSize;
-    } while (u32SectorAddr < u32EndAddr);
+        u32CurrSize = MIN(W25QXX_SECTOR_SIZE, u32EndAddr - u32CurrAddr);
+
+    } while (u32CurrAddr < u32EndAddr);
 
     return ERR_NONE;
 }
@@ -566,8 +620,8 @@ void W25Qxx_Test(void)
 
     W25Qxx_Init(&w25qxx);
 
-    uint8_t  au8Data[512] = {0};
-    uint32_t u32Address   = 26;
+    static uint8_t au8Data[W25QXX_SECTOR_SIZE * 2] = {0};
+    uint32_t       u32Address                      = 88;
 
     W25Qxx_ReadDeviceID(&w25qxx, au8Data);
 
@@ -590,13 +644,14 @@ void W25Qxx_Test(void)
 
     for (uint16_t i = 0; i < ARRAY_SIZE(au8Data); ++i)
     {
-        au8Data[i] += 1;
+        // au8Data[i] += 1;
+        au8Data[i] = 'A';
     }
 
     PRINTLN("[to write]");
     hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, u32Address);
 
-    W25Qxx_WriteData(&w25qxx, u32Address, ARRAY_SIZE(au8Data), au8Data);
+    W25Qxx_WriteData(&w25qxx, u32Address, ARRAY_SIZE(au8Data) - W25QXX_PAGE_SIZE, au8Data);
 
     // 3. read again
 
