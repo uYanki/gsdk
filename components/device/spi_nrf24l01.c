@@ -1,4 +1,5 @@
 #include "spi_nrf24l01.h"
+#include "hexdump.h"
 
 //---------------------------------------------------------------------------
 // Definitions
@@ -308,55 +309,96 @@ static inline void NRF24L01_ToggleFeatures(spi_nrf24l01_t* pHandle)
     SPI_Master_Deselect(pHandle->hSPI);
 }
 
-void print_status(spi_nrf24l01_t* pHandle, uint8_t status)
+void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
 {
-    LOGV("STATUS\t\t = 0x%02x RX_DR=%x TX_DS=%x MAX_RT=%x RX_P_NO=%x TX_FULL=%x",
-         status,
-         (status & BV(RX_DR)) ? 1 : 0,
-         (status & BV(TX_DS)) ? 1 : 0,
-         (status & BV(MAX_RT)) ? 1 : 0,
-         ((status >> RX_P_NO) & 0b111),
-         (status & BV(TX_FULL)) ? 1 : 0);
-}
+    uint8_t u8Status = NRF24L01_GetStatus(pHandle);
 
-void print_observe_tx(spi_nrf24l01_t* pHandle, uint8_t value)
-{
-    LOGV("OBSERVE_TX=%02x: POLS_CNT=%x ARC_CNT=%x",
-         value,
-         (value >> PLOS_CNT) & 0b1111,
-         (value >> ARC_CNT) & 0b1111);
-}
+    PRINTLN("STATUS        : 0x%02X", u8Status);
 
-void print_byte_register(spi_nrf24l01_t* pHandle, const char* name, uint8_t reg, uint8_t qty)
-{
-    char extra_tab = strlen(name) < 8 ? '\t' : 0;
-    printf("%s\t%c =", name, extra_tab);
-    while (qty--)
+    PRINTLN("STATUS_BIT    : RX_DR=%X TX_DS=%X MAX_RT=%X RX_P_NO=%X TX_FULL=%X",
+            (u8Status & BV(RX_DR)) ? 1 : 0,
+            (u8Status & BV(TX_DS)) ? 1 : 0,
+            (u8Status & BV(MAX_RT)) ? 1 : 0,
+            ((u8Status >> RX_P_NO) & 0b111),
+            (u8Status & BV(TX_FULL)) ? 1 : 0);
+
+    //
+
+    uint8_t au8Data[32];
+
+    struct {
+        uint8_t     u8Type;  // 0: byte register, 1: address register
+        const char* szName;
+        uint8_t     u8MemAddr;
+        uint8_t     u8MemSize;
+    } au8RegMap[] = {
+        {1, "TX_ADDR       : ", TX_ADDR,    1},
+        {1, "RX_ADDR_P0-1  : ", RX_ADDR_P0, 2},
+        {0, "RX_ADDR_P2-5  : ", RX_ADDR_P2, 4},
+        {0, "RX_PW_P0-6    : ", RX_PW_P0,   6},
+        {0, "EN_AA         : ", EN_AA,      1},
+        {0, "EN_RXADDR     : ", EN_RXADDR,  1},
+        {0, "RF_CH         : ", RF_CH,      1},
+        {0, "RF_SETUP      : ", RF_SETUP,   1},
+        {0, "CONFIG        : ", CONFIG,     1},
+        {0, "DYNPD/FEATURE : ", DYNPD,      2},
+    };
+
+    for (uint8_t i = 0; i < ARRAY_SIZE(au8RegMap); i++)
     {
-        printf(" 0x%02X", NRF24L01_ReadByte(pHandle, reg++));
-    }
-    printf("\n");
-}
-
-void print_address_register(spi_nrf24l01_t* pHandle, const char* name, uint8_t reg, uint8_t qty)
-{
-    char extra_tab = strlen(name) < 8 ? '\t' : 0;
-    printf("%s\t%c =", name, extra_tab);
-
-    while (qty--)
-    {
-        uint8_t buffer[5];
-        NRF24L01_ReadBlock(pHandle, reg++, buffer, sizeof buffer);
-
-        printf(" 0x");
-        uint8_t* bufptr = buffer + sizeof buffer;
-        while (--bufptr >= buffer)
+        if (au8RegMap[i].u8Type == 0)
         {
-            printf("%02X", *bufptr);
+            for (uint8_t j = 0; j < au8RegMap[i].u8MemSize; j++)
+            {
+                au8Data[j] = NRF24L01_ReadByte(pHandle, au8RegMap[i].u8MemAddr + j);
+            }
+
+            hexdump(au8Data, au8RegMap[i].u8MemSize, 16, 1, false, au8RegMap[i].szName, 0);
+        }
+        else
+        {
+#define MEM_SIZE 5
+
+            for (uint8_t j = 0; j < au8RegMap[i].u8MemSize; j++)
+            {
+                NRF24L01_ReadBlock(pHandle, au8RegMap[i].u8MemAddr + j, au8Data + MEM_SIZE * j, MEM_SIZE);
+            }
+
+            hexdump(au8Data, au8RegMap[i].u8MemSize * MEM_SIZE, 16, 1, false, au8RegMap[i].szName, 0);
+
+#undef MEM_SIZE
         }
     }
 
-    printf("\n");
+    //
+
+    static const char* const rf24_datarate_e_str[] = {
+        "1MBPS",
+        "2MBPS",
+        "250KBPS",
+    };
+    static const char* const rf24_model_e_str[] = {
+        "nRF24L01",
+        "nRF24L01+",
+    };
+
+    static const char* const rf24_crclength_e_str[] = {
+        "Disabled",
+        "8 bits",
+        "16 bits",
+    };
+
+    static const char* const rf24_pa_dbm_e_str[] = {
+        "PA_MIN",
+        "PA_LOW",
+        "LA_MED",
+        "PA_HIGH",
+    };
+
+    PRINTLN("Data Rate     : %s", rf24_datarate_e_str[NRF24L01_GetDataRate(pHandle)]);
+    PRINTLN("Model         : %s", rf24_model_e_str[NRF24L01_IsPVariant(pHandle)]);
+    PRINTLN("CRC Length    : %s", rf24_crclength_e_str[NRF24L01_GetCRCLength(pHandle)]);
+    PRINTLN("PA Power      : %s", rf24_pa_dbm_e_str[NRF24L01_GetPALevel(pHandle)]);
 }
 
 void NRF24L01_SetChannel(spi_nrf24l01_t* pHandle, uint8_t u8Channel)
@@ -374,51 +416,6 @@ void NRF24L01_SetPayloadSize(spi_nrf24l01_t* pHandle, uint8_t u8Size)
 uint8_t NRF24L01_GetPayloadSize(spi_nrf24l01_t* pHandle)
 {
     return pHandle->u8PayloadSize;
-}
-
-void printDetails(spi_nrf24l01_t* pHandle)
-{
-    static const char* const rf24_datarate_e_str_P[] = {
-        "1MBPS",
-        "2MBPS",
-        "250KBPS",
-    };
-    static const char* const rf24_model_e_str_P[] = {
-        "nRF24L01",
-        "nRF24L01+",
-    };
-
-    static const char* const rf24_crclength_e_str_P[] = {
-        "Disabled",
-        "8 bits",
-        "16 bits",
-    };
-
-    static const char* const rf24_pa_dbm_e_str_P[] = {
-        "PA_MIN",
-        "PA_LOW",
-        "LA_MED",
-        "PA_HIGH",
-    };
-
-    print_status(pHandle, NRF24L01_GetStatus(pHandle));
-
-    print_address_register(pHandle, "RX_ADDR_P0-1", RX_ADDR_P0, 2);
-    print_byte_register(pHandle, "RX_ADDR_P2-5", RX_ADDR_P2, 4);
-    print_address_register(pHandle, "TX_ADDR", TX_ADDR, 1);
-
-    print_byte_register(pHandle, "RX_PW_P0-6", RX_PW_P0, 6);
-    print_byte_register(pHandle, "EN_AA", EN_AA, 1);
-    print_byte_register(pHandle, "EN_RXADDR", EN_RXADDR, 1);
-    print_byte_register(pHandle, "RF_CH", RF_CH, 1);
-    print_byte_register(pHandle, "RF_SETUP", RF_SETUP, 1);
-    print_byte_register(pHandle, "CONFIG", CONFIG, 1);
-    print_byte_register(pHandle, "DYNPD/FEATURE", DYNPD, 2);
-
-    LOGV("Data Rate\t = %s", rf24_datarate_e_str_P[NRF24L01_GetDataRate(pHandle)]);
-    LOGV("Model\t = %s", rf24_model_e_str_P[NRF24L01_IsPVariant(pHandle)]);
-    LOGV("CRC Length\t = %s", rf24_crclength_e_str_P[NRF24L01_GetCRCLength(pHandle)]);
-    LOGV("PA Power\t = %s", rf24_pa_dbm_e_str_P[NRF24L01_GetPALevel(pHandle)]);
 }
 
 void NRF24L01_Init(spi_nrf24l01_t* pHandle)
@@ -537,16 +534,23 @@ bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_
 
     // IN the end, the send should be blocking.  It comes back in 60ms worst case, or much faster
     // if I tighted up the retry logic.  (Default settings will be 1500us.
+
     // Monitor the send
-    uint8_t        observe_tx;
-    uint8_t        u8Status;
-    tick_t         sent_at = GetTickMs();
-    const uint32_t timeout = 500;  // ms to wait for timeout
+
+    uint8_t u8ObserveTx;
+    uint8_t u8Status;
+    tick_t  TickStart = GetTickUs();
+
     do
     {
-        u8Status = NRF24L01_ReadBlock(pHandle, OBSERVE_TX, &observe_tx, 1);
-        LOGD("0x%X", observe_tx);
-    } while (!(u8Status & (BV(TX_DS) | BV(MAX_RT))) && (GetTickMs() - sent_at < timeout));
+        u8Status = NRF24L01_ReadBlock(pHandle, OBSERVE_TX, &u8ObserveTx, 1);
+
+        if (DelayNonBlockMs(TickStart, 500))
+        {
+            break;
+        }
+
+    } while (!(u8Status & (BV(TX_DS) | BV(MAX_RT))));
 
     // The part above is what you could recreate with your own interrupt handler,
     // and then call this when you got an interrupt
@@ -560,13 +564,11 @@ bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_
     bool bTxOk = false, bTxFail = true;
     NRF24L01_WhatHappened(pHandle, &bTxOk, &bTxFail, &pHandle->bAckPayloadAvailable);
 
-    LOGV("%s", bTxOk ? "Tx OK" : "Tx Failed");
-
     // Handle the ack packet
     if (pHandle->bAckPayloadAvailable)
     {
         pHandle->u8AckPayloadLength = NRF24L01_GetDynamicPayloadSize(pHandle);
-        LOGD("[AckPacket] %d", pHandle->u8AckPayloadLength);
+        LOGV("[AckPacket] %d", pHandle->u8AckPayloadLength);
     }
 
     // Power down
@@ -610,7 +612,7 @@ bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle)
     return NRF24L01_Available(pHandle, nullptr);
 }
 
-bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pu8PipeNum)
+bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe)
 {
     uint8_t u8Status = NRF24L01_GetStatus(pHandle);
 
@@ -619,9 +621,9 @@ bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pu8PipeNum)
     if (bRxReady)
     {
         // If the caller wants the pipe number, include that
-        if (pu8PipeNum != nullptr)
+        if (pu8Pipe != nullptr)
         {
-            *pu8PipeNum = (u8Status >> RX_P_NO) & 0b111;
+            *pu8Pipe = (u8Status >> RX_P_NO) & 0b111;
         }
 
         // Clear the status bit
@@ -868,7 +870,7 @@ rf24_pa_dbm_e NRF24L01_GetPALevel(spi_nrf24l01_t* pHandle)
     return ePaDbm;
 }
 
-bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e speed)
+bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed)
 {
     uint8_t u8Data = NRF24L01_ReadByte(pHandle, RF_SETUP);
 
@@ -876,7 +878,7 @@ bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e speed)
     pHandle->bWideBand = false;
     u8Data &= ~(BV(RF_DR_LOW) | BV(RF_DR_HIGH));
 
-    if (speed == RF24_250KBPS)
+    if (eSpeed == RF24_250KBPS)
     {
         // Must set the RF_DR_LOW to 1; RF_DR_HIGH (used to be RF_DR) is already 0
         // Making it '10'.
@@ -887,7 +889,7 @@ bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e speed)
     {
         // Set 2Mbs, RF_DR (RF_DR_HIGH) is set 1
         // Making it '01'
-        if (speed == RF24_2MBPS)
+        if (eSpeed == RF24_2MBPS)
         {
             pHandle->bWideBand = true;
             u8Data |= BV(RF_DR_HIGH);
@@ -997,7 +999,7 @@ void NRF24L01_SetRetries(spi_nrf24l01_t* pHandle, uint8_t u8Delay, uint8_t u8Cou
 
 #if CONFIG_DEMOS_SW
 
-#define DEMO 0
+#define DEMO 1
 
 void NRF24L01_Test(void)
 {
@@ -1021,7 +1023,7 @@ void NRF24L01_Test(void)
 
 #if DEMO == 0  // getting started
 
-#define CONFIG_ROLE 1  // 0:tx 1:rx
+#define CONFIG_ROLE 0  // 0:tx 1:rx
 
     // Radio pipe addresses for the 2 nodes to communicate.
     const uint64_t au64Pipe[2] = {0xF0F0F0F0E1, 0xF0F0F0F0D2};
@@ -1041,7 +1043,7 @@ void NRF24L01_Test(void)
 
     NRF24L01_StartListening(&nrf24l01);
 
-    printDetails(&nrf24l01);
+    NRF24L01_PrintDetails(&nrf24l01);
 
     while (1)
     {
@@ -1055,46 +1057,47 @@ void NRF24L01_Test(void)
         NRF24L01_StopListening(&nrf24l01);
 
         // Take the time, and send it.  This will block until complete
-        unsigned long time = GetTickMs();
-        LOGI("Now sending %lu...", time);
-        bool ok = NRF24L01_WriteData(&nrf24l01, &time, sizeof(unsigned long));
+        tick_t TickTx_Us = GetTickMs();
+        LOGI("Now sending %lu...", TickTx_Us);
+        bool bOk = NRF24L01_WriteData(&nrf24l01, &TickTx_Us, sizeof(tick_t));
 
-        if (ok)
+        if (bOk)
         {
-            LOGI("ok...");
+            LOGI("Tx success.");
         }
         else
         {
-            LOGI("failed.");
+            LOGI("Tx failed.");
         }
 
         // Now, continue listening
         NRF24L01_StartListening(&nrf24l01);
 
         // Wait here until we get a response, or timeout (250ms)
-        unsigned long started_waiting_at = GetTickMs();
-        bool          timeout            = false;
-        while (!NRF24L01_IsAvailable(&nrf24l01) && !timeout)
+        bool   bTimeout     = false;
+        tick_t TickStart_Us = GetTickUs();
+        while (!NRF24L01_IsAvailable(&nrf24l01))
         {
-            if (GetTickMs() - started_waiting_at > 200)
+            if (DelayNonBlockMs(TickStart_Us, 200))
             {
-                timeout = true;
+                bTimeout = true;
+                break;
             }
         }
 
         // Describe the results
-        if (timeout)
+        if (bTimeout)
         {
             LOGW("Failed, response timed out.");
         }
         else
         {
             // Grab the response, compare, and send to debugging spew
-            unsigned long got_time;
-            NRF24L01_ReadData(&nrf24l01, &got_time, sizeof(unsigned long));
+            tick_t TickRx_Us;
+            NRF24L01_ReadData(&nrf24l01, &TickRx_Us, sizeof(tick_t));
 
             // Spew it
-            LOGI("Got response %lu, round-trip delay: %lu", got_time, GetTickMs() - got_time);
+            LOGI("Got response %lu", TickRx_Us);
         }
 
         // Try again 1s later
@@ -1110,15 +1113,15 @@ void NRF24L01_Test(void)
         if (NRF24L01_IsAvailable(&nrf24l01))
         {
             // Dump the payloads until we've gotten everything
-            tick_t got_time;
+            tick_t TickRxVal;
             bool   bDone = false;
             while (!bDone)
             {
                 // Fetch the payload, and see if this was the last one.
-                bDone = NRF24L01_ReadData(&nrf24l01, &got_time, sizeof(tick_t));
+                bDone = NRF24L01_ReadData(&nrf24l01, &TickRxVal, sizeof(tick_t));
 
                 // Spew it
-                LOGI("Got payload %lu...", got_time);
+                LOGI("Got payload %lu...", TickRxVal);
 
                 // Delay just a little bit to let the other unit
                 // make the transition to receiver
@@ -1129,7 +1132,7 @@ void NRF24L01_Test(void)
             NRF24L01_StopListening(&nrf24l01);
 
             // Send the final one back.
-            NRF24L01_WriteData(&nrf24l01, &got_time, sizeof(unsigned long));
+            NRF24L01_WriteData(&nrf24l01, &TickRxVal, sizeof(unsigned long));
             LOGI("Sent response.");
 
             // Now, resume listening so we catch the next packets.
@@ -1152,7 +1155,7 @@ void NRF24L01_Test(void)
     NRF24L01_StopListening(&nrf24l01);
 
     // Print out header, high then low digit
-    int i = 0;
+    int i = 100;
     while (i < num_channels)
     {
         printf("%x", i >> 4);

@@ -69,7 +69,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle);
 /**
  * @brief Start listening on the pipes opened for reading.
  *
- * Be sure to call NRF24L01_OpenReadingPipe() first.  Do not call NRF24L01_Write() while
+ * Be sure to call NRF24L01_OpenReadingPipe() first.  Do not call NRF24L01_WriteData() while
  * in this mode, without first calling NRF24L01_StopListening().  Call
  * NRF24L01_IsAvailable() to check for incoming traffic, and NRF24L01_ReadData() to get it.
  */
@@ -78,7 +78,7 @@ void NRF24L01_StartListening(spi_nrf24l01_t* pHandle);
 /**
  * @brief Stop listening for incoming messages
  *
- * Do this before calling NRF24L01_Write().
+ * Do this before calling NRF24L01_WriteData().
  */
 void NRF24L01_StopListening(spi_nrf24l01_t* pHandle);
 
@@ -155,7 +155,7 @@ void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address);
  *
  * @warning Pipe 0 is also used by the writing pipe.  So if you open
  * pipe 0 for reading, and then NRF24L01_StartListening(), it will overwrite the
- * writing pipe.  Ergo, do an NRF24L01_OpenWritingPipe() again before NRF24L01_Write().
+ * writing pipe.  Ergo, do an NRF24L01_OpenWritingPipe() again before NRF24L01_WriteData().
  *
  * @todo Enforce the restriction that pipes 1-5 must share the top 32 bits
  *
@@ -194,7 +194,7 @@ void NRF24L01_SetChannel(spi_nrf24l01_t* pHandle, uint8_t u8Channel);
  * This implementation uses a pre-stablished fixed payload size for all
  * transmissions.  If this method is never called, the driver will always
  * transmit the maximum payload size (32 bytes), no matter how much
- * was sent to NRF24L01_Write().
+ * was sent to NRF24L01_WriteData().
  *
  * @todo Implement variable-sized payloads feature
  *
@@ -297,10 +297,10 @@ rf24_pa_dbm_e NRF24L01_GetPALevel(spi_nrf24l01_t* pHandle);
  *
  * @warning setting RF24_250KBPS will fail for non-plus units
  *
- * @param speed RF24_250KBPS for 250kbs, RF24_1MBPS for 1Mbps, or RF24_2MBPS for 2Mbps
+ * @param eSpeed RF24_250KBPS for 250kbs, RF24_1MBPS for 1Mbps, or RF24_2MBPS for 2Mbps
  * @return true if the change was successful
  */
-bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e speed);
+bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed);
 
 /**
  * @brief Fetches the transmission data rate
@@ -314,9 +314,9 @@ rf24_datarate_e NRF24L01_GetDataRate(spi_nrf24l01_t* pHandle);
 /**
  * @brief Set the CRC length
  *
- * @param length RF24_CRC_8 for 8-bit or RF24_CRC_16 for 16-bit
+ * @param eLength RF24_CRC_8 for 8-bit or RF24_CRC_16 for 16-bit
  */
-void NRF24L01_SetCRCLength(spi_nrf24l01_t* pHandle, rf24_crc_len_e length);
+void NRF24L01_SetCRCLength(spi_nrf24l01_t* pHandle, rf24_crc_len_e eLength);
 
 /**
  * @brief Get the CRC length
@@ -330,25 +330,10 @@ rf24_crc_len_e NRF24L01_GetCRCLength(spi_nrf24l01_t* pHandle);
  */
 void NRF24L01_DisableCRC(spi_nrf24l01_t* pHandle);
 
-/**@}*/
-/**
- * @name Advanced Operation
- *
- *  Methods you can use to drive the chip in more advanced ways
- */
-/**@{*/
-
-/**
- * @brief Print a giant block of debugging information to stdout
- *
- * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
- */
-void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle);
-
 /**
  * @brief Enter low-power mode
  *
- * To return to normal power mode, either NRF24L01_Write() some data or
+ * To return to normal power mode, either NRF24L01_WriteData() some data or
  * startListening, or NRF24L01_PowerUp().
  */
 void NRF24L01_PowerDown(spi_nrf24l01_t* pHandle);
@@ -366,22 +351,24 @@ void NRF24L01_PowerUp(spi_nrf24l01_t* pHandle);
  * Use this version to discover on which pipe the message
  * arrived.
  *
- * @param[out] pipe_num Which pipe has the payload available
+ * @param[out] pu8Pipe Which pipe has the payload available
  * @return True if there is a payload available, false if none is
  */
-bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pipe_num);
+bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe);
+
+bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Non-blocking write to the open writing pipe
  *
- * Just like NRF24L01_Write(), but it returns immediately. To find out what happened
+ * Just like NRF24L01_WriteData(), but it returns immediately. To find out what happened
  * to the send, catch the IRQ and then call NRF24L01_WhatHappened().
  *
- * @see NRF24L01_Write()
+ * @see NRF24L01_WriteData()
  * @see NRF24L01_WhatHappened()
  *
- * @param buf Pointer to the data to be sent
- * @param len Number of bytes to be sent
+ * @param cpu8Data Pointer to the data to be sent
+ * @param u8Len Number of bytes to be sent
  * @return True if the payload was delivered successfully false if not
  */
 void NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len);
@@ -395,16 +382,16 @@ void NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8
  * @warning According to the data sheet, only three of these can be pending
  * at any time.  I have not tested this.
  *
- * @param pipe Which pipe# (typically 1-5) will get this response.
- * @param buf Pointer to data that is sent
- * @param len Length of the data to send, up to 32 bytes max.  Not affected
+ * @param u8Pipe Which pipe# (typically 1-5) will get this response.
+ * @param cpu8Data Pointer to data that is sent
+ * @param u8Len Length of the data to send, up to 32 bytes max.  Not affected
  * by the static payload set by NRF24L01_SetPayloadSize().
  */
-void NRF24L01_WriteAckPayload(spi_nrf24l01_t* pHandle, uint8_t pipe, const uint8_t* cpu8Data, uint8_t u8Len);
+void NRF24L01_WriteAckPayload(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, const uint8_t* cpu8Data, uint8_t u8Len);
 
 /**
  * @brief Determine if an ack payload was received in the most recent call to
- * NRF24L01_Write().
+ * NRF24L01_WriteData().
  *
  * Call NRF24L01_ReadData() to retrieve the ack payload.
  *
@@ -423,11 +410,11 @@ bool NRF24L01_IsAckPayloadAvailable(spi_nrf24l01_t* pHandle);
  * Tells you what caused the interrupt, and clears the state of
  * interrupts.
  *
- * @param[out] tx_ok The send was successful (TX_DS)
- * @param[out] tx_fail The send failed, too many retries (MAX_RT)
- * @param[out] rx_ready There is a message waiting to be read (RX_DS)
+ * @param[out] pbTxOk The send was successful (TX_DS)
+ * @param[out] pbTxFali The send failed, too many retries (MAX_RT)
+ * @param[out] pbRxRdy There is a message waiting to be read (RX_DS)
  */
-void NRF24L01_WhatHappened(spi_nrf24l01_t* pHandle, bool* tx_ok, bool* tx_fail, bool* rx_ready);
+void NRF24L01_WhatHappened(spi_nrf24l01_t* pHandle, bool* pbTxOk, bool* pbTxFali, bool* pbRxRdy);
 
 /**
  * @brief Test whether there was a carrier on the line for the
@@ -450,6 +437,20 @@ bool NRF24L01_TestCarrier(spi_nrf24l01_t* pHandle);
  * @return true if signal => -64dBm, false if not
  */
 bool NRF24L01_TestRPD(spi_nrf24l01_t* pHandle);
+
+/**
+ * @name Advanced Operation
+ *
+ *  Methods you can use to drive the chip in more advanced ways
+ */
+/**@{*/
+
+/**
+ * @brief Print a giant block of debugging information to stdout
+ *
+ * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
+ */
+void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle);
 
 //---------------------------------------------------------------------------
 // Example
