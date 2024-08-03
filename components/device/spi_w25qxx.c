@@ -9,16 +9,20 @@
 //---------------------------------------------------------------------------
 
 #define LOG_LOCAL_TAG   "w25qxx"
-#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
+#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE
 
 /**
  * @brief W25Q128FV Configuration
  */
 
-// W25Q128
+/**
+ * @brief W25Q128
+ * 包含256个块、每个块（64KB）有16个扇区（4096个扇区）、每个扇区（4KB）有16页、每一页有256个字节（Byte
+ * 可看成电子书，这本书有256个章节，每个章节有16个小节，每个小节有16页，每页有256个字
+ */
 #define W25QXX_FLASH_SIZE               0x1000000 /* 128 MBits => 16MBytes */
-#define W25QXX_SECTOR_SIZE              0x10000   /* 256 sectors of 64KBytes */
-#define W25QXX_SUBSECTOR_SIZE           0x1000    /* 4096 subsectors of 4kBytes */
+#define W25QXX_BLOCK_SIZE               0x10000   /* 256 sectors of 64KBytes */
+#define W25QXX_SECTOR_SIZE              0x1000    /* 4096 subsectors of 4kBytes */
 #define W25QXX_PAGE_SIZE                0x100     /* 65536 pages of 256 bytes */
 
 #define W25QXX_DUMMY_CYCLES_READ        4
@@ -399,11 +403,26 @@ err_t W25Qxx_WakeUp(spi_w25qxx_t* pHandle)
  */
 err_t W25Qxx_ReadData(spi_w25qxx_t* pHandle, uint32_t u32ReadAddr, uint32_t u32Size, uint8_t* pu8Data)
 {
+    ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
+
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, READ_CMD);
     _W25Qxx_WriteAddr(pHandle, u32ReadAddr);
     SPI_Master_ReceiveBlock(pHandle->hSPI, pu8Data, u32Size);
     SPI_Master_Deselect(pHandle->hSPI);
+}
+
+static bool _W25Qxx_IsNeedErase(const uint8_t* cpu8Data, uint16_t u16Size)
+{
+    while (u16Size--)
+    {
+        if (*cpu8Data != 0xFF)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -414,47 +433,75 @@ err_t W25Qxx_ReadData(spi_w25qxx_t* pHandle, uint32_t u32ReadAddr, uint32_t u32S
  */
 err_t W25Qxx_WriteData(spi_w25qxx_t* pHandle, uint32_t u32WriteAddr, uint32_t u32Size, const uint8_t* cpu8Data)
 {
-    uint32_t u32EndAddr, u32CurrSize, u32CurrAddr;
+    uint8_t  au8OldData[W25QXX_SECTOR_SIZE];
+    uint32_t u32CurrSize;
 
     /* Calculation of the size between the write address and the end of the page */
-    u32CurrAddr = 0;
 
-    while (u32CurrAddr <= u32WriteAddr)
-    {
-        u32CurrAddr += W25QXX_PAGE_SIZE;
-    }
-    u32CurrSize = u32CurrAddr - u32WriteAddr;
+    uint32_t u32StartAddr = u32WriteAddr;
+    uint32_t u32EndAddr   = u32StartAddr + u32Size;
 
-    /* Check if the size of the data is less than the remaining place in the page */
-    if (u32CurrSize > u32Size)
-    {
-        u32CurrSize = u32Size;
-    }
-
-    /* Initialize the adress variables */
-    u32CurrAddr = u32WriteAddr;
-    u32EndAddr  = u32WriteAddr + u32Size;
+    uint32_t u32SectorAddr = (u32StartAddr / W25QXX_PAGE_SIZE) * W25QXX_PAGE_SIZE;
 
     /* Perform the write page by page */
     do
     {
-        ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
+        W25Qxx_ReadData(pHandle, u32SectorAddr, W25QXX_PAGE_SIZE, au8OldData);
+
+        /* Check if it needs to be erased */
+        if (_W25Qxx_IsNeedErase(au8OldData, W25QXX_PAGE_SIZE))
+        {
+            LOGV("erase block at 0x%08X", u32SectorAddr);
+
+            W25Qxx_EraseSector(pHandle, u32SectorAddr);
+
+            /* Waiting for erasure to complete */
+            ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
+        }
 
         /* Enable write operations */
         _W25Qxx_WriteEnable(pHandle);
 
         SPI_Master_Select(pHandle->hSPI);
         SPI_Master_TransmitByte(pHandle->hSPI, PAGE_PROG_CMD);
-        _W25Qxx_WriteAddr(pHandle, u32CurrAddr);
-        SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
+        _W25Qxx_WriteAddr(pHandle, u32SectorAddr);
+
+        if (u32SectorAddr < u32StartAddr)  // header
+        {
+            u32CurrSize = W25QXX_PAGE_SIZE - (u32StartAddr - u32SectorAddr);
+
+            if (u32CurrSize > u32Size)
+            {
+                u32CurrSize = u32Size;
+            }
+
+            SPI_Master_TransmitBlock(pHandle->hSPI, &au8OldData[0], u32StartAddr - u32SectorAddr);
+            SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
+
+            LOGV("begin  - write %3d bytes at 0x%08X", u32CurrSize, u32StartAddr);
+        }
+        else if ((u32SectorAddr + W25QXX_PAGE_SIZE) > u32EndAddr)  // tail
+        {
+            u32CurrSize = u32EndAddr - u32SectorAddr;
+            SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
+            SPI_Master_TransmitBlock(pHandle->hSPI, &au8OldData[u32CurrSize], W25QXX_PAGE_SIZE - u32CurrSize);
+
+            LOGV("end    - write %3d bytes at 0x%08X", u32CurrSize, u32SectorAddr);
+        }
+        else
+        {
+            u32CurrSize = W25QXX_PAGE_SIZE;
+            SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u32CurrSize);
+
+            LOGV("middle - write %3d bytes at 0x%08X", u32CurrSize, u32SectorAddr);
+        }
+
         SPI_Master_Deselect(pHandle->hSPI);
 
         /* Update the address and size variables for next page programming */
-        u32CurrAddr += u32CurrSize;
+        u32SectorAddr += W25QXX_PAGE_SIZE;
         cpu8Data += u32CurrSize;
-        u32CurrSize = MIN(W25QXX_PAGE_SIZE, u32EndAddr - u32CurrAddr);
-
-    } while (u32CurrAddr < u32EndAddr);
+    } while (u32SectorAddr < u32EndAddr);
 
     return ERR_NONE;
 }
@@ -519,8 +566,8 @@ void W25Qxx_Test(void)
 
     W25Qxx_Init(&w25qxx);
 
-    uint8_t  au8Data[128] = {0};
-    uint32_t u32Address   = 1234;
+    uint8_t  au8Data[512] = {0};
+    uint32_t u32Address   = 26;
 
     W25Qxx_ReadDeviceID(&w25qxx, au8Data);
 
@@ -537,7 +584,7 @@ void W25Qxx_Test(void)
     W25Qxx_ReadData(&w25qxx, u32Address, ARRAY_SIZE(au8Data), au8Data);
 
     PRINTLN("[first read]");
-    hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, 0);
+    hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, u32Address);
 
     // 2. write
 
@@ -549,18 +596,11 @@ void W25Qxx_Test(void)
     PRINTLN("[to write]");
     hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, u32Address);
 
-    W25Qxx_EraseSector(&w25qxx, 0);
-    DelayBlockMs(1000);
     W25Qxx_WriteData(&w25qxx, u32Address, ARRAY_SIZE(au8Data), au8Data);
-    DelayBlockMs(1000);
 
     // 3. read again
 
-    for (uint16_t i = 0; i < ARRAY_SIZE(au8Data); ++i)
-    {
-        au8Data[i] = 0;
-    }
-
+    memset(au8Data, 0, sizeof(au8Data));
     W25Qxx_ReadData(&w25qxx, u32Address, ARRAY_SIZE(au8Data), au8Data);
 
     PRINTLN("[second read]");

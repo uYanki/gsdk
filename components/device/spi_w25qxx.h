@@ -27,12 +27,14 @@ extern "C" {
 /**
  * @brief W25QXX Jedec ID
  */
-
 #define SST25VF016B_JEDEC_ID 0xBF2541
 #define MX25L1606E_JEDEC_ID  0xC22015
 #define W25Q64BV_JEDEC_ID    0xEF4017
 #define W25Q128_JEDEC_ID     0xEF4018
 
+/**
+ * @brief address mode
+ */
 typedef enum {
     W25QXX_ADDRESS_MODE_3_BYTE = 0x00, /**< 3 byte mode */
     W25QXX_ADDRESS_MODE_4_BYTE = 0x01, /**< 4 byte mode */
