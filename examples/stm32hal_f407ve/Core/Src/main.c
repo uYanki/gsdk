@@ -153,7 +153,8 @@ int main(void)
     // Shell_Test();
     // foc();
 		
-		W25Qxx_Test();
+		NRF24L01_Test();
+
 
     i2c_mst_t i2c = {
 #if I2C_IF == 0
@@ -208,6 +209,7 @@ int main(void)
 	// AD7705_Test(); 
 	// ST7735_Test();
 	// MCP2515_Test();
+	// W25Qxx_Test();
 #endif
 
     while (1)

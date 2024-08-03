@@ -2288,6 +2288,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\components\device\spi_w25qxx.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_nrf24l01.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\device\spi_nrf24l01.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

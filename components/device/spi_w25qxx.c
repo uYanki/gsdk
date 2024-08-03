@@ -12,15 +12,11 @@
 #define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE
 
 /**
- * @brief W25Q128FV Configuration
- */
-
-/**
  * @brief W25Q128
  * 包含256个块、每个块（64KB）有16个扇区（4096个扇区）、每个扇区（4KB）有16页、每一页有256个字节（Byte
- * 可看成电子书，这本书有256个章节，每个章节有16个小节，每个小节有16页，每页有256个字
+ * 该书有256个章节，每个章节有16个小节，每个小节有16页，每页有256个字。
  */
-#define W25QXX_FLASH_SIZE               0x1000000 /* 128 MBits => 16MBytes */
+#define W25Q128_FLASH_SIZE              0x1000000 /* 128 MBits => 16MBytes */
 #define W25QXX_BLOCK_SIZE               0x10000   /* 256 sectors of 64KBytes */
 #define W25QXX_SECTOR_SIZE              0x1000    /* 4096 subsectors of 4kBytes */
 #define W25QXX_PAGE_SIZE                0x100     /* 65536 pages of 256 bytes */
