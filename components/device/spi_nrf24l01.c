@@ -999,7 +999,20 @@ void NRF24L01_SetRetries(spi_nrf24l01_t* pHandle, uint8_t u8Delay, uint8_t u8Cou
 
 #if CONFIG_DEMOS_SW
 
-#define DEMO 1
+#define CONFIG_DEVICE_ROLE         DEVICE_ROLE_RX
+#define CONFIG_DYNAMIC_PAYLOADS_SW 1
+
+/**
+ * @brief CONFIG_DEVICE_ROLE
+ */
+#define DEVICE_ROLE_TX 0
+#define DEVICE_ROLE_RX 1
+
+#if CONFIG_DYNAMIC_PAYLOADS_SW
+#define PAYLOAD_MIN_SIZE 4
+#define PAYLOAD_MAX_SIZE 32
+#define PAYLOAD_INC_SIZE 2
+#endif
 
 void NRF24L01_Test(void)
 {
@@ -1021,33 +1034,43 @@ void NRF24L01_Test(void)
 
     SPI_Master_Init(&spi, 500000, SPI_DUTYCYCLE_50_50, NRF24L01_SPI_TIMING | SPI_FLAG_SOFT_CS);
 
-#if DEMO == 0  // getting started
-
-#define CONFIG_ROLE 0  // 0:tx 1:rx
-
     // Radio pipe addresses for the 2 nodes to communicate.
     const uint64_t au64Pipe[2] = {0xF0F0F0F0E1, 0xF0F0F0F0D2};
 
     NRF24L01_Init(&nrf24l01);
+
+#if CONFIG_DYNAMIC_PAYLOADS_SW
+    // enable dynamic payloads
+    NRF24L01_EnableDynamicPayloads(&nrf24l01);
+#endif
+
+    // optionally, increase the delay between retries & # of retries
     NRF24L01_SetRetries(&nrf24l01, 15, 15);
 
-#if CONFIG_ROLE == 0
+#if CONFIG_DEVICE_ROLE == DEVICE_ROLE_TX
     LOGD("TRANSMIT ROLE");
     NRF24L01_OpenWritingPipe(&nrf24l01, au64Pipe[0]);
     NRF24L01_OpenReadingPipe(&nrf24l01, 1, au64Pipe[1]);
-#else
+#else  // DEVICE_ROLE_RX
     LOGD("RECEIVE ROLE");
     NRF24L01_OpenWritingPipe(&nrf24l01, au64Pipe[1]);
     NRF24L01_OpenReadingPipe(&nrf24l01, 1, au64Pipe[0]);
 #endif
 
+    // Start listening
     NRF24L01_StartListening(&nrf24l01);
 
+    // Dump the configuration of the rf unit for debugging
     NRF24L01_PrintDetails(&nrf24l01);
+
+#if CONFIG_DYNAMIC_PAYLOADS_SW
+    uint8_t u8NextPayloadSize = PAYLOAD_MIN_SIZE;
+    char    szRxPayloadData[PAYLOAD_MAX_SIZE + 1];  // +1 to allow room for a terminating NULL char
+#endif
 
     while (1)
     {
-#if CONFIG_ROLE == 0
+#if CONFIG_DEVICE_ROLE == DEVICE_ROLE_TX
 
         //
         // Ping out role.  Repeatedly send the current time
@@ -1056,29 +1079,33 @@ void NRF24L01_Test(void)
         // First, stop listening so we can talk.
         NRF24L01_StopListening(&nrf24l01);
 
-        // Take the time, and send it.  This will block until complete
-        tick_t TickTx_Us = GetTickMs();
-        LOGI("Now sending %lu...", TickTx_Us);
-        bool bOk = NRF24L01_WriteData(&nrf24l01, &TickTx_Us, sizeof(tick_t));
+#if CONFIG_DYNAMIC_PAYLOADS_SW
 
-        if (bOk)
-        {
-            LOGI("Tx success.");
-        }
-        else
-        {
-            LOGI("Tx failed.");
-        }
+        // The payload will always be the same, what will change is how much of it we send.
+        static char szTxPayloadData[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ789012";
+
+        // Take the time, and send it.  This will block until complete
+        LOGI("Now sending length %i...", u8NextPayloadSize);
+        NRF24L01_WriteData(&nrf24l01, szTxPayloadData, u8NextPayloadSize);
+
+#else
+
+        // Take the time, and send it.  This will block until complete
+        tick_t TickTx = GetTickMs();
+        LOGI("Now sending %lu...", TickTx);
+        NRF24L01_WriteData(&nrf24l01, &TickTx, sizeof(tick_t));
+
+#endif
 
         // Now, continue listening
         NRF24L01_StartListening(&nrf24l01);
 
         // Wait here until we get a response, or timeout (250ms)
-        bool   bTimeout     = false;
-        tick_t TickStart_Us = GetTickUs();
+        bool   bTimeout  = false;
+        tick_t TickStart = GetTickUs();
         while (!NRF24L01_IsAvailable(&nrf24l01))
         {
-            if (DelayNonBlockMs(TickStart_Us, 200))
+            if (DelayNonBlockMs(TickStart, 200))
             {
                 bTimeout = true;
                 break;
@@ -1092,128 +1119,98 @@ void NRF24L01_Test(void)
         }
         else
         {
+#if CONFIG_DYNAMIC_PAYLOADS_SW
+
             // Grab the response, compare, and send to debugging spew
-            tick_t TickRx_Us;
-            NRF24L01_ReadData(&nrf24l01, &TickRx_Us, sizeof(tick_t));
+            uint8_t u8RxPayloadLen = NRF24L01_GetDynamicPayloadSize(&nrf24l01);
+            NRF24L01_ReadData(&nrf24l01, szRxPayloadData, u8RxPayloadLen);
+
+            // Put a zero at the end for easy printing
+            szRxPayloadData[u8RxPayloadLen] = 0;
 
             // Spew it
-            LOGI("Got response %lu", TickRx_Us);
+            LOGI("Got response size=%i data=%s", u8RxPayloadLen, szRxPayloadData);
+
+            // Update size for next time.
+            u8NextPayloadSize += PAYLOAD_INC_SIZE;
+
+            if (u8NextPayloadSize > PAYLOAD_MAX_SIZE)
+            {
+                u8NextPayloadSize = PAYLOAD_MIN_SIZE;
+            }
+
+#else
+
+            // Grab the response, compare, and send to debugging spew
+            tick_t TickRx;
+            NRF24L01_ReadData(&nrf24l01, &TickRx, sizeof(tick_t));
+
+            // Spew it
+            LOGI("Got response %lu", TickRx);
+
+#endif
         }
 
         // Try again 1s later
         DelayBlockMs(1000);
 
-#else
+#else /* DEVICE_ROLE_RX */
 
         //
         // Pong back role.  Receive each packet, dump it out, and send it back
         //
+        uint8_t u8Pipe;
 
         // if there is data ready
-        if (NRF24L01_IsAvailable(&nrf24l01))
+        if (NRF24L01_Available(&nrf24l01, &u8Pipe))
         {
             // Dump the payloads until we've gotten everything
-            tick_t TickRxVal;
-            bool   bDone = false;
+            tick_t  TickRxVal;
+            bool    bDone = false;
+            uint8_t u8RxPayloadLen;
+
             while (!bDone)
             {
+
+#if CONFIG_DYNAMIC_PAYLOADS_SW
+
                 // Fetch the payload, and see if this was the last one.
-                bDone = NRF24L01_ReadData(&nrf24l01, &TickRxVal, sizeof(tick_t));
+                u8RxPayloadLen = NRF24L01_GetDynamicPayloadSize(&nrf24l01);
+                bDone          = NRF24L01_ReadData(&nrf24l01, szRxPayloadData, u8RxPayloadLen);
+
+                // Put a zero at the end for easy printing
+                szRxPayloadData[u8RxPayloadLen] = 0;
+
+                // Spew it
+                LOGI("Got payload (pipe %d) size=%i data=%s", u8Pipe, u8RxPayloadLen, szRxPayloadData);
+
+#else
+                // Fetch the payload, and see if this was the last one.
+                bDone = NRF24L01_ReadData(&nrf24l01, &TickRxVal, sizeof(tick_t), u8Pipe);
 
                 // Spew it
                 LOGI("Got payload %lu...", TickRxVal);
-
-                // Delay just a little bit to let the other unit
-                // make the transition to receiver
-                DelayBlockMs(20);
+#endif
             }
 
             // First, stop listening so we can talk
             NRF24L01_StopListening(&nrf24l01);
 
             // Send the final one back.
-            NRF24L01_WriteData(&nrf24l01, &TickRxVal, sizeof(unsigned long));
+#if CONFIG_DYNAMIC_PAYLOADS_SW
+            NRF24L01_WriteData(&nrf24l01, szRxPayloadData, u8RxPayloadLen);
+#else
+            TickRxVal = GetTickMs();
+            NRF24L01_WriteData(&nrf24l01, &TickRxVal, sizeof(TickRxVal));  // loopback
+#endif
+
             LOGI("Sent response.");
 
             // Now, resume listening so we catch the next packets.
             NRF24L01_StartListening(&nrf24l01);
         }
-
 #endif
     }
-
-#elif DEMO == 1  // scanner
-
-    const uint8_t  num_channels = 128;
-    static uint8_t values[num_channels];
-
-    NRF24L01_Init(&nrf24l01);
-    NRF24L01_SetAutoAck(&nrf24l01, false);
-
-    // Get into standby mode
-    NRF24L01_StartListening(&nrf24l01);
-    NRF24L01_StopListening(&nrf24l01);
-
-    // Print out header, high then low digit
-    int i = 100;
-    while (i < num_channels)
-    {
-        printf("%x", i >> 4);
-        ++i;
-    }
-    printf("");
-    i = 0;
-    while (i < num_channels)
-    {
-        printf("%x", i & 0x0F);
-        ++i;
-    }
-    printf("");
-
-    const int num_reps = 1;
-
-    while (1)
-    {
-        LOGD("here");
-        // Clear measurement values
-        memset(values, 0, sizeof(values));
-
-        // Scan all channels num_reps times
-        int rep_counter = num_reps;
-        while (rep_counter--)
-        {
-            int i = num_channels;
-            LOGD("%d", rep_counter);
-            while (i--)
-            {
-                // Select this channel
-                NRF24L01_SetChannel(&nrf24l01, i);
-
-                // Listen for a little
-                NRF24L01_StartListening(&nrf24l01);
-                // DelayBlockMs(128);
-                DelayBlockMs(10);
-                NRF24L01_StopListening(&nrf24l01);
-
-                // Did we get a carrier?
-                if (NRF24L01_TestCarrier(&nrf24l01))
-                {
-                    ++values[i];
-                }
-            }
-        }
-
-        // Print out channel measurements, clamped to a single hex digit
-        int i = 0;
-        while (i < num_channels)
-        {
-            printf("%x", MIN(0x0F, values[i] & 0x0F));
-            ++i;
-        }
-        printf("");
-    }
-
-#endif
 }
 
 #endif /* CONFIG_DEMOS_SW */

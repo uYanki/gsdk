@@ -96,8 +96,8 @@ void NRF24L01_StopListening(spi_nrf24l01_t* pHandle);
  * NRF24L01_GetPayloadSize().  However, you can write less, and the remainder
  * will just be filled with zeroes.
  *
- * @param buf Pointer to the data to be sent
- * @param len Number of bytes to be sent
+ * @param[in] cpu8Data Pointer to the data to be sent
+ * @param[in] u8Len Number of bytes to be sent
  * @return True if the payload was delivered successfully false if not
  */
 bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len);
@@ -163,14 +163,6 @@ void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address);
  * @param u64Address The 40-bit address of the pipe to open.
  */
 void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t u64Address);
-
-/**
- * @name Optional Configurators
- *
- *  Methods you can use to get or set the configuration of the chip.
- *  None are required.  Calling NRF24L01_Begin() sets up a reasonable set of
- *  defaults.
- */
 
 /**
  * Set the number and delay of retries upon failed submit
@@ -265,10 +257,10 @@ void NRF24L01_SetAutoAck(spi_nrf24l01_t* pHandle, bool bEnable);
  * AA is enabled by default, so it's only needed if you want to turn
  * it off/on for some reason on a per pipeline basis.
  *
- * @param pipe Which pipeline to modify
+ * @param u8Pipe Which pipeline to modify
  * @param bEnable Whether to enable (true) or disable (false) auto-acks
  */
-void NRF24L01_SetAutoAckEx(spi_nrf24l01_t* pHandle, uint8_t pipe, bool bEnable);
+void NRF24L01_SetAutoAckEx(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable);
 
 /**
  * @brief Set Power Amplifier (PA) level to one of four levels.
