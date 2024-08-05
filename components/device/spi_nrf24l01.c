@@ -859,7 +859,7 @@ void NRF24L01_WriteAckPayload(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, const uin
     uint8_t u8DataLen = MIN(u8Len, RF24_MAX_PAYLOAD_SIZE);
 
     SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitByte(pHandle->hSPI, W_ACK_PAYLOAD | (u8Pipe & 0b111));
+    SPI_Master_TransmitByte(pHandle->hSPI, W_ACK_PAYLOAD | (u8Pipe & 0x07));
     SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u8DataLen);
     SPI_Master_Deselect(pHandle->hSPI);
 }
@@ -1151,7 +1151,7 @@ uint8_t NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle)
 #if CONFIG_DEMOS_SW
 
 
-#define CONFIG_DYNAMIC_PAYLOADS_SW 1
+#define CONFIG_DYNAMIC_PAYLOADS_SW 0
 
 /**
  * @brief CONFIG_DEVICE_ROLE
@@ -1337,7 +1337,7 @@ void NRF24L01_Test(void)
 
 #else
                 // Fetch the payload, and see if this was the last one.
-                bDone = NRF24L01_ReadData(&nrf24l01, &TickRxVal, sizeof(tick_t), u8Pipe);
+                bDone = NRF24L01_ReadData(&nrf24l01, &TickRxVal, sizeof(tick_t));
 
                 // Spew it
                 LOGI("Got payload %lu...", TickRxVal);
