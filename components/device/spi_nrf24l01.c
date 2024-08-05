@@ -613,7 +613,7 @@ void NRF24L01_PowerUp(spi_nrf24l01_t* pHandle)
 bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len)
 {
     // Begin the write
-    NRF24L01_StartWrite(pHandle, cpu8Data, u8Len);
+    NRF24L01_StartWrite(pHandle, cpu8Data, u8Len, false);
 
     // ------------
     // At this point we could return from a non-blocking write, and then call
@@ -671,19 +671,21 @@ bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_
     return bTxOk;
 }
 
-void NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len)
+bool NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast)
 {
     // Transmitter power-up
     NRF24L01_WriteByte(pHandle, CONFIG, (NRF24L01_ReadByte(pHandle, CONFIG) | BV(PWR_UP)) & ~BV(PRIM_RX));
     DelayBlockMs(150);
 
     // Send the payload
-    NRF24L01_WritePayload(pHandle, cpu8Data, u8Len, false);
+    bool bIsOk = NRF24L01_WritePayload(pHandle, cpu8Data, u8Len, bBroadcast) & BV(TX_FULL);
 
     // Allons!
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_HIGH);
     DelayBlockMs(15);
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
+
+    return bIsOk;
 }
 
 uint8_t NRF24L01_GetDynamicPayloadSize(spi_nrf24l01_t* pHandle)
@@ -1082,6 +1084,16 @@ void NRF24L01_DisableCRC(spi_nrf24l01_t* pHandle)
 void NRF24L01_SetRetries(spi_nrf24l01_t* pHandle, uint8_t u8Delay, uint8_t u8Count)
 {
     NRF24L01_WriteByte(pHandle, SETUP_RETR, (u8Delay & 0x0F) << ARD | (u8Count & 0x0F) << ARC);
+}
+
+uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel)
+{
+    return (NRF24L01_ReadByte(pHandle, FIFO_STATUS) >> (4 * bFifoSel)) & 3;
+}
+
+uint8_t NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle)
+{
+    return NRF24L01_ReadByte(pHandle, FIFO_STATUS) & BV(RX_FULL);
 }
 
 //---------------------------------------------------------------------------

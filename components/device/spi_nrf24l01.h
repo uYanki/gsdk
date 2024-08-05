@@ -399,7 +399,7 @@ bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle);
  * @param u8Len Number of bytes to be sent
  * @return True if the payload was delivered successfully false if not
  */
-void NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len);
+bool NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast);
 
 /**
  * @brief Write an ack payload for the specified pipe
@@ -471,7 +471,6 @@ bool NRF24L01_TestRPD(spi_nrf24l01_t* pHandle);
  *
  *  Methods you can use to drive the chip in more advanced ways
  */
-/**@{*/
 
 /**
  * @brief Print a giant block of debugging information to stdout
@@ -479,6 +478,48 @@ bool NRF24L01_TestRPD(spi_nrf24l01_t* pHandle);
  * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
  */
 void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle);
+/**
+ * Use this function to check if the radio's RX FIFO levels are all
+ * occupied. This can be used to prevent data loss because any incoming
+ * transmissions are rejected if there is no unoccupied levels in the RX
+ * FIFO to store the incoming payload. Remember that each level can hold
+ * up to a maximum of 32 bytes.
+ * @return
+ * - `true` if all three 3 levels of the RX FIFO buffers are occupied.
+ * - `false` if there is one or more levels available in the RX FIFO
+ *   buffers. Remember that this does not always mean that the RX FIFO
+ *   buffers are empty; use available() to see if the RX FIFO buffers are
+ *   empty or not.
+ */
+uint8_t NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle);
+
+/**
+ * @param bFifoSel `true` focuses on the TX FIFO, `false` focuses on the RX FIFO
+ * @return
+ * - `0` if the specified FIFO is neither full nor empty.
+ * - `1` if the specified FIFO is empty.
+ * - `2` if the specified FIFO is full.
+ */
+uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel);
+
+/**
+ * @brief Open or close all data pipes.
+ *
+ * This function does not alter the addresses assigned to pipes. It is simply a
+ * convenience function that allows controling all pipes at once.
+ * @param bEnabled `true` opens all pipes; `false` closes all pipes.
+ */
+void NRF24L01_ToggleAllPipes(spi_nrf24l01_t* pHandle, bool bEnabled);
+
+/**
+ * @brief Stop transmission of constant wave and reset PLL and CONT registers
+ */
+void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle);
+
+/**
+ * @brief  Disable custom payloads on the acknowledge packets
+ */
+void NRF24L01_DisableAckPayload(spi_nrf24l01_t* pHandle);
 
 //---------------------------------------------------------------------------
 // Example
