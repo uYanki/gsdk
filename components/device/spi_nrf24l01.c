@@ -448,8 +448,6 @@ void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_SetChannel(spi_nrf24l01_t* pHandle, uint8_t u8Channel)
 {
-    // TODO: This method could take advantage of the 'bWideBand' calculation
-    // done in NRF24L01_SetChannel() to require certain channel spacing.
     NRF24L01_WriteByte(pHandle, RF_CH, MIN(u8Channel, RF24_MAX_CHANNEL));
 }
 
@@ -475,7 +473,7 @@ uint8_t NRF24L01_GetPayloadSize(spi_nrf24l01_t* pHandle)
 void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 {
     pHandle->bWideBand               = true;
-    pHandle->bPlusVer                = false;
+
     pHandle->u8PayloadSize           = 32;
     pHandle->bAckPayloadAvailable    = false;
     pHandle->bDynamicPayloadsEnabled = false;
@@ -551,6 +549,17 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     // Flush buffers
     NRF24L01_FlushRx(pHandle);
     NRF24L01_FlushTx(pHandle);
+}
+
+void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
+{
+    NRF24L01_WriteByte(pHandle, EN_RXADDR, NRF24L01_ReadByte(pHandle, EN_RXADDR) & ~BV(m_cau8ChildPipeEnable[u8Pipe]));
+
+    if (u8Pipe == 0)
+    {
+        // keep track of pipe 0's RX state to avoid null vs 0 in addr cache
+      //   pHandle->bPipe0Rx = false;
+    }
 }
 
 void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
