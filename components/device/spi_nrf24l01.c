@@ -707,33 +707,18 @@ bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle)
 
 bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe)
 {
-    uint8_t u8Status = NRF24L01_GetStatus(pHandle);
-
-    bool bRxReady = (u8Status & BV(RX_DR)) ? true : false;
-
-    if (bRxReady)
+    if (NRF24L01_ReadByte(pHandle, FIFO_STATUS) & 1)
     {
-        // If the caller wants the pipe number, include that
-        if (pu8Pipe != nullptr)
-        {
-            *pu8Pipe = (u8Status >> RX_P_NO) & 0b111;
-        }
-
-        // Clear the status bit
-
-        // ??? Should this REALLY be cleared now?  Or wait until we
-        // actually READ the payload?
-
-        NRF24L01_WriteByte(pHandle, STATUS, BV(RX_DR));
-
-        // Handle ack payload receipt
-        if (u8Status & BV(TX_DS))
-        {
-            NRF24L01_WriteByte(pHandle, STATUS, BV(TX_DS));
-        }
+        return false;  // RX FIFO is empty
     }
 
-    return bRxReady;
+    // If the caller wants the pipe number, include that
+    if (pu8Pipe != nullptr)
+    {
+        *pu8Pipe = (NRF24L01_GetStatus(pHandle) >> RX_P_NO) & 0x07;
+    }
+
+    return true;
 }
 
 bool NRF24L01_ReadData(spi_nrf24l01_t* pHandle, uint8_t* pu8Data, uint8_t u8Len)
