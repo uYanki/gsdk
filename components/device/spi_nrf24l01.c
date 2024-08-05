@@ -704,7 +704,7 @@ bool NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8
 {
     // Transmitter power-up
     NRF24L01_WriteByte(pHandle, CONFIG, (NRF24L01_ReadByte(pHandle, CONFIG) | BV(PWR_UP)) & ~BV(PRIM_RX));
-    DelayBlockMs(150);
+    DelayBlockUs(150);
 
     // Send the payload
     bool bIsOk = NRF24L01_WritePayload(pHandle, cpu8Data, u8Len, bBroadcast) & BV(TX_FULL);
@@ -782,10 +782,8 @@ void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address)
     // Note that AVR 8-bit uC's store this LSB first, and the NRF24L01(+)
     // expects it LSB first too, so we're good.
 
-    NRF24L01_WriteBlock(pHandle, RX_ADDR_P0, (uint8_t*)&u64Address, 5);  // 大小端?
-    NRF24L01_WriteBlock(pHandle, TX_ADDR, (uint8_t*)&u64Address, 5);
-
-    NRF24L01_WriteByte(pHandle, RX_PW_P0, MIN(pHandle->u8PayloadSize, RF24_MAX_PAYLOAD_SIZE));
+    NRF24L01_WriteBlock(pHandle, RX_ADDR_P0, (uint8_t*)&u64Address, pHandle->u8AddrWidth);  // 大小端?
+    NRF24L01_WriteBlock(pHandle, TX_ADDR, (uint8_t*)&u64Address, pHandle->u8AddrWidth);
 }
 
 void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t u64Address)
@@ -799,7 +797,7 @@ void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t 
         pHandle->u64Pipe0ReadingAddress = u64Address;
     }
 
-    if (u8Pipe <= 6)
+    if (u8Pipe <= 5)
     {
         // For pipes 2-5, only write the LSB
         NRF24L01_WriteBlock(pHandle, m_cau8ChildPipe[u8Pipe], (const uint8_t*)&u64Address, (u8Pipe < 2) ? 5 : 1);
@@ -813,18 +811,15 @@ void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t 
     }
 }
 
+void NRF24L01_ToggleAllPipes(spi_nrf24l01_t* pHandle, bool bEnabled)
+{
+    NRF24L01_WriteByte(pHandle, EN_RXADDR, bEnabled ? 0x3F : 0);
+}
+
 void NRF24L01_EnableDynamicPayloads(spi_nrf24l01_t* pHandle)
 {
     // Enable dynamic payload throughout the system
     NRF24L01_WriteByte(pHandle, FEATURE, NRF24L01_ReadByte(pHandle, FEATURE) | BV(EN_DPL));
-
-    // If it didn't work, the features are not enabled
-    if (!NRF24L01_ReadByte(pHandle, FEATURE))
-    {
-        // So enable them and try again
-        NRF24L01_ToggleFeatures(pHandle);
-        NRF24L01_WriteByte(pHandle, FEATURE, NRF24L01_ReadByte(pHandle, FEATURE) | BV(EN_DPL));
-    }
 
     // Enable dynamic payload on all pipes
     //
@@ -1151,7 +1146,7 @@ uint8_t NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle)
 #if CONFIG_DEMOS_SW
 
 
-#define CONFIG_DYNAMIC_PAYLOADS_SW 0
+#define CONFIG_DYNAMIC_PAYLOADS_SW 1
 
 /**
  * @brief CONFIG_DEVICE_ROLE
