@@ -582,7 +582,6 @@ void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
     NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) | BV(PRIM_RX));
     NRF24L01_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
 
-
     // Restore the pipe0 adddress, if exists
     if (pHandle->u64Pipe0ReadingAddress != 0)
     {
@@ -597,7 +596,7 @@ void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_HIGH);
 
     // wait for the radio to come up (130us actually only needed)
-    DelayBlockMs(130);
+    DelayBlockUs(130);
 }
 
 void NRF24L01_StopListening(spi_nrf24l01_t* pHandle)
