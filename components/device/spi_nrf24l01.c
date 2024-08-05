@@ -602,12 +602,19 @@ bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_PowerDown(spi_nrf24l01_t* pHandle)
 {
+    PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
     NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) & ~BV(PWR_UP));
 }
 
+// Power up now. Radio will not power down unless instructed by MCU for config changes etc.
 void NRF24L01_PowerUp(spi_nrf24l01_t* pHandle)
 {
     NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) | BV(PWR_UP));
+
+    // For nRF24L01+ to go from power down mode to TX or RX mode it must first pass through stand-by mode.
+    // There must be a delay of Tpd2stby (see Table 16.) after the nRF24L01+ leaves power down mode before
+    // the CEis set high. - Tpd2stby can be up to 5ms per the 1.0 datasheet
+    DelayBlockMs(5);
 }
 
 bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len)
@@ -682,7 +689,7 @@ bool NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8
 
     // Allons!
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_HIGH);
-    DelayBlockMs(15);
+    DelayBlockMs(10);
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
 
     return bIsOk;
@@ -1285,6 +1292,8 @@ void NRF24L01_Test(void)
                 // Spew it
                 LOGI("Got payload %lu...", TickRxVal);
 #endif
+
+                DelayBlockMs(20);
             }
 
             // First, stop listening so we can talk
