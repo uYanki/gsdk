@@ -4,6 +4,7 @@
 #ifndef CONFIG_DEVICE_ROLE
 #define CONFIG_DEVICE_ROLE         DEVICE_ROLE_RX
 #endif
+void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth);
 
 //---------------------------------------------------------------------------
 // Definitions
@@ -454,7 +455,16 @@ void NRF24L01_SetChannel(spi_nrf24l01_t* pHandle, uint8_t u8Channel)
 
 void NRF24L01_SetPayloadSize(spi_nrf24l01_t* pHandle, uint8_t u8Size)
 {
-    pHandle->u8PayloadSize = MIN(u8Size, RF24_MAX_PAYLOAD_SIZE);
+    u8Size = MIN(u8Size, RF24_MAX_PAYLOAD_SIZE);
+    u8Size = MAX(u8Size, 1);
+
+    pHandle->u8PayloadSize = u8Size;
+
+    // write static payload size setting for all pipes
+    for (uint8_t u8Pipe = 0; u8Pipe < 6; ++u8Pipe)
+    {
+        NRF24L01_WriteByte(pHandle, RX_PW_P0 + u8Pipe, pHandle->u8PayloadSize - 2);
+    }
 }
 
 uint8_t NRF24L01_GetPayloadSize(spi_nrf24l01_t* pHandle)
@@ -486,24 +496,37 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 
     // Set 1500uS (minimum for 32B payload in ESB@250KBPS) timeouts, to make testing a little easier
     // WARNING: If this is ever lowered, either 250KBS mode with AA is broken or maximum packet
-    // sizes must never be used. See documentation for a more complete explanation.
-    NRF24L01_WriteByte(pHandle, SETUP_RETR, (0b0100 << ARD) | (0b1111 << ARC));
+    // sizes must never be used. See datasheet for a more complete explanation.
+    NRF24L01_SetRetries(pHandle, 5, 15);
+
+    // Then set the data rate to the slowest (and most reliable) speed supported by all hardware.
+    NRF24L01_SetDataRate(pHandle, RF24_1MBPS);
 
     // Restore our default PA level
     NRF24L01_SetPALevel(pHandle, RF24_PA_MAX);
 
-    // Determine if this is a p or non-p RF24 module and then
-    // reset our data rate back to default value. This works
-    // because a non-P variant won't allow the data rate to
-    // be set to 250Kbps.
-    if (NRF24L01_SetDataRate(pHandle, RF24_250KBPS))
+    // detect if is a plus variant & use old toggle features command accordingly
     {
-        pHandle->bPlusVer = true;
-    }
+        uint8_t u8TglBefore = NRF24L01_ReadByte(pHandle, FEATURE);
 
-    // Then set the data rate to the slowest (and most reliable) speed supported by all
-    // hardware.
-    NRF24L01_SetDataRate(pHandle, RF24_1MBPS);
+        NRF24L01_ToggleFeatures(pHandle);
+
+        uint8_t u8TglAfter = NRF24L01_ReadByte(pHandle, FEATURE);
+
+        pHandle->bPlusVer = u8TglBefore == u8TglAfter;
+
+        if (u8TglAfter)
+        {
+            if (pHandle->bPlusVer)
+            {
+                // module did not experience power-on-reset (#401)
+                NRF24L01_ToggleFeatures(pHandle);
+            }
+
+            // allow use of multicast parameter and dynamic payloads by default
+            NRF24L01_WriteByte(pHandle, FEATURE, 0);
+        }
+    }
 
     // Initialize CRC and request 2-byte (16bit) CRC
     NRF24L01_SetCRCLength(pHandle, RF24_CRC_16);
@@ -511,9 +534,14 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     // Disable dynamic payloads, to match bDynamicPayloadsEnabled setting
     NRF24L01_WriteByte(pHandle, DYNPD, 0);
 
-    // Reset current status
-    // Notice reset and flush is the last thing we do
-    NRF24L01_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
+    // enable auto-ack on all pipes
+    NRF24L01_WriteByte(pHandle, EN_AA, 0x3F);
+
+    // only open RX pipes 0 & 1
+    NRF24L01_WriteByte(pHandle, EN_RXADDR, 3);
+
+    NRF24L01_SetPayloadSize(pHandle, RF24_MAX_PAYLOAD_SIZE);  // set static payload size to 32 (max) bytes by default
+    NRF24L01_SetAddressWidth(pHandle, 5);                     // set default address length to (max) 5 bytes
 
     // Set up default configuration.  Callers can always change it later.
     // This channel should be universally safe and not bleed over into adjacent
