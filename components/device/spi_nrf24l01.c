@@ -1267,7 +1267,7 @@ void NRF24L01_Test(void)
         tick_t TickStart = GetTickUs();
         while (!NRF24L01_IsAvailable(&nrf24l01))
         {
-            if (DelayNonBlockMs(TickStart, 200))
+            if (DelayNonBlockMs(TickStart, 250))
             {
                 bTimeout = true;
                 break;
