@@ -554,6 +554,17 @@ void NRF24L01_StopListening(spi_nrf24l01_t* pHandle)
     NRF24L01_FlushRx(pHandle);
 }
 
+void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth)
+{
+    pHandle->u8AddrWidth = CLAMP(u8AddrWidth, 2, 5);
+    NRF24L01_WriteByte(pHandle, SETUP_AW, pHandle->u8AddrWidth - 2);
+}
+
+bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle)
+{
+    return NRF24L01_ReadByte(pHandle, SETUP_AW) == (pHandle->u8AddrWidth - 2);
+}
+
 void NRF24L01_PowerDown(spi_nrf24l01_t* pHandle)
 {
     NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) & ~BV(PWR_UP));
