@@ -538,7 +538,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     NRF24L01_WriteByte(pHandle, EN_RXADDR, 3);
 
     NRF24L01_SetPayloadSize(pHandle, RF24_MAX_PAYLOAD_SIZE);  // set static payload size to 32 (max) bytes by default
-    NRF24L01_SetAddressWidth(pHandle, 5);                     // set default address length to (max) 5 bytes
+    NRF24L01_SetAddressWidth(pHandle, 4);                     // set default address length to (max) 5 bytes
 
     // Set up default configuration.  Callers can always change it later.
     // This channel should be universally safe and not bleed over into adjacent
@@ -578,8 +578,8 @@ void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
 
 void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
 {
-    NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) | BV(PWR_UP) | BV(PRIM_RX));
-
+    NRF24L01_PowerUp(pHandle);
+    NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) | BV(PRIM_RX));
     NRF24L01_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
 
 
