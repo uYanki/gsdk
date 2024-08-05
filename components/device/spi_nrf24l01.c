@@ -13,7 +13,7 @@
 #define LOG_LOCAL_LEVEL       LOG_LEVEL_VERBOSE
 
 #define RF24_MAX_PAYLOAD_SIZE 32
-#define RF24_MAX_CHANNEL      127
+#define RF24_MAX_CHANNEL      125
 
 /* Memory Map */
 #define CONFIG      0x00
@@ -109,7 +109,8 @@
 #define LNA_HCURR 0
 
 /* P model memory Map */
-#define RPD 0x09
+#define RPD                 0x09
+#define W_TX_PAYLOAD_NO_ACK 0xB0
 
 /* P model bit Mnemonics */
 #define RF_DR_LOW   5
@@ -133,7 +134,7 @@ static inline uint8_t NRF24L01_WriteBlock(spi_nrf24l01_t* pHandle, uint8_t u8Mem
  * @param u8Len Number of bytes to be sent
  * @return Current value of status register
  */
-static inline uint8_t NRF24L01_WritePayload(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len);
+static inline uint8_t NRF24L01_WritePayload(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast);
 
 /**
  * @brief Read the receive payload
@@ -230,15 +231,26 @@ static inline uint8_t NRF24L01_WriteByte(spi_nrf24l01_t* pHandle, uint8_t u8MemA
     return u8Status;
 }
 
-static inline uint8_t NRF24L01_WritePayload(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len)
+static inline uint8_t NRF24L01_WritePayload(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast)
 {
     uint8_t u8Status;
 
     uint8_t u8DataLen  = MIN(u8Len, pHandle->u8PayloadSize);
     uint8_t u8BlankLen = pHandle->bDynamicPayloadsEnabled ? 0 : pHandle->u8PayloadSize - u8DataLen;
 
+    if (pHandle->bDynamicPayloadsEnabled)
+    {
+        u8DataLen  = MIN(u8Len, RF24_MAX_PAYLOAD_SIZE);
+        u8BlankLen = u8DataLen == 0 ? 1 : 0;
+    }
+    else
+    {
+        u8DataLen  = MIN(u8Len, pHandle->u8PayloadSize);
+        u8BlankLen = pHandle->u8PayloadSize - u8DataLen;
+    }
+
     SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitReceiveByte(pHandle->hSPI, W_TX_PAYLOAD, &u8Status);
+    SPI_Master_TransmitReceiveByte(pHandle->hSPI, bBroadcast ? W_TX_PAYLOAD_NO_ACK : W_TX_PAYLOAD, &u8Status);
     SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u8DataLen);
 
     while (u8BlankLen--)
@@ -255,8 +267,19 @@ static inline uint8_t NRF24L01_ReadPayload(spi_nrf24l01_t* pHandle, uint8_t* pu8
 {
     uint8_t u8Status;
 
-    uint8_t u8DataLen  = MIN(u8Len, pHandle->u8PayloadSize);
-    uint8_t u8BlankLen = pHandle->bDynamicPayloadsEnabled ? 0 : pHandle->u8PayloadSize - u8DataLen;
+    uint8_t u8DataLen;
+    uint8_t u8BlankLen;
+
+    if (pHandle->bDynamicPayloadsEnabled)
+    {
+        u8DataLen  = MIN(u8Len, RF24_MAX_PAYLOAD_SIZE);
+        u8BlankLen = 0;
+    }
+    else
+    {
+        u8DataLen  = MIN(u8Len, pHandle->u8PayloadSize);
+        u8BlankLen = pHandle->u8PayloadSize - u8DataLen;
+    }
 
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitReceiveByte(pHandle->hSPI, R_RX_PAYLOAD, &u8Status);
@@ -609,7 +632,7 @@ void NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8
     DelayBlockMs(150);
 
     // Send the payload
-    NRF24L01_WritePayload(pHandle, cpu8Data, u8Len);
+    NRF24L01_WritePayload(pHandle, cpu8Data, u8Len, false);
 
     // Allons!
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_HIGH);
