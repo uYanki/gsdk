@@ -68,6 +68,7 @@ void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth);
 #define ARD         4
 #define ARC         0
 #define PLL_LOCK    4
+#define CONT_WAVE   7
 #define RF_DR       3
 #define RF_PWR      6
 #define RX_DR       6
@@ -585,14 +586,35 @@ void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
 void NRF24L01_StopListening(spi_nrf24l01_t* pHandle)
 {
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
-    NRF24L01_FlushTx(pHandle);
-    NRF24L01_FlushRx(pHandle);
+
+    DelayBlockUs(100);
+
+    if (pHandle->bAckPayloadAvailable)
+    {
+        NRF24L01_FlushTx(pHandle);
+    }
+
+    NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) & ~BV(PRIM_RX));
+    NRF24L01_WriteByte(pHandle, EN_RXADDR, NRF24L01_ReadByte(pHandle, EN_RXADDR) | m_cau8ChildPipeEnable[0]);  // Enable RX on pipe0
 }
 
 void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth)
 {
     pHandle->u8AddrWidth = CLAMP(u8AddrWidth, 2, 5);
     NRF24L01_WriteByte(pHandle, SETUP_AW, pHandle->u8AddrWidth - 2);
+}
+
+void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle)
+{
+    /*
+     * A note from the datasheet:
+     * Do not use REUSE_TX_PL together with CONT_WAVE=1. When both these
+     * registers are set the chip does not react when setting CE low. If
+     * however, both registers are set PWR_UP = 0 will turn TX mode off.
+     */
+    NRF24L01_PowerDown(pHandle);  // per datasheet recommendation (just to be safe)
+    NRF24L01_WriteByte(pHandle, RF_SETUP, NRF24L01_ReadByte(pHandle, RF_SETUP) & ~BV(CONT_WAVE) & ~BV(PLL_LOCK));
+    PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
 }
 
 bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle)
