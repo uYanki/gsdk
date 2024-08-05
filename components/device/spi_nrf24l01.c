@@ -1120,7 +1120,7 @@ void NRF24L01_Test(void)
     NRF24L01_PrintDetails(&nrf24l01);
 
 #if CONFIG_DYNAMIC_PAYLOADS_SW
-    uint8_t u8NextPayloadSize = PAYLOAD_MIN_SIZE;
+    uint8_t u8NextPayloadSize = 20;
     char    szRxPayloadData[PAYLOAD_MAX_SIZE + 1];  // +1 to allow room for a terminating NULL char
 #endif
 
@@ -1208,7 +1208,7 @@ void NRF24L01_Test(void)
         }
 
         // Try again 1s later
-        DelayBlockMs(1000);
+        DelayBlockMs(500);
 
 #else /* DEVICE_ROLE_RX */
 
