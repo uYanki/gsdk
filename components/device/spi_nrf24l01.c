@@ -579,7 +579,9 @@ void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
 void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
 {
     NRF24L01_WriteByte(pHandle, CONFIG, NRF24L01_ReadByte(pHandle, CONFIG) | BV(PWR_UP) | BV(PRIM_RX));
+
     NRF24L01_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
+
 
     // Restore the pipe0 adddress, if exists
     if (pHandle->u64Pipe0ReadingAddress != 0)
@@ -815,7 +817,7 @@ void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t 
     if (u8Pipe <= 5)
     {
         // For pipes 2-5, only write the LSB
-        NRF24L01_WriteBlock(pHandle, m_cau8ChildPipe[u8Pipe], (const uint8_t*)&u64Address, (u8Pipe < 2) ? 5 : 1);
+        NRF24L01_WriteBlock(pHandle, m_cau8ChildPipe[u8Pipe], (const uint8_t*)&u64Address, (u8Pipe < 2) ? pHandle->u8AddrWidth : 1);
 
         NRF24L01_WriteByte(pHandle, m_cau8ChildPayloadSize[u8Pipe], pHandle->u8PayloadSize);
 
