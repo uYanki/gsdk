@@ -532,7 +532,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     NRF24L01_WriteByte(pHandle, DYNPD, 0);
 
     // enable auto-ack on all pipes
-		NRF24L01_SetAutoAck(pHandle, true);
+    NRF24L01_SetAutoAck(pHandle, true);
 
     // only open RX pipes 0 & 1
     NRF24L01_WriteByte(pHandle, EN_RXADDR, 3);
@@ -545,9 +545,24 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     // spectrum.
     NRF24L01_SetChannel(pHandle, 76);
 
+    // Reset current status
+    // Notice reset and flush is the last thing we do
+    NRF24L01_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
+
     // Flush buffers
     NRF24L01_FlushRx(pHandle);
     NRF24L01_FlushTx(pHandle);
+
+    // Clear CONFIG register:
+    //      Reflect all IRQ events on IRQ pin
+    //      Enable PTX
+    //      Power Up
+    //      16-bit CRC (CRC required by auto-ack)
+    // Do not write CE high so radio will remain in standby I mode
+    // PTX should use only 22uA of power
+    NRF24L01_SetCRCLength(pHandle, RF24_CRC_8);
+
+    NRF24L01_PowerUp(pHandle);
 }
 
 void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
@@ -557,7 +572,7 @@ void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
     if (u8Pipe == 0)
     {
         // keep track of pipe 0's RX state to avoid null vs 0 in addr cache
-      //   pHandle->bPipe0Rx = false;
+        // pHandle->bPipe0Rx = false;
     }
 }
 
@@ -569,7 +584,7 @@ void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
     // Restore the pipe0 adddress, if exists
     if (pHandle->u64Pipe0ReadingAddress != 0)
     {
-        NRF24L01_WriteBlock(pHandle, RX_ADDR_P0, (const uint8_t*)&pHandle->u64Pipe0ReadingAddress, 5);
+        NRF24L01_WriteBlock(pHandle, RX_ADDR_P0, (const uint8_t*)&pHandle->u64Pipe0ReadingAddress, pHandle->u8AddrWidth);
     }
 
     // Flush buffers
@@ -1089,7 +1104,7 @@ void NRF24L01_SetCRCLength(spi_nrf24l01_t* pHandle, rf24_crc_len_e eLength)
     {
         u8Data |= BV(EN_CRC);
     }
-    else
+    else // RF24_CRC_16
     {
         u8Data |= BV(EN_CRC);
         u8Data |= BV(CRCO);
