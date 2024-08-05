@@ -696,6 +696,12 @@ uint8_t NRF24L01_GetDynamicPayloadSize(spi_nrf24l01_t* pHandle)
     SPI_Master_TransmitByte(pHandle->hSPI, R_RX_PL_WID);
     SPI_Master_ReceiveByte(pHandle->hSPI, &u8Data);
     SPI_Master_Deselect(pHandle->hSPI);
+    if (u8Data > RF24_MAX_PAYLOAD_SIZE)
+    {
+        NRF24L01_FlushRx(pHandle);
+        DelayBlockUs(2);
+        return 0;
+    }
 
     return u8Data;
 }
