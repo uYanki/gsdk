@@ -526,7 +526,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     }
 
     // Initialize CRC and request 2-byte (16bit) CRC
-    NRF24L01_SetCRCLength(pHandle, RF24_CRC_16);
+    NRF24L01_SetCRCLength(pHandle, RF24_CRC_8);
 
     // Disable dynamic payloads, to match bDynamicPayloadsEnabled setting
     NRF24L01_WriteByte(pHandle, DYNPD, 0);
@@ -560,7 +560,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     //      16-bit CRC (CRC required by auto-ack)
     // Do not write CE high so radio will remain in standby I mode
     // PTX should use only 22uA of power
-    NRF24L01_SetCRCLength(pHandle, RF24_CRC_8);
+    NRF24L01_SetCRCLength(pHandle, RF24_CRC_16);
 
     NRF24L01_PowerUp(pHandle);
 }
@@ -741,6 +741,7 @@ uint8_t NRF24L01_GetDynamicPayloadSize(spi_nrf24l01_t* pHandle)
     SPI_Master_TransmitByte(pHandle->hSPI, R_RX_PL_WID);
     SPI_Master_ReceiveByte(pHandle->hSPI, &u8Data);
     SPI_Master_Deselect(pHandle->hSPI);
+	
     if (u8Data > RF24_MAX_PAYLOAD_SIZE)
     {
         NRF24L01_FlushRx(pHandle);
@@ -1142,7 +1143,7 @@ void NRF24L01_DisableCRC(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_SetRetries(spi_nrf24l01_t* pHandle, uint8_t u8Delay, uint8_t u8Count)
 {
-    NRF24L01_WriteByte(pHandle, SETUP_RETR, (u8Delay & 0x0F) << ARD | (u8Count & 0x0F) << ARC);
+    NRF24L01_WriteByte(pHandle, SETUP_RETR, MIN(u8Delay, 15) << ARD | MIN(u8Count, 15) << ARC);
 }
 
 uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel)

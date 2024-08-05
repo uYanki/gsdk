@@ -105,9 +105,15 @@ bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle);
 /**
  * @brief Start listening on the pipes opened for reading.
  *
- * Be sure to call NRF24L01_OpenReadingPipe() first.  Do not call NRF24L01_WriteData() while
- * in this mode, without first calling NRF24L01_StopListening().  Call
- * NRF24L01_IsAvailable() to check for incoming traffic, and NRF24L01_ReadData() to get it.
+ * 1. Be sure to call NRF24L01_OpenReadingPipe() first.
+ * 2. Do not call NRF24L01_WriteData() while in this mode, without first calling NRF24L01_StopListening().
+ * 3. Call NRF24L01_IsAvailable() to check for incoming traffic, and NRF24L01_ReadData() to get it.
+ * @note If there was a call to NRF24L01_OpenReadingPipe() about pipe 0 prior to
+ * calling this function, then this function will re-write the address
+ * that was last set to reading pipe 0. This is because NRF24L01_OpenWritingPipe()
+ * will overwrite the address to reading pipe 0 for proper auto-ack
+ * functionality.
+ *
  */
 void NRF24L01_StartListening(spi_nrf24l01_t* pHandle);
 
@@ -115,6 +121,9 @@ void NRF24L01_StartListening(spi_nrf24l01_t* pHandle);
  * @brief Stop listening for incoming messages
  *
  * Do this before calling NRF24L01_WriteData().
+ * @note When the ACK payloads feature is enabled, the TX FIFO buffers are
+ * flushed when calling this function. This is meant to discard any ACK
+ * payloads that were not appended to acknowledgment packets.
  */
 void NRF24L01_StopListening(spi_nrf24l01_t* pHandle);
 
@@ -155,48 +164,61 @@ bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_
 bool NRF24L01_ReadData(spi_nrf24l01_t* pHandle, uint8_t* pu8Data, uint8_t u8Len);
 
 /**
- * Open a pipe for writing
+ * @brief Open a pipe for writing. Old addressing format retained
+ * for compatibility.
  *
- * Only one pipe can be open at once, but you can change the pipe
- * you'll listen to.  Do not call this while actively listening.
- * Remember to NRF24L01_StopListening() first.
+ * Only one writing pipe can be opened at once, but this function changes
+ * the address that is used to transmit (ACK payloads/packets do not apply
+ * here). Be sure to call NRF24L01_StopListening() prior to calling this function.
  *
- * Addresses are 40-bit hex values, e.g.:
+ * Addresses are assigned via a byte array, default is 5 byte address length
  *
- * @code
- *   NRF24L01_OpenWritingPipe(pHandle,0xF0F0F0F0F0);
- * @endcode
+ * @warning This function will overwrite the address set to reading pipe 0
+ * as stipulated by the datasheet for proper auto-ack functionality in TX
+ * mode. Use this function to ensure proper transmission acknowledgement
+ * when the address set to reading pipe 0 (via NRF24L01_OpenReadingPipe()) does not
+ * match the address passed to this function. If the auto-ack feature is
+ * disabled, then this function will still overwrite the address for
+ * reading pipe 0 regardless.
  *
- * @param u64Address The 40-bit address of the pipe to open.  This can be
- * any value whatsoever, as long as you are the only one writing to it
- * and only one other radio is listening to it.  Coordinate these pipe
- * addresses amongst nodes on the network.
+ * @param cpu8Address The address to be used for outgoing transmissions (uses
+ * pipe 0). Coordinate this address amongst other receiving nodes (the
+ * pipe numbers don't need to match).
+ *
+ * @remark There is no address length parameter because this function will
+ * always write the number of bytes that the radio addresses are configured
+ * to use (set with NRF24L01_SetAddressWidth()).
  */
-void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address);
+ void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address);
 
 /**
- * Open a pipe for reading
+ * @brief Open a pipe for reading
  *
- * Up to 6 pipes can be open for reading at once.  Open all the
- * reading pipes, and then call NRF24L01_StartListening().
+ * Up to 6 pipes can be open for reading at once.  Open all the required
+ * reading pipes, and then call startListening().
  *
- * @see openWritingPipe
+ * @note Pipes 0 and 1 will store a full 5-byte address. Pipes 2-5 will technically
+ * only store a single byte, borrowing up to 4 additional bytes from pipe 1 per the
+ * assigned address width.
+ * Pipes 1-5 should share the same address, except the first byte.
+ * Only the first byte in the array should be unique, e.g.
  *
- * @warning Pipes 1-5 should share the first 32 bits.
- * Only the least significant byte should be unique, e.g.
- * @code
- *   NRF24L01_OpenReadingPipe(pHandle,1,0xF0F0F0F0AA);
- *   NRF24L01_OpenReadingPipe(pHandle,2,0xF0F0F0F066);
- * @endcode
+ * @warning
+ * @parblock
+ * If the reading pipe 0 is opened by this function, the address
+ * passed to this function (for pipe 0) will be restored at every call to
+ * startListening().
  *
- * @warning Pipe 0 is also used by the writing pipe.  So if you open
- * pipe 0 for reading, and then NRF24L01_StartListening(), it will overwrite the
- * writing pipe.  Ergo, do an NRF24L01_OpenWritingPipe() again before NRF24L01_WriteData().
+ * Read
+ * http://maniacalbits.blogspot.com/2013/04/rf24-addressing-nrf24l01-radios-require.html
+ * to understand how to avoid using malformed addresses. This address
+ * restoration is implemented because of the underlying necessary
+ * functionality of openWritingPipe().
+ * @endparblock
  *
- * @todo Enforce the restriction that pipes 1-5 must share the top 32 bits
- *
- * @param u8Pipe Which pipe# to open, 0-5.
- * @param u64Address The 40-bit address of the pipe to open.
+ * @param u8Pipe Which pipe to open. Only pipe numbers 0-5 are available,
+ * an address assigned to any pipe number not in that range will be ignored.
+ * @param u64Address The 24, 32 or 40 bit address of the pipe to open.
  */
 void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t u64Address);
 
