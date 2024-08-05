@@ -474,12 +474,10 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 {
     pHandle->bWideBand               = true;
 
-    pHandle->u8PayloadSize           = 32;
     pHandle->bAckPayloadAvailable    = false;
     pHandle->bDynamicPayloadsEnabled = false;
     pHandle->u8AckPayloadLength      = 0;
     pHandle->u64Pipe0ReadingAddress  = 0;
-	  pHandle->u8AddrWidth = 5;
 
     PIN_SetMode(&pHandle->CE, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_UP);
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
