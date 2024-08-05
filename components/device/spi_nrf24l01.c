@@ -532,7 +532,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     NRF24L01_WriteByte(pHandle, DYNPD, 0);
 
     // enable auto-ack on all pipes
-    NRF24L01_WriteByte(pHandle, EN_AA, 0x3F);
+		NRF24L01_SetAutoAck(pHandle, true);
 
     // only open RX pipes 0 & 1
     NRF24L01_WriteByte(pHandle, EN_RXADDR, 3);
@@ -866,9 +866,7 @@ void NRF24L01_WriteAckPayload(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, const uin
 
 bool NRF24L01_IsAckPayloadAvailable(spi_nrf24l01_t* pHandle)
 {
-    bool result                   = pHandle->bAckPayloadAvailable;
-    pHandle->bAckPayloadAvailable = false;
-    return result;
+    return NRF24L01_Available(pHandle, nullptr);
 }
 
 bool NRF24L01_IsPVariant(spi_nrf24l01_t* pHandle)
@@ -878,10 +876,20 @@ bool NRF24L01_IsPVariant(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_SetAutoAck(spi_nrf24l01_t* pHandle, bool bEnable)
 {
-    NRF24L01_WriteByte(pHandle, EN_AA, bEnable ? 0b111111 : 0);
+    if (bEnable)
+    {
+        NRF24L01_WriteByte(pHandle, EN_AA, 0x3F);
+    }
+    else
+    {
+        NRF24L01_WriteByte(pHandle, EN_AA, 0);
+
+        // accommodate ACK payloads feature
+        NRF24L01_DisableAckPayload(pHandle);
+    }
 }
 
-void NRF24L01_SetAutoAckEx(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable)
+void NRF24L01_SetAutoPipeAck(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable)
 {
     if (u8Pipe <= 6)
     {
@@ -894,9 +902,24 @@ void NRF24L01_SetAutoAckEx(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable
         else
         {
             u8Data &= ~BV(u8Pipe);
+
+            if (u8Pipe != 0)
+            {
+                NRF24L01_DisableAckPayload(pHandle);
+            }
         }
 
         NRF24L01_WriteByte(pHandle, EN_AA, u8Data);
+    }
+}
+
+void NRF24L01_DisableAckPayload(spi_nrf24l01_t* pHandle)
+{
+    // disable ack payloads (leave dynamic payload features as is)
+    if (pHandle->bAckPayloadAvailable)
+    {
+        NRF24L01_WriteByte(pHandle, FEATURE, NRF24L01_ReadByte(pHandle, FEATURE) & ~BV(EN_ACK_PAY));
+        pHandle->bAckPayloadAvailable = false;
     }
 }
 
@@ -981,6 +1004,11 @@ rf24_pa_dbm_e NRF24L01_GetPALevel(spi_nrf24l01_t* pHandle)
     }
 
     return ePaDbm;
+}
+
+uint8_t NRF24L01_GetARC(spi_nrf24l01_t* pHandle)
+{
+    return NRF24L01_ReadByte(pHandle, OBSERVE_TX) & 0x0F;
 }
 
 bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed)
