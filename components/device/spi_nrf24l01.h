@@ -18,18 +18,47 @@ extern "C" {
 #define NRF24L01_SPI_TIMING (SPI_FLAG_4WIRE | SPI_FLAG_CPHA_1EDGE | SPI_FLAG_CPOL_LOW | SPI_FLAG_MSBFIRST | SPI_FLAG_DATAWIDTH_8B | SPI_FLAG_CS_ACTIVE_LOW | SPI_FLAG_FAST_CLOCK_ENABLE)
 
 /**
- * Power Amplifier level.
+ * @brief Power Amplifier level
+ * Power Amplifier level. The units dBm (decibel-milliwatts or dB<sub>mW</sub>)
+ * represents a logarithmic signal loss.
  */
 typedef enum {
+    /**
+     * (0) represents:
+     * nRF24L01 | Si24R1 with<br>lnaEnabled = 1 | Si24R1 with<br>lnaEnabled = 0
+     * :-------:|:-----------------------------:|:----------------------------:
+     *  -18 dBm | -6 dBm | -12 dBm
+     */
     RF24_PA_MIN = 0,
+    /**
+     * (1) represents:
+     * nRF24L01 | Si24R1 with<br>lnaEnabled = 1 | Si24R1 with<br>lnaEnabled = 0
+     * :-------:|:-----------------------------:|:----------------------------:
+     *  -12 dBm | 0 dBm | -4 dBm
+     */
     RF24_PA_LOW,
+    /**
+     * (2) represents:
+     * nRF24L01 | Si24R1 with<br>lnaEnabled = 1 | Si24R1 with<br>lnaEnabled = 0
+     * :-------:|:-----------------------------:|:----------------------------:
+     *  -6 dBm | 3 dBm | 1 dBm
+     */
     RF24_PA_HIGH,
+    /**
+     * (3) represents:
+     * nRF24L01 | Si24R1 with<br>lnaEnabled = 1 | Si24R1 with<br>lnaEnabled = 0
+     * :-------:|:-----------------------------:|:----------------------------:
+     *  0 dBm | 7 dBm | 4 dBm
+     */
     RF24_PA_MAX,
-    RF24_PA_ERROR,
+    /**
+     * (4) This should not be used and remains for backward compatibility.
+     */
+    RF24_PA_ERROR
 } rf24_pa_dbm_e;
 
 /**
- * Data rate.  How fast data moves through the air.
+ * Data rate.  How fast data moves through the air. Units are in bits per second (bps).
  */
 typedef enum {
     RF24_1MBPS = 0,
@@ -38,7 +67,9 @@ typedef enum {
 } rf24_datarate_e;
 
 /**
- * CRC Length.  How big (if any) of a CRC is included.
+ * @brief CRC Length.  How big (if any) of a CRC is included.
+ * The length of a CRC checksum that is used (if any). Cyclical Redundancy
+ * Checking (CRC) is commonly used to ensure data integrity.
  */
 typedef enum {
     RF24_CRC_DISABLED = 0,
@@ -54,7 +85,8 @@ typedef struct {
     bool     bPlusVer;                /* False for RF24L01 and true for RF24L01P */
     uint8_t  u8PayloadSize;           /**< Fixed size of payloads */
     bool     bAckPayloadAvailable;    /**< Whether there is an ack payload waiting */
-    bool     bDynamicPayloadsEnabled; /**< Whether dynamic payloads are enabled. */
+    uint8_t  u8AddrWidth;               /**< The address width to use (3, 4 or 5 bytes). */
+    bool     bDynamicPayloadsEnabled;   /**< Whether dynamic payloads are enabled. */
     uint8_t  u8AckPayloadLength;      /**< Dynamic size of pending ack payload. */
     uint64_t u64Pipe0ReadingAddress;  /**< Last address set on pipe 0 for reading. */
 
@@ -65,6 +97,10 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void NRF24L01_Init(spi_nrf24l01_t* pHandle);
+/**
+ * Checks if the chip is connected to the SPI bus
+ */
+bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Start listening on the pipes opened for reading.

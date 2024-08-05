@@ -1,6 +1,10 @@
 #include "spi_nrf24l01.h"
 #include "hexdump.h"
 
+#ifndef CONFIG_DEVICE_ROLE
+#define CONFIG_DEVICE_ROLE         DEVICE_ROLE_RX
+#endif
+
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
@@ -311,66 +315,39 @@ static inline void NRF24L01_ToggleFeatures(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
 {
-    uint8_t u8Status = NRF24L01_GetStatus(pHandle);
-
-    PRINTLN("STATUS        : 0x%02X", u8Status);
-
-    PRINTLN("STATUS_BIT    : RX_DR=%X TX_DS=%X MAX_RT=%X RX_P_NO=%X TX_FULL=%X",
-            (u8Status & BV(RX_DR)) ? 1 : 0,
-            (u8Status & BV(TX_DS)) ? 1 : 0,
-            (u8Status & BV(MAX_RT)) ? 1 : 0,
-            ((u8Status >> RX_P_NO) & 0b111),
-            (u8Status & BV(TX_FULL)) ? 1 : 0);
-
-    //
-
-    uint8_t au8Data[32];
-
-    struct {
-        uint8_t     u8Type;  // 0: byte register, 1: address register
-        const char* szName;
-        uint8_t     u8MemAddr;
-        uint8_t     u8MemSize;
-    } au8RegMap[] = {
-        {1, "TX_ADDR       : ", TX_ADDR,    1},
-        {1, "RX_ADDR_P0-1  : ", RX_ADDR_P0, 2},
-        {0, "RX_ADDR_P2-5  : ", RX_ADDR_P2, 4},
-        {0, "RX_PW_P0-6    : ", RX_PW_P0,   6},
-        {0, "EN_AA         : ", EN_AA,      1},
-        {0, "EN_RXADDR     : ", EN_RXADDR,  1},
-        {0, "RF_CH         : ", RF_CH,      1},
-        {0, "RF_SETUP      : ", RF_SETUP,   1},
-        {0, "CONFIG        : ", CONFIG,     1},
-        {0, "DYNPD/FEATURE : ", DYNPD,      2},
+    static const char* szTag[] = {
+        "- CONFIG      : ",  // 0
+        "- EN_AA       : ",  // 1
+        "- EN_RXADDR   : ",  // 2
+        "- SETUP_AW    : ",  // 3
+        "- SETUP_RETR  : ",  // 4
+        "- RF_CH       : ",  // 5
+        "- RF_SETUP    : ",  // 6
+        "- NRF_STATUS  : ",  // 7
+        "- OBSERVE_TX  : ",  // 8
+        "- CD (aka RPD): ",  // 9
+        "- RX_ADDR_P0  : ",  // 10
+        "- RX_ADDR_P1  : ",  // 11
+        "- RX_ADDR_P2  : ",  // 12
+        "- RX_ADDR_P3  : ",  // 13
+        "- RX_ADDR_P4  : ",  // 14
+        "- RX_ADDR_P5  : ",  // 15
+        "- TX_ADDR     : ",  // 16
+        "- RX_PW_P0    : ",  // 17
+        "- RX_PW_P1    : ",  // 18
+        "- RX_PW_P2    : ",  // 19
+        "- RX_PW_P3    : ",  // 20
+        "- RX_PW_P4    : ",  // 21
+        "- RX_PW_P5    : ",  // 22
+        "- FIFO_STATUS : ",  // 23
+        "",                  // 24
+        "",                  // 25
+        "",                  // 26
+        "",                  // 27
+        "- DYNPD       : ",  // 28
+        "- FEATURE     : ",  // 29
+        "- SPI speed MHz | (isPlusVariant << 4)",
     };
-
-    for (uint8_t i = 0; i < ARRAY_SIZE(au8RegMap); i++)
-    {
-        if (au8RegMap[i].u8Type == 0)
-        {
-            for (uint8_t j = 0; j < au8RegMap[i].u8MemSize; j++)
-            {
-                au8Data[j] = NRF24L01_ReadByte(pHandle, au8RegMap[i].u8MemAddr + j);
-            }
-
-            hexdump(au8Data, au8RegMap[i].u8MemSize, 16, 1, false, au8RegMap[i].szName, 0);
-        }
-        else
-        {
-#define MEM_SIZE 5
-
-            for (uint8_t j = 0; j < au8RegMap[i].u8MemSize; j++)
-            {
-                NRF24L01_ReadBlock(pHandle, au8RegMap[i].u8MemAddr + j, au8Data + MEM_SIZE * j, MEM_SIZE);
-            }
-
-            hexdump(au8Data, au8RegMap[i].u8MemSize * MEM_SIZE, 16, 1, false, au8RegMap[i].szName, 0);
-
-#undef MEM_SIZE
-        }
-    }
-
-    //
 
     static const char* const rf24_datarate_e_str[] = {
         "1MBPS",
@@ -394,6 +371,50 @@ void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
         "LA_MED",
         "PA_HIGH",
     };
+
+    PRINTLN("Register      :");
+
+    for (uint8_t u8MemAddr = CONFIG; u8MemAddr < (FEATURE + 1); ++u8MemAddr)
+    {
+        switch (u8MemAddr)
+        {
+            case RX_ADDR_P0:
+            case RX_ADDR_P1:
+            case TX_ADDR:
+            {
+                uint8_t au8Data[5] = {0};
+                NRF24L01_ReadBlock(pHandle, u8MemAddr, au8Data, pHandle->u8AddrWidth);
+                hexdump(au8Data, 5, 16, 1, false, szTag[u8MemAddr], 0);
+                break;
+            }
+
+            case 0x18:
+            case 0x19:
+            case 0x1A:
+            case 0x1B:
+            {
+                // skip undocumented registers
+                break;
+            }
+
+            default:
+            {
+                // get single byte registers
+                uint8_t u8Data = NRF24L01_ReadByte(pHandle, u8MemAddr);
+                hexdump(&u8Data, 1, 16, 1, false, szTag[u8MemAddr], 0);
+                break;
+            }
+        }
+    }
+
+    uint8_t u8Status = NRF24L01_GetStatus(pHandle);
+
+    PRINTLN("STATUS_BIT    : RX_DR=%X TX_DS=%X MAX_RT=%X RX_P_NO=%X TX_FULL=%X",
+            (u8Status & BV(RX_DR)) ? 1 : 0,
+            (u8Status & BV(TX_DS)) ? 1 : 0,
+            (u8Status & BV(MAX_RT)) ? 1 : 0,
+            ((u8Status >> RX_P_NO) & 0b111),
+            (u8Status & BV(TX_FULL)) ? 1 : 0);
 
     PRINTLN("Data Rate     : %s", rf24_datarate_e_str[NRF24L01_GetDataRate(pHandle)]);
     PRINTLN("Model         : %s", rf24_model_e_str[NRF24L01_IsPVariant(pHandle)]);
@@ -427,6 +448,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     pHandle->bDynamicPayloadsEnabled = false;
     pHandle->u8AckPayloadLength      = 0;
     pHandle->u64Pipe0ReadingAddress  = 0;
+	  pHandle->u8AddrWidth = 5;
 
     PIN_SetMode(&pHandle->CE, PIN_MODE_OUTPUT_PUSH_PULL, PIN_PULL_UP);
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
@@ -999,7 +1021,7 @@ void NRF24L01_SetRetries(spi_nrf24l01_t* pHandle, uint8_t u8Delay, uint8_t u8Cou
 
 #if CONFIG_DEMOS_SW
 
-#define CONFIG_DEVICE_ROLE         DEVICE_ROLE_RX
+
 #define CONFIG_DYNAMIC_PAYLOADS_SW 1
 
 /**
