@@ -251,6 +251,11 @@ static inline uint8_t NRF24L01_ReadMemByte(spi_nrf24l01_t* pHandle, uint8_t u8Me
     return u8Data;
 }
 
+static inline uint8_t NRF24L01_WriteMemByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
+{
+    return NRF24L01_WriteCmdData(pHandle, W_REGISTER | (REGISTER_MASK & u8MemAddr), u8Data);
+}
+
 static inline uint8_t NRF24L01_WriteMemBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, const uint8_t* cpu8Data, uint8_t u8Size)
 {
     uint8_t u8Status;
@@ -258,18 +263,6 @@ static inline uint8_t NRF24L01_WriteMemBlock(spi_nrf24l01_t* pHandle, uint8_t u8
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitReceiveByte(pHandle->hSPI, W_REGISTER | (REGISTER_MASK & u8MemAddr), &u8Status);
     SPI_Master_TransmitBlock(pHandle->hSPI, cpu8Data, u8Size);
-    SPI_Master_Deselect(pHandle->hSPI);
-
-    return u8Status;
-}
-
-static inline uint8_t NRF24L01_WriteMemByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
-{
-    uint8_t u8Status;
-
-    SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitReceiveByte(pHandle->hSPI, W_REGISTER | (REGISTER_MASK & u8MemAddr), &u8Status);
-    SPI_Master_TransmitByte(pHandle->hSPI, u8Data);
     SPI_Master_Deselect(pHandle->hSPI);
 
     return u8Status;
@@ -558,7 +551,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     NRF24L01_WriteMemByte(pHandle, EN_RXADDR, 3);
 
     NRF24L01_SetPayloadSize(pHandle, RF24_MAX_PAYLOAD_SIZE);  // set static payload size to 32 (max) bytes by default
-    NRF24L01_SetAddressWidth(pHandle, 4);                     // set default address length to (max) 5 bytes
+    NRF24L01_SetAddressWidth(pHandle, 5);                     // set default address length to (max) 5 bytes
 
     // Set up default configuration.  Callers can always change it later.
     // This channel should be universally safe and not bleed over into adjacent
