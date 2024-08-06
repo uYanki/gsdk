@@ -404,9 +404,35 @@ bool NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle);
 uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel);
 
 /**
- * @brief Stop transmission of constant wave and reset PLL and CONT registers
+ * @brief This function is used to configure what events will trigger the Interrupt
+ * Request (IRQ) pin active LOW.
+ * The following events can be configured:
+ * 1. "data sent": This does not mean that the data transmitted was
+ * received, only that the attempt to send it was complete.
+ * 2. "data failed": This means the data being sent was not received. This
+ * event is only triggered when the auto-ack feature is enabled.
+ * 3. "data received": This means that data from a receiving payload has
+ * been loaded into the RX FIFO buffers. Remember that there are only 3
+ * levels available in the RX FIFO buffers.
+ *
+ * By default, all events are configured to trigger the IRQ pin active LOW.
+ * When the IRQ pin is active, use NRF24L01_WhatHappened() to determine what events
+ * triggered it. Remember that calling NRF24L01_WhatHappened() also clears these
+ * events' status, and the IRQ pin will then be reset to inactive HIGH.
+ *
+ * The following code configures the IRQ pin to only reflect the "data received" event:
+ * @code
+ * radio.maskIRQ(1, 1, 0);
+ * @endcode
+ *
+ * @param bTxOk  `true` ignores the "data sent" event, `false` reflects the
+ * "data sent" event on the IRQ pin.
+ * @param bTxFail  `true` ignores the "data failed" event, `false` reflects the
+ * "data failed" event on the IRQ pin.
+ * @param bRxRdy `true` ignores the "data received" event, `false` reflects the
+ * "data received" event on the IRQ pin.
  */
-void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle);
+void NRF24L01_MaskIRQ(spi_nrf24l01_t* pHandle, bool bTxOk, bool bTxFail, bool bRxRdy);
 
 //---------------------------------------------------------------------------
 // Example

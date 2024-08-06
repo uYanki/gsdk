@@ -633,19 +633,6 @@ void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth)
     NRF24L01_WriteMemByte(pHandle, SETUP_AW, pHandle->u8AddrWidth - 2);
 }
 
-void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle)
-{
-    /*
-     * A note from the datasheet:
-     * Do not use REUSE_TX_PL together with CONT_WAVE=1. When both these
-     * registers are set the chip does not react when setting CE low. If
-     * however, both registers are set PWR_UP = 0 will turn TX mode off.
-     */
-    NRF24L01_PowerDown(pHandle);  // per datasheet recommendation (just to be safe)
-    NRF24L01_WriteMemByte(pHandle, RF_SETUP, NRF24L01_ReadMemByte(pHandle, RF_SETUP) & ~BV(CONT_WAVE) & ~BV(PLL_LOCK));
-    PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
-}
-
 bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle)
 {
     return NRF24L01_ReadMemByte(pHandle, SETUP_AW) == (pHandle->u8AddrWidth - 2);
@@ -1156,6 +1143,40 @@ uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel)
 bool NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle)
 {
     return NRF24L01_ReadMemByte(pHandle, FIFO_STATUS) & BV(RX_FULL) ? true : false;
+}
+
+void NRF24L01_MaskIRQ(spi_nrf24l01_t* pHandle, bool bTxOk, bool bTxFail, bool bRxRdy)
+{
+    uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, CONFIG);
+
+    if (bTxOk)
+    {
+        u8Data |= BV(TX_DS);
+    }
+    else
+    {
+        u8Data &= ~BV(TX_DS);
+    }
+
+    if (bRxRdy)
+    {
+        u8Data |= BV(RX_DR);
+    }
+    else
+    {
+        u8Data &= ~BV(RX_DR);
+    }
+
+    if (bTxFail)
+    {
+        u8Data |= BV(MAX_RT);
+    }
+    else
+    {
+        u8Data &= ~BV(MAX_RT);
+    }
+
+    NRF24L01_WriteMemByte(pHandle, CONFIG, u8Data);
 }
 
 //---------------------------------------------------------------------------
