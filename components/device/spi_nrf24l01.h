@@ -320,7 +320,7 @@ bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle);
  * @param[out] pu8Pipe Which pipe has the payload available
  * @return True if there is a payload available, false if none is
  */
-bool NRF24L01_WhichPipeAvailable(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe);
+bool NRF24L01_IsPipeAvailable(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe);
 
 /**
  * @brief Non-blocking write to the open writing pipe

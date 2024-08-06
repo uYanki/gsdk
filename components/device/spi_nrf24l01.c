@@ -143,10 +143,10 @@ void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth);
 // Prototypes
 //---------------------------------------------------------------------------
 
-static inline uint8_t NRF24L01_Mem_ReadByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr);
-static inline uint8_t NRF24L01_Mem_ReadBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data, uint8_t u8Size);
-static inline uint8_t NRF24L01_Mem_WriteByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data);
-static inline uint8_t NRF24L01_Mem_WriteBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, const uint8_t* cpu8Data, uint8_t u8Size);
+static inline uint8_t NRF24L01_ReadMemByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr);
+static inline uint8_t NRF24L01_ReadMemBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data, uint8_t u8Size);
+static inline uint8_t NRF24L01_WriteMemByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data);
+static inline uint8_t NRF24L01_WriteMemBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, const uint8_t* cpu8Data, uint8_t u8Size);
 
 /**
  * @brief Write the transmit payload
@@ -204,7 +204,30 @@ static const uint8_t m_cau8ChildPipeEnable[]  = {ERX_P0, ERX_P1, ERX_P2, ERX_P3,
 // Functions
 //---------------------------------------------------------------------------
 
-static inline uint8_t NRF24L01_Mem_ReadBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data, uint8_t u8Size)
+static inline uint8_t NRF24L01_WriteCmd(spi_nrf24l01_t* pHandle, uint8_t u8Cmd)
+{
+    uint8_t u8Status;
+
+    SPI_Master_Select(pHandle->hSPI);
+    SPI_Master_TransmitReceiveByte(pHandle->hSPI, u8Cmd, &u8Status);
+    SPI_Master_Deselect(pHandle->hSPI);
+
+    return u8Status;
+}
+
+static inline uint8_t NRF24L01_WriteCmdData(spi_nrf24l01_t* pHandle, uint8_t u8Cmd, uint8_t u8Data)
+{
+    uint8_t u8Status;
+
+    SPI_Master_Select(pHandle->hSPI);
+    SPI_Master_TransmitReceiveByte(pHandle->hSPI, u8Cmd, &u8Status);
+    SPI_Master_TransmitByte(pHandle->hSPI, u8Data);
+    SPI_Master_Deselect(pHandle->hSPI);
+
+    return u8Status;
+}
+
+static inline uint8_t NRF24L01_ReadMemBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t* pu8Data, uint8_t u8Size)
 {
     uint8_t u8Status;
 
@@ -216,7 +239,7 @@ static inline uint8_t NRF24L01_Mem_ReadBlock(spi_nrf24l01_t* pHandle, uint8_t u8
     return u8Status;
 }
 
-static inline uint8_t NRF24L01_Mem_ReadByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr)
+static inline uint8_t NRF24L01_ReadMemByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr)
 {
     uint8_t u8Data;
 
@@ -228,7 +251,7 @@ static inline uint8_t NRF24L01_Mem_ReadByte(spi_nrf24l01_t* pHandle, uint8_t u8M
     return u8Data;
 }
 
-static inline uint8_t NRF24L01_Mem_WriteBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, const uint8_t* cpu8Data, uint8_t u8Size)
+static inline uint8_t NRF24L01_WriteMemBlock(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, const uint8_t* cpu8Data, uint8_t u8Size)
 {
     uint8_t u8Status;
 
@@ -240,7 +263,7 @@ static inline uint8_t NRF24L01_Mem_WriteBlock(spi_nrf24l01_t* pHandle, uint8_t u
     return u8Status;
 }
 
-static inline uint8_t NRF24L01_Mem_WriteByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
+static inline uint8_t NRF24L01_WriteMemByte(spi_nrf24l01_t* pHandle, uint8_t u8MemAddr, uint8_t u8Data)
 {
     uint8_t u8Status;
 
@@ -318,43 +341,22 @@ static inline uint8_t NRF24L01_ReadPayload(spi_nrf24l01_t* pHandle, uint8_t* pu8
 
 static inline uint8_t NRF24L01_FlushRx(spi_nrf24l01_t* pHandle)
 {
-    uint8_t u8Status;
-
-    SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitReceiveByte(pHandle->hSPI, FLUSH_RX, &u8Status);
-    SPI_Master_Deselect(pHandle->hSPI);
-
-    return u8Status;
+    return NRF24L01_WriteCmd(pHandle, FLUSH_RX);
 }
 
 static inline uint8_t NRF24L01_FlushTx(spi_nrf24l01_t* pHandle)
 {
-    uint8_t u8Status;
-
-    SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitReceiveByte(pHandle->hSPI, FLUSH_TX, &u8Status);
-    SPI_Master_Deselect(pHandle->hSPI);
-
-    return u8Status;
+    return NRF24L01_WriteCmd(pHandle, FLUSH_TX);
 }
 
 static inline uint8_t NRF24L01_GetStatus(spi_nrf24l01_t* pHandle)
 {
-    uint8_t u8Status;
-
-    SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitReceiveByte(pHandle->hSPI, NOP, &u8Status);
-    SPI_Master_Deselect(pHandle->hSPI);
-
-    return u8Status;
+    return NRF24L01_WriteCmd(pHandle, NOP);
 }
 
 static inline void NRF24L01_ToggleFeatures(spi_nrf24l01_t* pHandle)
 {
-    SPI_Master_Select(pHandle->hSPI);
-    SPI_Master_TransmitByte(pHandle->hSPI, ACTIVATE);
-    SPI_Master_TransmitByte(pHandle->hSPI, 0x73);
-    SPI_Master_Deselect(pHandle->hSPI);
+    NRF24L01_WriteCmdData(pHandle, ACTIVATE, 0x73);
 }
 
 void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
@@ -426,7 +428,7 @@ void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
             case TX_ADDR:
             {
                 uint8_t au8Data[5] = {0};
-                NRF24L01_Mem_ReadBlock(pHandle, u8MemAddr, au8Data, pHandle->u8AddrWidth);
+                NRF24L01_ReadMemBlock(pHandle, u8MemAddr, au8Data, pHandle->u8AddrWidth);
                 hexdump(au8Data, 5, 16, 1, false, szTag[u8MemAddr], 0);
                 break;
             }
@@ -443,7 +445,7 @@ void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
             default:
             {
                 // get single byte registers
-                uint8_t u8Data = NRF24L01_Mem_ReadByte(pHandle, u8MemAddr);
+                uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, u8MemAddr);
                 hexdump(&u8Data, 1, 16, 1, false, szTag[u8MemAddr], 0);
                 break;
             }
@@ -467,7 +469,7 @@ void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_SetChannel(spi_nrf24l01_t* pHandle, uint8_t u8Channel)
 {
-    NRF24L01_Mem_WriteByte(pHandle, RF_CH, MIN(u8Channel, RF24_MAX_CHANNEL));
+    NRF24L01_WriteMemByte(pHandle, RF_CH, MIN(u8Channel, RF24_MAX_CHANNEL));
 }
 
 void NRF24L01_SetPayloadSize(spi_nrf24l01_t* pHandle, uint8_t u8Size)
@@ -480,7 +482,7 @@ void NRF24L01_SetPayloadSize(spi_nrf24l01_t* pHandle, uint8_t u8Size)
     // write static payload size setting for all pipes
     for (uint8_t u8Pipe = 0; u8Pipe < 6; ++u8Pipe)
     {
-        NRF24L01_Mem_WriteByte(pHandle, RX_PW_P0 + u8Pipe, pHandle->u8PayloadSize - 2);
+        NRF24L01_WriteMemByte(pHandle, RX_PW_P0 + u8Pipe, pHandle->u8PayloadSize - 2);
     }
 }
 
@@ -522,11 +524,11 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 
     // detect if is a plus variant & use old toggle features command accordingly
     {
-        uint8_t u8TglBefore = NRF24L01_Mem_ReadByte(pHandle, FEATURE);
+        uint8_t u8TglBefore = NRF24L01_ReadMemByte(pHandle, FEATURE);
 
         NRF24L01_ToggleFeatures(pHandle);
 
-        uint8_t u8TglAfter = NRF24L01_Mem_ReadByte(pHandle, FEATURE);
+        uint8_t u8TglAfter = NRF24L01_ReadMemByte(pHandle, FEATURE);
 
         pHandle->bPlusVer = u8TglBefore == u8TglAfter;
 
@@ -539,7 +541,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
             }
 
             // allow use of multicast parameter and dynamic payloads by default
-            NRF24L01_Mem_WriteByte(pHandle, FEATURE, 0);
+            NRF24L01_WriteMemByte(pHandle, FEATURE, 0);
         }
     }
 
@@ -547,13 +549,13 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
     NRF24L01_SetCRCLength(pHandle, RF24_CRC_8);
 
     // Disable dynamic payloads, to match bDynamicPayloadsEnabled setting
-    NRF24L01_Mem_WriteByte(pHandle, DYNPD, 0);
+    NRF24L01_WriteMemByte(pHandle, DYNPD, 0);
 
     // enable auto-ack on all pipes
     NRF24L01_SetAutoAck(pHandle, true);
 
     // only open RX pipes 0 & 1
-    NRF24L01_Mem_WriteByte(pHandle, EN_RXADDR, 3);
+    NRF24L01_WriteMemByte(pHandle, EN_RXADDR, 3);
 
     NRF24L01_SetPayloadSize(pHandle, RF24_MAX_PAYLOAD_SIZE);  // set static payload size to 32 (max) bytes by default
     NRF24L01_SetAddressWidth(pHandle, 4);                     // set default address length to (max) 5 bytes
@@ -565,7 +567,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 
     // Reset current status
     // Notice reset and flush is the last thing we do
-    NRF24L01_Mem_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
+    NRF24L01_WriteMemByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
 
     // Flush buffers
     NRF24L01_FlushRx(pHandle);
@@ -585,7 +587,7 @@ void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
 {
-    NRF24L01_Mem_WriteByte(pHandle, EN_RXADDR, NRF24L01_Mem_ReadByte(pHandle, EN_RXADDR) & ~BV(m_cau8ChildPipeEnable[u8Pipe]));
+    NRF24L01_WriteMemByte(pHandle, EN_RXADDR, NRF24L01_ReadMemByte(pHandle, EN_RXADDR) & ~BV(m_cau8ChildPipeEnable[u8Pipe]));
 
     if (u8Pipe == 0)
     {
@@ -597,13 +599,13 @@ void NRF24L01_CloseReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe)
 void NRF24L01_StartListening(spi_nrf24l01_t* pHandle)
 {
     NRF24L01_PowerUp(pHandle);
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, NRF24L01_Mem_ReadByte(pHandle, CONFIG) | BV(PRIM_RX));
-    NRF24L01_Mem_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
+    NRF24L01_WriteMemByte(pHandle, CONFIG, NRF24L01_ReadMemByte(pHandle, CONFIG) | BV(PRIM_RX));
+    NRF24L01_WriteMemByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
 
     // Restore the pipe0 adddress, if exists
     if (pHandle->u64Pipe0ReadingAddress != 0)
     {
-        NRF24L01_Mem_WriteBlock(pHandle, RX_ADDR_P0, (const uint8_t*)&pHandle->u64Pipe0ReadingAddress, pHandle->u8AddrWidth);
+        NRF24L01_WriteMemBlock(pHandle, RX_ADDR_P0, (const uint8_t*)&pHandle->u64Pipe0ReadingAddress, pHandle->u8AddrWidth);
     }
 
     // Flush buffers
@@ -628,14 +630,14 @@ void NRF24L01_StopListening(spi_nrf24l01_t* pHandle)
         NRF24L01_FlushTx(pHandle);
     }
 
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, NRF24L01_Mem_ReadByte(pHandle, CONFIG) & ~BV(PRIM_RX));
-    NRF24L01_Mem_WriteByte(pHandle, EN_RXADDR, NRF24L01_Mem_ReadByte(pHandle, EN_RXADDR) | m_cau8ChildPipeEnable[0]);  // Enable RX on pipe0
+    NRF24L01_WriteMemByte(pHandle, CONFIG, NRF24L01_ReadMemByte(pHandle, CONFIG) & ~BV(PRIM_RX));
+    NRF24L01_WriteMemByte(pHandle, EN_RXADDR, NRF24L01_ReadMemByte(pHandle, EN_RXADDR) | m_cau8ChildPipeEnable[0]);  // Enable RX on pipe0
 }
 
 void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth)
 {
     pHandle->u8AddrWidth = CLAMP(u8AddrWidth, 2, 5);
-    NRF24L01_Mem_WriteByte(pHandle, SETUP_AW, pHandle->u8AddrWidth - 2);
+    NRF24L01_WriteMemByte(pHandle, SETUP_AW, pHandle->u8AddrWidth - 2);
 }
 
 void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle)
@@ -647,25 +649,25 @@ void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle)
      * however, both registers are set PWR_UP = 0 will turn TX mode off.
      */
     NRF24L01_PowerDown(pHandle);  // per datasheet recommendation (just to be safe)
-    NRF24L01_Mem_WriteByte(pHandle, RF_SETUP, NRF24L01_Mem_ReadByte(pHandle, RF_SETUP) & ~BV(CONT_WAVE) & ~BV(PLL_LOCK));
+    NRF24L01_WriteMemByte(pHandle, RF_SETUP, NRF24L01_ReadMemByte(pHandle, RF_SETUP) & ~BV(CONT_WAVE) & ~BV(PLL_LOCK));
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
 }
 
 bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle)
 {
-    return NRF24L01_Mem_ReadByte(pHandle, SETUP_AW) == (pHandle->u8AddrWidth - 2);
+    return NRF24L01_ReadMemByte(pHandle, SETUP_AW) == (pHandle->u8AddrWidth - 2);
 }
 
 void NRF24L01_PowerDown(spi_nrf24l01_t* pHandle)
 {
     PIN_WriteLevel(&pHandle->CE, PIN_LEVEL_LOW);
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, NRF24L01_Mem_ReadByte(pHandle, CONFIG) & ~BV(PWR_UP));
+    NRF24L01_WriteMemByte(pHandle, CONFIG, NRF24L01_ReadMemByte(pHandle, CONFIG) & ~BV(PWR_UP));
 }
 
 // Power up now. Radio will not power down unless instructed by MCU for config changes etc.
 void NRF24L01_PowerUp(spi_nrf24l01_t* pHandle)
 {
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, NRF24L01_Mem_ReadByte(pHandle, CONFIG) | BV(PWR_UP));
+    NRF24L01_WriteMemByte(pHandle, CONFIG, NRF24L01_ReadMemByte(pHandle, CONFIG) | BV(PWR_UP));
 
     // For nRF24L01+ to go from power down mode to TX or RX mode it must first pass through stand-by mode.
     // There must be a delay of Tpd2stby (see Table 16.) after the nRF24L01+ leaves power down mode before
@@ -697,7 +699,7 @@ bool NRF24L01_WritePacketBlocking(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Da
 
     do
     {
-        u8Status = NRF24L01_Mem_ReadBlock(pHandle, OBSERVE_TX, &u8ObserveTx, 1);
+        u8Status = NRF24L01_ReadMemBlock(pHandle, OBSERVE_TX, &u8ObserveTx, 1);
 
         if (DelayNonBlockMs(TickStart, 500))
         {
@@ -737,7 +739,7 @@ bool NRF24L01_WritePacketBlocking(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Da
 bool NRF24L01_WritePacketNonBlock(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast)
 {
     // Transmitter power-up
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, (NRF24L01_Mem_ReadByte(pHandle, CONFIG) | BV(PWR_UP)) & ~BV(PRIM_RX));
+    NRF24L01_WriteMemByte(pHandle, CONFIG, (NRF24L01_ReadMemByte(pHandle, CONFIG) | BV(PWR_UP)) & ~BV(PRIM_RX));
     DelayBlockUs(150);
 
     // Send the payload
@@ -772,12 +774,12 @@ uint8_t NRF24L01_GetDynamicPayloadSize(spi_nrf24l01_t* pHandle)
 
 bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle)
 {
-    return NRF24L01_WhichPipeAvailable(pHandle, nullptr);
+    return NRF24L01_IsPipeAvailable(pHandle, nullptr);
 }
 
-bool NRF24L01_WhichPipeAvailable(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe)
+bool NRF24L01_IsPipeAvailable(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe)
 {
-    if (NRF24L01_Mem_ReadByte(pHandle, FIFO_STATUS) & 1)
+    if (NRF24L01_ReadMemByte(pHandle, FIFO_STATUS) & 1)
     {
         return false;  // RX FIFO is empty
     }
@@ -797,14 +799,14 @@ bool NRF24L01_ReadPacket(spi_nrf24l01_t* pHandle, uint8_t* pu8Data, uint8_t u8Le
     NRF24L01_ReadPayload(pHandle, pu8Data, u8Len);
 
     // was this the last of the data available?
-    return NRF24L01_Mem_ReadByte(pHandle, FIFO_STATUS) & BV(RX_EMPTY);
+    return NRF24L01_ReadMemByte(pHandle, FIFO_STATUS) & BV(RX_EMPTY);
 }
 
 void NRF24L01_WhatHappened(spi_nrf24l01_t* pHandle, bool* pbTxOk, bool* pbTxFali, bool* pbRxRdy)
 {
     // Read the status & reset the status in one easy call
     // Or is that such a good idea?
-    uint8_t u8Status = NRF24L01_Mem_WriteByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
+    uint8_t u8Status = NRF24L01_WriteMemByte(pHandle, STATUS, BV(RX_DR) | BV(TX_DS) | BV(MAX_RT));
 
     // Report to the user what happened
     *pbTxOk   = (u8Status & BV(TX_DS)) ? true : false;
@@ -817,8 +819,8 @@ void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address)
     // Note that AVR 8-bit uC's store this LSB first, and the NRF24L01(+)
     // expects it LSB first too, so we're good.
 
-    NRF24L01_Mem_WriteBlock(pHandle, RX_ADDR_P0, (uint8_t*)&u64Address, pHandle->u8AddrWidth);  // 大小端?
-    NRF24L01_Mem_WriteBlock(pHandle, TX_ADDR, (uint8_t*)&u64Address, pHandle->u8AddrWidth);
+    NRF24L01_WriteMemBlock(pHandle, RX_ADDR_P0, (uint8_t*)&u64Address, pHandle->u8AddrWidth);  // 大小端?
+    NRF24L01_WriteMemBlock(pHandle, TX_ADDR, (uint8_t*)&u64Address, pHandle->u8AddrWidth);
 }
 
 void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t u64Address)
@@ -835,27 +837,27 @@ void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t 
     if (u8Pipe <= 5)
     {
         // For pipes 2-5, only write the LSB
-        NRF24L01_Mem_WriteBlock(pHandle, m_cau8ChildPipe[u8Pipe], (const uint8_t*)&u64Address, (u8Pipe < 2) ? pHandle->u8AddrWidth : 1);
+        NRF24L01_WriteMemBlock(pHandle, m_cau8ChildPipe[u8Pipe], (const uint8_t*)&u64Address, (u8Pipe < 2) ? pHandle->u8AddrWidth : 1);
 
-        NRF24L01_Mem_WriteByte(pHandle, m_cau8ChildPayloadSize[u8Pipe], pHandle->u8PayloadSize);
+        NRF24L01_WriteMemByte(pHandle, m_cau8ChildPayloadSize[u8Pipe], pHandle->u8PayloadSize);
 
         // Note it would be more efficient to set all of the bits for all open
         // pipes at once.  However, I thought it would make the calling code
         // more simple to do it this way.
-        NRF24L01_Mem_WriteByte(pHandle, EN_RXADDR, NRF24L01_Mem_ReadByte(pHandle, EN_RXADDR) | BV(m_cau8ChildPipeEnable[u8Pipe]));
+        NRF24L01_WriteMemByte(pHandle, EN_RXADDR, NRF24L01_ReadMemByte(pHandle, EN_RXADDR) | BV(m_cau8ChildPipeEnable[u8Pipe]));
     }
 }
 
 void NRF24L01_EnableDynamicPayloads(spi_nrf24l01_t* pHandle)
 {
     // Enable dynamic payload throughout the system
-    NRF24L01_Mem_WriteByte(pHandle, FEATURE, NRF24L01_Mem_ReadByte(pHandle, FEATURE) | BV(EN_DPL));
+    NRF24L01_WriteMemByte(pHandle, FEATURE, NRF24L01_ReadMemByte(pHandle, FEATURE) | BV(EN_DPL));
 
     // Enable dynamic payload on all pipes
     //
     // Not sure the use case of only having dynamic payload on certain
     // pipes, so the library does not support it.
-    NRF24L01_Mem_WriteByte(pHandle, DYNPD, NRF24L01_Mem_ReadByte(pHandle, DYNPD) | BV(DPL_P5) | BV(DPL_P4) | BV(DPL_P3) | BV(DPL_P2) | BV(DPL_P1) | BV(DPL_P0));
+    NRF24L01_WriteMemByte(pHandle, DYNPD, NRF24L01_ReadMemByte(pHandle, DYNPD) | BV(DPL_P5) | BV(DPL_P4) | BV(DPL_P3) | BV(DPL_P2) | BV(DPL_P1) | BV(DPL_P0));
 
     pHandle->bDynamicPayloadsEnabled = true;
 }
@@ -863,18 +865,18 @@ void NRF24L01_EnableDynamicPayloads(spi_nrf24l01_t* pHandle)
 void NRF24L01_EnableAckPayload(spi_nrf24l01_t* pHandle)
 {
     // enable ack payload and dynamic payload features
-    NRF24L01_Mem_WriteByte(pHandle, FEATURE, NRF24L01_Mem_ReadByte(pHandle, FEATURE) | BV(EN_ACK_PAY) | BV(EN_DPL));
+    NRF24L01_WriteMemByte(pHandle, FEATURE, NRF24L01_ReadMemByte(pHandle, FEATURE) | BV(EN_ACK_PAY) | BV(EN_DPL));
 
     // If it didn't work, the features are not enabled
-    if (!NRF24L01_Mem_ReadByte(pHandle, FEATURE))
+    if (!NRF24L01_ReadMemByte(pHandle, FEATURE))
     {
         // So enable them and try again
         NRF24L01_ToggleFeatures(pHandle);
-        NRF24L01_Mem_WriteByte(pHandle, FEATURE, NRF24L01_Mem_ReadByte(pHandle, FEATURE) | BV(EN_ACK_PAY) | BV(EN_DPL));
+        NRF24L01_WriteMemByte(pHandle, FEATURE, NRF24L01_ReadMemByte(pHandle, FEATURE) | BV(EN_ACK_PAY) | BV(EN_DPL));
     }
 
     // Enable dynamic payload on pipes 0 & 1
-    NRF24L01_Mem_WriteByte(pHandle, DYNPD, NRF24L01_Mem_ReadByte(pHandle, DYNPD) | BV(DPL_P1) | BV(DPL_P0));
+    NRF24L01_WriteMemByte(pHandle, DYNPD, NRF24L01_ReadMemByte(pHandle, DYNPD) | BV(DPL_P1) | BV(DPL_P0));
 }
 
 void NRF24L01_WriteAckPayload(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, const uint8_t* cpu8Data, uint8_t u8Len)
@@ -896,11 +898,11 @@ void NRF24L01_SetAutoAck(spi_nrf24l01_t* pHandle, bool bEnable)
 {
     if (bEnable)
     {
-        NRF24L01_Mem_WriteByte(pHandle, EN_AA, 0x3F);
+        NRF24L01_WriteMemByte(pHandle, EN_AA, 0x3F);
     }
     else
     {
-        NRF24L01_Mem_WriteByte(pHandle, EN_AA, 0);
+        NRF24L01_WriteMemByte(pHandle, EN_AA, 0);
 
         // accommodate ACK payloads feature
         NRF24L01_DisableAckPayload(pHandle);
@@ -911,7 +913,7 @@ void NRF24L01_SetPipeAutoAck(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnab
 {
     if (u8Pipe <= 6)
     {
-        uint8_t u8Data = NRF24L01_Mem_ReadByte(pHandle, EN_AA);
+        uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, EN_AA);
 
         if (bEnable)
         {
@@ -927,7 +929,7 @@ void NRF24L01_SetPipeAutoAck(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnab
             }
         }
 
-        NRF24L01_Mem_WriteByte(pHandle, EN_AA, u8Data);
+        NRF24L01_WriteMemByte(pHandle, EN_AA, u8Data);
     }
 }
 
@@ -937,24 +939,24 @@ void NRF24L01_DisableAckPayload(spi_nrf24l01_t* pHandle)
 
     if (pHandle->bAckPayload)
     {
-        NRF24L01_Mem_WriteByte(pHandle, FEATURE, NRF24L01_Mem_ReadByte(pHandle, FEATURE) & ~BV(EN_ACK_PAY));
+        NRF24L01_WriteMemByte(pHandle, FEATURE, NRF24L01_ReadMemByte(pHandle, FEATURE) & ~BV(EN_ACK_PAY));
         pHandle->bAckPayload = false;
     }
 }
 
 bool NRF24L01_TestCarrier(spi_nrf24l01_t* pHandle)
 {
-    return NRF24L01_Mem_ReadByte(pHandle, CD) & 1;
+    return NRF24L01_ReadMemByte(pHandle, CD) & 1;
 }
 
 bool NRF24L01_TestRPD(spi_nrf24l01_t* pHandle)
 {
-    return NRF24L01_Mem_ReadByte(pHandle, RPD) & 1;
+    return NRF24L01_ReadMemByte(pHandle, RPD) & 1;
 }
 
 void NRF24L01_SetPALevel(spi_nrf24l01_t* pHandle, rf24_pa_dbm_e eLevel)
 {
-    uint8_t u8Data = NRF24L01_Mem_ReadByte(pHandle, RF_SETUP);
+    uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, RF_SETUP);
 
     u8Data &= ~(BV(RF_PWR_LOW) | BV(RF_PWR_HIGH));
 
@@ -997,13 +999,13 @@ void NRF24L01_SetPALevel(spi_nrf24l01_t* pHandle, rf24_pa_dbm_e eLevel)
         }
     }
 
-    NRF24L01_Mem_WriteByte(pHandle, RF_SETUP, u8Data);
+    NRF24L01_WriteMemByte(pHandle, RF_SETUP, u8Data);
 }
 
 rf24_pa_dbm_e NRF24L01_GetPALevel(spi_nrf24l01_t* pHandle)
 {
     rf24_pa_dbm_e ePaDbm = RF24_PA_ERROR;
-    uint8_t       u8Data = NRF24L01_Mem_ReadByte(pHandle, RF_SETUP) & (BV(RF_PWR_LOW) | BV(RF_PWR_HIGH));
+    uint8_t       u8Data = NRF24L01_ReadMemByte(pHandle, RF_SETUP) & (BV(RF_PWR_LOW) | BV(RF_PWR_HIGH));
 
     if (u8Data == (BV(RF_PWR_LOW) | BV(RF_PWR_HIGH)))
     {
@@ -1027,12 +1029,12 @@ rf24_pa_dbm_e NRF24L01_GetPALevel(spi_nrf24l01_t* pHandle)
 
 uint8_t NRF24L01_GetARC(spi_nrf24l01_t* pHandle)
 {
-    return NRF24L01_Mem_ReadByte(pHandle, OBSERVE_TX) & 0x0F;
+    return NRF24L01_ReadMemByte(pHandle, OBSERVE_TX) & 0x0F;
 }
 
 bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed)
 {
-    uint8_t u8Data = NRF24L01_Mem_ReadByte(pHandle, RF_SETUP);
+    uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, RF_SETUP);
 
     // HIGH and LOW '00' is 1Mbs - our default
     pHandle->bWideBand = false;
@@ -1061,10 +1063,10 @@ bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed)
         }
     }
 
-    NRF24L01_Mem_WriteByte(pHandle, RF_SETUP, u8Data);
+    NRF24L01_WriteMemByte(pHandle, RF_SETUP, u8Data);
 
     // Verify our result
-    if (NRF24L01_Mem_ReadByte(pHandle, RF_SETUP) == u8Data)
+    if (NRF24L01_ReadMemByte(pHandle, RF_SETUP) == u8Data)
     {
         return true;
     }
@@ -1079,7 +1081,7 @@ bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed)
 rf24_datarate_e NRF24L01_GetDataRate(spi_nrf24l01_t* pHandle)
 {
     rf24_datarate_e eDataRate;
-    uint8_t         u8Data = NRF24L01_Mem_ReadByte(pHandle, RF_SETUP) & (BV(RF_DR_LOW) | BV(RF_DR_HIGH));
+    uint8_t         u8Data = NRF24L01_ReadMemByte(pHandle, RF_SETUP) & (BV(RF_DR_LOW) | BV(RF_DR_HIGH));
 
     // Order matters in our case below
     if (u8Data == BV(RF_DR_LOW))
@@ -1103,7 +1105,7 @@ rf24_datarate_e NRF24L01_GetDataRate(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_SetCRCLength(spi_nrf24l01_t* pHandle, rf24_crc_len_e eLength)
 {
-    uint8_t u8Data = NRF24L01_Mem_ReadByte(pHandle, CONFIG) & ~(BV(CRCO) | BV(EN_CRC));
+    uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, CONFIG) & ~(BV(CRCO) | BV(EN_CRC));
 
     if (eLength == RF24_CRC_DISABLED)
     {
@@ -1119,13 +1121,13 @@ void NRF24L01_SetCRCLength(spi_nrf24l01_t* pHandle, rf24_crc_len_e eLength)
         u8Data |= BV(CRCO);
     }
 
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, u8Data);
+    NRF24L01_WriteMemByte(pHandle, CONFIG, u8Data);
 }
 
 rf24_crc_len_e NRF24L01_GetCRCLength(spi_nrf24l01_t* pHandle)
 {
     rf24_crc_len_e eLength = RF24_CRC_DISABLED;
-    uint8_t        u8Data  = NRF24L01_Mem_ReadByte(pHandle, CONFIG) & (BV(CRCO) | BV(EN_CRC));
+    uint8_t        u8Data  = NRF24L01_ReadMemByte(pHandle, CONFIG) & (BV(CRCO) | BV(EN_CRC));
 
     if (u8Data & BV(EN_CRC))
     {
@@ -1144,23 +1146,23 @@ rf24_crc_len_e NRF24L01_GetCRCLength(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_DisableCRC(spi_nrf24l01_t* pHandle)
 {
-    uint8_t u8Data = NRF24L01_Mem_ReadByte(pHandle, CONFIG) & ~BV(EN_CRC);
-    NRF24L01_Mem_WriteByte(pHandle, CONFIG, u8Data);
+    uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, CONFIG) & ~BV(EN_CRC);
+    NRF24L01_WriteMemByte(pHandle, CONFIG, u8Data);
 }
 
 void NRF24L01_SetRetries(spi_nrf24l01_t* pHandle, uint8_t u8Delay, uint8_t u8Count)
 {
-    NRF24L01_Mem_WriteByte(pHandle, SETUP_RETR, MIN(u8Delay, 15) << ARD | MIN(u8Count, 15) << ARC);
+    NRF24L01_WriteMemByte(pHandle, SETUP_RETR, MIN(u8Delay, 15) << ARD | MIN(u8Count, 15) << ARC);
 }
 
 uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel)
 {
-    return (NRF24L01_Mem_ReadByte(pHandle, FIFO_STATUS) >> (4 * bFifoSel)) & 3;
+    return (NRF24L01_ReadMemByte(pHandle, FIFO_STATUS) >> (4 * bFifoSel)) & 3;
 }
 
 bool NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle)
 {
-    return NRF24L01_Mem_ReadByte(pHandle, FIFO_STATUS) & BV(RX_FULL) ? true : false;
+    return NRF24L01_ReadMemByte(pHandle, FIFO_STATUS) & BV(RX_FULL) ? true : false;
 }
 
 //---------------------------------------------------------------------------
@@ -1331,7 +1333,7 @@ void NRF24L01_Test(void)
         uint8_t u8Pipe;
 
         // if there is data ready
-        if (NRF24L01_WhichPipeAvailable(&nrf24l01, &u8Pipe))
+        if (NRF24L01_IsPipeAvailable(&nrf24l01, &u8Pipe))
         {
             // Dump the payloads until we've gotten everything
             tick_t  TickRxVal;
