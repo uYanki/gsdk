@@ -84,9 +84,9 @@ typedef struct {
     bool     bWideBand;               /* 2Mbs data rate in use? */
     bool     bPlusVer;                /* False for RF24L01 and true for RF24L01P */
     uint8_t  u8PayloadSize;           /**< Fixed size of payloads */
-    bool     bAckPayloadAvailable;    /**< Whether there is an ack payload waiting */
-    uint8_t  u8AddrWidth;               /**< The address width to use (3, 4 or 5 bytes). */
-    bool     bDynamicPayloadsEnabled;   /**< Whether dynamic payloads are enabled. */
+    bool     bAckPayload;             /**< Whether there is an ack payload waiting */
+    uint8_t  u8AddrWidth;             /**< The address width to use (3, 4 or 5 bytes). */
+    bool     bDynamicPayloadsEnabled; /**< Whether dynamic payloads are enabled. */
     uint8_t  u8AckPayloadLength;      /**< Dynamic size of pending ack payload. */
     uint64_t u64Pipe0ReadingAddress;  /**< Last address set on pipe 0 for reading. */
 
@@ -104,126 +104,56 @@ bool NRF24L01_IsChipConnected(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Start listening on the pipes opened for reading.
- *
- * 1. Be sure to call NRF24L01_OpenReadingPipe() first.
- * 2. Do not call NRF24L01_WriteData() while in this mode, without first calling NRF24L01_StopListening().
- * 3. Call NRF24L01_IsAvailable() to check for incoming traffic, and NRF24L01_ReadData() to get it.
- * @note If there was a call to NRF24L01_OpenReadingPipe() about pipe 0 prior to
- * calling this function, then this function will re-write the address
- * that was last set to reading pipe 0. This is because NRF24L01_OpenWritingPipe()
- * will overwrite the address to reading pipe 0 for proper auto-ack
- * functionality.
- *
  */
 void NRF24L01_StartListening(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Stop listening for incoming messages
- *
- * Do this before calling NRF24L01_WriteData().
- * @note When the ACK payloads feature is enabled, the TX FIFO buffers are
- * flushed when calling this function. This is meant to discard any ACK
- * payloads that were not appended to acknowledgment packets.
  */
 void NRF24L01_StopListening(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Write to the open writing pipe
- *
- * Be sure to call NRF24L01_OpenWritingPipe() first to set the destination
- * of where to write to.
- *
- * This blocks until the message is successfully acknowledged by
- * the receiver or the timeout/retransmit maxima are reached.  In
- * the current configuration, the max delay here is 60ms.
- *
- * The maximum size of data written is the fixed payload size, see
- * NRF24L01_GetPayloadSize().  However, you can write less, and the remainder
- * will just be filled with zeroes.
- *
+
  * @param[in] cpu8Data Pointer to the data to be sent
- * @param[in] u8Len Number of bytes to be sent
+ * @param[in] u8Len Number of bytes to be sent. The maximum size of data written
+ * is the fixed payload size, see NRF24L01_GetPayloadSize().  However, you can
+ * write less, and the remainderwill just be filled with zeroes.
+ *
  * @return True if the payload was delivered successfully false if not
  */
-bool NRF24L01_WriteData(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len);
+bool NRF24L01_WritePacket(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len);
 
 /**
- * Read the payload
+ * @brief Read the payload
  *
- * Return the last payload received
+ * @param[in] pu8Data Pointer to a buffer where the data should be written
+ * @param[in] u8Len Maximum number of bytes to read into the buffer. The size of
+ * data read is the fixed payload size, see NRF24L01_GetPayloadSize()
  *
- * The size of data read is the fixed payload size, see NRF24L01_GetPayloadSize()
- *
- * @note I specifically chose 'void*' as a data type to make it easier
- * for beginners to use.  No casting needed.
- *
- * @param pu8Data Pointer to a buffer where the data should be written
- * @param u8Len Maximum number of bytes to read into the buffer
  * @return True if the payload was delivered successfully false if not
  */
-bool NRF24L01_ReadData(spi_nrf24l01_t* pHandle, uint8_t* pu8Data, uint8_t u8Len);
+bool NRF24L01_ReadPacket(spi_nrf24l01_t* pHandle, uint8_t* pu8Data, uint8_t u8Len);
 
 /**
- * @brief Open a pipe for writing. Old addressing format retained
- * for compatibility.
+ * @brief Open a pipe for writing. Old addressing format retained for compatibility.
  *
- * Only one writing pipe can be opened at once, but this function changes
- * the address that is used to transmit (ACK payloads/packets do not apply
- * here). Be sure to call NRF24L01_StopListening() prior to calling this function.
- *
- * Addresses are assigned via a byte array, default is 5 byte address length
- *
- * @warning This function will overwrite the address set to reading pipe 0
- * as stipulated by the datasheet for proper auto-ack functionality in TX
- * mode. Use this function to ensure proper transmission acknowledgement
- * when the address set to reading pipe 0 (via NRF24L01_OpenReadingPipe()) does not
- * match the address passed to this function. If the auto-ack feature is
- * disabled, then this function will still overwrite the address for
- * reading pipe 0 regardless.
- *
- * @param cpu8Address The address to be used for outgoing transmissions (uses
- * pipe 0). Coordinate this address amongst other receiving nodes (the
- * pipe numbers don't need to match).
- *
- * @remark There is no address length parameter because this function will
- * always write the number of bytes that the radio addresses are configured
- * to use (set with NRF24L01_SetAddressWidth()).
+ * @param[in] u64Address The 24, 32 or 40 bit address of the pipe to open.
  */
- void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address);
+void NRF24L01_OpenWritingPipe(spi_nrf24l01_t* pHandle, uint64_t u64Address);
 
 /**
  * @brief Open a pipe for reading
  *
- * Up to 6 pipes can be open for reading at once.  Open all the required
- * reading pipes, and then call startListening().
- *
- * @note Pipes 0 and 1 will store a full 5-byte address. Pipes 2-5 will technically
- * only store a single byte, borrowing up to 4 additional bytes from pipe 1 per the
- * assigned address width.
- * Pipes 1-5 should share the same address, except the first byte.
- * Only the first byte in the array should be unique, e.g.
- *
- * @warning
- * @parblock
- * If the reading pipe 0 is opened by this function, the address
- * passed to this function (for pipe 0) will be restored at every call to
- * startListening().
- *
- * Read
- * http://maniacalbits.blogspot.com/2013/04/rf24-addressing-nrf24l01-radios-require.html
- * to understand how to avoid using malformed addresses. This address
- * restoration is implemented because of the underlying necessary
- * functionality of openWritingPipe().
- * @endparblock
- *
- * @param u8Pipe Which pipe to open. Only pipe numbers 0-5 are available,
+ * @param[in] u8Pipe Which pipe to open. Only pipe numbers 0-5 are available,
  * an address assigned to any pipe number not in that range will be ignored.
- * @param u64Address The 24, 32 or 40 bit address of the pipe to open.
+ * @param[in] u64Address The 24, 32 or 40 bit address of the pipe to open.
+ *
  */
 void NRF24L01_OpenReadingPipe(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, uint64_t u64Address);
 
 /**
- * Set the number and delay of retries upon failed submit
+ * @brief Set the number and delay of retries upon failed submit
  *
  * @param u8Delay How long to wait between each retry, in multiples of 250us,
  * max is 15.  0 means 250us, 15 means 4000us.
@@ -241,31 +171,19 @@ void NRF24L01_SetChannel(spi_nrf24l01_t* pHandle, uint8_t u8Channel);
 /**
  * @brief Set Static Payload Size
  *
- * This implementation uses a pre-stablished fixed payload size for all
- * transmissions.  If this method is never called, the driver will always
- * transmit the maximum payload size (32 bytes), no matter how much
- * was sent to NRF24L01_WriteData().
- *
- * @todo Implement variable-sized payloads feature
- *
- * @param size The number of bytes in the payload
+ * @param[in] size The number of bytes in the payload
  */
 void NRF24L01_SetPayloadSize(spi_nrf24l01_t* pHandle, uint8_t u8Size);
 
 /**
  * @brief Get Static Payload Size
  *
- * @see NRF24L01_SetPayloadSize()
- *
  * @return The number of bytes in the payload
  */
 uint8_t NRF24L01_GetPayloadSize(spi_nrf24l01_t* pHandle);
 
 /**
- * Get Dynamic Payload Size
- *
- * For dynamic payloads, this pulls the size of the payload off
- * the chip
+ * @brief Get Dynamic Payload Size
  *
  * @return Payload length of last-received dynamic payload
  */
@@ -273,21 +191,19 @@ uint8_t NRF24L01_GetDynamicPayloadSize(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Enable custom payloads on the acknowledge packets
- *
- * Ack payloads are a handy way to return data back to senders without
- * manually changing the radio modes on both units.
- *
- * @see examples/pingpair_pl/pingpair_pl.pde
  */
 void NRF24L01_EnableAckPayload(spi_nrf24l01_t* pHandle);
 
 /**
+ * @brief  Disable custom payloads on the acknowledge packets
+ */
+void NRF24L01_DisableAckPayload(spi_nrf24l01_t* pHandle);
+
+/**
  * @brief Enable dynamically-sized payloads
  *
- * This way you don't always have to send large packets just to send them
+ * @note This way you don't always have to send large packets just to send them
  * once in a while.  This enables dynamic payloads on ALL pipes.
- *
- * @see examples/pingpair_pl/pingpair_dyn.pde
  */
 void NRF24L01_EnableDynamicPayloads(spi_nrf24l01_t* pHandle);
 
@@ -297,28 +213,25 @@ void NRF24L01_EnableDynamicPayloads(spi_nrf24l01_t* pHandle);
  * @return true if the hardware is nRF24L01+ (or compatible) and false
  * if its not.
  */
-bool NRF24L01_IsPVariant(spi_nrf24l01_t* pHandle);
+bool NRF24L01_IsPlusVariant(spi_nrf24l01_t* pHandle);
 
 /**
- * Enable or disable auto-acknowlede packets
+ * @brief Enable or disable auto-acknowlede packets
  *
  * This is enabled by default, so it's only needed if you want to turn
  * it off for some reason.
  *
- * @param bEnable Whether to enable (true) or disable (false) auto-acks
+ * @param[in] bEnable Whether to enable (true) or disable (false) auto-acks
  */
 void NRF24L01_SetAutoAck(spi_nrf24l01_t* pHandle, bool bEnable);
 
 /**
  * @brief Enable or disable auto-acknowlede packets on a per pipeline basis.
  *
- * AA is enabled by default, so it's only needed if you want to turn
- * it off/on for some reason on a per pipeline basis.
- *
- * @param u8Pipe Which pipeline to modify
- * @param bEnable Whether to enable (true) or disable (false) auto-acks
+ * @param[in] u8Pipe Which pipeline to modify
+ * @param[in] bEnable Whether to enable (true) or disable (false) auto-acks
  */
-void NRF24L01_SetAutoAckEx(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable);
+void NRF24L01_SetPipeAutoAck(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable);
 
 /**
  * @brief Set Power Amplifier (PA) level to one of four levels.
@@ -328,7 +241,7 @@ void NRF24L01_SetAutoAckEx(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, bool bEnable
  * they translate to: RF24_PA_MIN=-18dBm, RF24_PA_LOW=-12dBm,
  * RF24_PA_MED=-6dBM, and RF24_PA_HIGH=0dBm.
  *
- * @param eLevel Desired PA level.
+ * @param[in] eLevel Desired PA level.
  */
 void NRF24L01_SetPALevel(spi_nrf24l01_t* pHandle, rf24_pa_dbm_e eLevel);
 
@@ -383,7 +296,7 @@ void NRF24L01_DisableCRC(spi_nrf24l01_t* pHandle);
 /**
  * @brief Enter low-power mode
  *
- * To return to normal power mode, either NRF24L01_WriteData() some data or
+ * To return to normal power mode, either NRF24L01_WritePacket() some data or
  * startListening, or NRF24L01_PowerUp().
  */
 void NRF24L01_PowerDown(spi_nrf24l01_t* pHandle);
@@ -397,31 +310,29 @@ void NRF24L01_PowerUp(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Test whether there are bytes available to be read
- *
- * Use this version to discover on which pipe the message
- * arrived.
+ * @return True if there is a payload available, false if none is
+ */
+bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle);
+
+/**
+ * @brief Test whether there are bytes available to be read
  *
  * @param[out] pu8Pipe Which pipe has the payload available
  * @return True if there is a payload available, false if none is
  */
-bool NRF24L01_Available(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe);
-
-bool NRF24L01_IsAvailable(spi_nrf24l01_t* pHandle);
+bool NRF24L01_WhichPipeAvailable(spi_nrf24l01_t* pHandle, uint8_t* pu8Pipe);
 
 /**
  * @brief Non-blocking write to the open writing pipe
  *
- * Just like NRF24L01_WriteData(), but it returns immediately. To find out what happened
+ * Just like NRF24L01_WritePacket(), but it returns immediately. To find out what happened
  * to the send, catch the IRQ and then call NRF24L01_WhatHappened().
  *
- * @see NRF24L01_WriteData()
- * @see NRF24L01_WhatHappened()
- *
- * @param cpu8Data Pointer to the data to be sent
- * @param u8Len Number of bytes to be sent
+ * @param[in] cpu8Data Pointer to the data to be sent
+ * @param[in] u8Len Number of bytes to be sent
  * @return True if the payload was delivered successfully false if not
  */
-bool NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast);
+bool NRF24L01_WritePacketNonBlock(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8_t u8Len, bool bBroadcast);
 
 /**
  * @brief Write an ack payload for the specified pipe
@@ -429,30 +340,12 @@ bool NRF24L01_StartWrite(spi_nrf24l01_t* pHandle, const uint8_t* cpu8Data, uint8
  * The next time a message is received on @p pipe, the data in @p buf will
  * be sent back in the acknowledgement.
  *
- * @warning According to the data sheet, only three of these can be pending
- * at any time.  I have not tested this.
- *
  * @param u8Pipe Which pipe# (typically 1-5) will get this response.
  * @param cpu8Data Pointer to data that is sent
  * @param u8Len Length of the data to send, up to 32 bytes max.  Not affected
  * by the static payload set by NRF24L01_SetPayloadSize().
  */
 void NRF24L01_WriteAckPayload(spi_nrf24l01_t* pHandle, uint8_t u8Pipe, const uint8_t* cpu8Data, uint8_t u8Len);
-
-/**
- * @brief Determine if an ack payload was received in the most recent call to
- * NRF24L01_WriteData().
- *
- * Call NRF24L01_ReadData() to retrieve the ack payload.
- *
- * @warning Calling this function clears the internal flag which indicates
- * a payload is available.  If it returns true, you must read the packet
- * out as the very next interaction with the radio, or the results are
- * undefined.
- *
- * @return True if an ack payload is available.
- */
-bool NRF24L01_IsAckPayloadAvailable(spi_nrf24l01_t* pHandle);
 
 /**
  * @brief Call this when you get an interrupt to find out why
@@ -489,59 +382,31 @@ bool NRF24L01_TestCarrier(spi_nrf24l01_t* pHandle);
 bool NRF24L01_TestRPD(spi_nrf24l01_t* pHandle);
 
 /**
- * @name Advanced Operation
- *
- *  Methods you can use to drive the chip in more advanced ways
- */
-
-/**
  * @brief Print a giant block of debugging information to stdout
- *
- * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
  */
 void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle);
+
 /**
- * Use this function to check if the radio's RX FIFO levels are all
+ * @brief Use this function to check if the radio's RX FIFO levels are all
  * occupied. This can be used to prevent data loss because any incoming
  * transmissions are rejected if there is no unoccupied levels in the RX
  * FIFO to store the incoming payload. Remember that each level can hold
  * up to a maximum of 32 bytes.
- * @return
- * - `true` if all three 3 levels of the RX FIFO buffers are occupied.
- * - `false` if there is one or more levels available in the RX FIFO
- *   buffers. Remember that this does not always mean that the RX FIFO
- *   buffers are empty; use available() to see if the RX FIFO buffers are
- *   empty or not.
  */
-uint8_t NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle);
+bool NRF24L01_RxFifoFull(spi_nrf24l01_t* pHandle);
 
 /**
- * @param bFifoSel `true` focuses on the TX FIFO, `false` focuses on the RX FIFO
- * @return
- * - `0` if the specified FIFO is neither full nor empty.
- * - `1` if the specified FIFO is empty.
- * - `2` if the specified FIFO is full.
+ * @param[in] bFifoSel true focuses on the TX FIFO, and false focuses on the RX FIFO
+ * @retval 0 if the specified FIFO is neither full nor empty.
+ * @retval 1 if the specified FIFO is empty.
+ * @retval 2 if the specified FIFO is full.
  */
 uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel);
-
-/**
- * @brief Open or close all data pipes.
- *
- * This function does not alter the addresses assigned to pipes. It is simply a
- * convenience function that allows controling all pipes at once.
- * @param bEnabled `true` opens all pipes; `false` closes all pipes.
- */
-void NRF24L01_ToggleAllPipes(spi_nrf24l01_t* pHandle, bool bEnabled);
 
 /**
  * @brief Stop transmission of constant wave and reset PLL and CONT registers
  */
 void NRF24L01_StopConstCarrier(spi_nrf24l01_t* pHandle);
-
-/**
- * @brief  Disable custom payloads on the acknowledge packets
- */
-void NRF24L01_DisableAckPayload(spi_nrf24l01_t* pHandle);
 
 //---------------------------------------------------------------------------
 // Example
