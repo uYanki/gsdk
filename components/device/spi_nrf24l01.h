@@ -81,7 +81,6 @@ typedef struct {
     __IN spi_mst_t*  hSPI;
     __IN const pin_t CE;  // The pin attached to Chip Enable on the RF module
 
-    bool     bWideBand;               /* 2Mbs data rate in use? */
     bool     bPlusVer;                /* False for RF24L01 and true for RF24L01P */
     uint8_t  u8PayloadSize;           /**< Fixed size of payloads */
     bool     bAckPayload;             /**< Whether there is an ack payload waiting */
@@ -425,14 +424,22 @@ uint8_t NRF24L01_GetFifoStatus(spi_nrf24l01_t* pHandle, bool bFifoSel);
  * radio.maskIRQ(1, 1, 0);
  * @endcode
  *
- * @param bTxOk  `true` ignores the "data sent" event, `false` reflects the
+ * @param[in] bTxOk  `true` ignores the "data sent" event, `false` reflects the
  * "data sent" event on the IRQ pin.
- * @param bTxFail  `true` ignores the "data failed" event, `false` reflects the
+ * @param[in] bTxFail  `true` ignores the "data failed" event, `false` reflects the
  * "data failed" event on the IRQ pin.
- * @param bRxRdy `true` ignores the "data received" event, `false` reflects the
+ * @param[in] bRxRdy `true` ignores the "data received" event, `false` reflects the
  * "data received" event on the IRQ pin.
  */
 void NRF24L01_MaskIRQ(spi_nrf24l01_t* pHandle, bool bTxOk, bool bTxFail, bool bRxRdy);
+
+/**
+ * @brief Set the address width from 3 to 5 bytes (24, 32 or 40 bit)
+ *
+ * @param[in] u8AddrWidth The address width (in bytes) to use; this can be 3, 4 or 5.
+ */
+void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth);
+
 
 //---------------------------------------------------------------------------
 // Example

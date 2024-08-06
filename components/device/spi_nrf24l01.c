@@ -4,7 +4,6 @@
 #ifndef CONFIG_DEVICE_ROLE
 #define CONFIG_DEVICE_ROLE DEVICE_ROLE_RX
 #endif
-void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth);
 
 //---------------------------------------------------------------------------
 // Definitions
@@ -185,7 +184,7 @@ static inline uint8_t NRF24L01_FlushTx(spi_nrf24l01_t* pHandle);
 static inline uint8_t NRF24L01_GetStatus(spi_nrf24l01_t* pHandle);
 
 /**
- * Turn on or off the special features of the chip
+ * @brief Turn on or off the special features of the chip
  *
  * The chip has certain 'features' which are only available when the 'features'
  * are enabled.  See the datasheet for details.
@@ -422,7 +421,7 @@ void NRF24L01_PrintDetails(spi_nrf24l01_t* pHandle)
             {
                 uint8_t au8Data[5] = {0};
                 NRF24L01_ReadMemBlock(pHandle, u8MemAddr, au8Data, pHandle->u8AddrWidth);
-                hexdump(au8Data, 5, 16, 1, false, szTag[u8MemAddr], 0);
+                hexdump(au8Data, 5, 8, 1, false, szTag[u8MemAddr], 0);
                 break;
             }
 
@@ -486,8 +485,6 @@ uint8_t NRF24L01_GetPayloadSize(spi_nrf24l01_t* pHandle)
 
 void NRF24L01_Init(spi_nrf24l01_t* pHandle)
 {
-    pHandle->bWideBand = true;
-
     pHandle->bAckPayload             = false;
     pHandle->bDynamicPayloadsEnabled = false;
     pHandle->u8AckPayloadLength      = 0;
@@ -1017,45 +1014,20 @@ bool NRF24L01_SetDataRate(spi_nrf24l01_t* pHandle, rf24_datarate_e eSpeed)
     uint8_t u8Data = NRF24L01_ReadMemByte(pHandle, RF_SETUP);
 
     // HIGH and LOW '00' is 1Mbs - our default
-    pHandle->bWideBand = false;
     u8Data &= ~(BV(RF_DR_LOW) | BV(RF_DR_HIGH));
 
-    if (eSpeed == RF24_250KBPS)
+    switch (eSpeed)
     {
-        // Must set the RF_DR_LOW to 1; RF_DR_HIGH (used to be RF_DR) is already 0
-        // Making it '10'.
-        pHandle->bWideBand = false;
-        u8Data |= BV(RF_DR_LOW);
-    }
-    else
-    {
-        // Set 2Mbs, RF_DR (RF_DR_HIGH) is set 1
-        // Making it '01'
-        if (eSpeed == RF24_2MBPS)
-        {
-            pHandle->bWideBand = true;
-            u8Data |= BV(RF_DR_HIGH);
-        }
-        else
-        {
-            // 1Mbs
-            pHandle->bWideBand = false;
-        }
+        case RF24_250KBPS: u8Data |= BV(RF_DR_LOW); break;
+        case RF24_1MBPS: u8Data |= 0; break;
+        case RF24_2MBPS: u8Data |= BV(RF_DR_HIGH); break;
+        default: return false;
     }
 
     NRF24L01_WriteMemByte(pHandle, RF_SETUP, u8Data);
 
-    // Verify our result
-    if (NRF24L01_ReadMemByte(pHandle, RF_SETUP) == u8Data)
-    {
-        return true;
-    }
-    else
-    {
-        pHandle->bWideBand = false;
-    }
-
-    return false;
+    // Verify result
+    return NRF24L01_ReadMemByte(pHandle, RF_SETUP) == u8Data;
 }
 
 rf24_datarate_e NRF24L01_GetDataRate(spi_nrf24l01_t* pHandle)
@@ -1185,7 +1157,7 @@ void NRF24L01_MaskIRQ(spi_nrf24l01_t* pHandle, bool bTxOk, bool bTxFail, bool bR
 
 #if CONFIG_DEMOS_SW
 
-#define CONFIG_DYNAMIC_PAYLOADS_SW 1
+#define CONFIG_DYNAMIC_PAYLOADS_SW 0
 
 /**
  * @brief CONFIG_DEVICE_ROLE
@@ -1249,7 +1221,7 @@ void NRF24L01_Test(void)
     NRF24L01_PrintDetails(&nrf24l01);
 
 #if CONFIG_DYNAMIC_PAYLOADS_SW
-    uint8_t u8NextPayloadSize = 20;                 // PAYLOAD_MIN_SIZE
+    uint8_t u8NextPayloadSize = PAYLOAD_MIN_SIZE;
     char    szRxPayloadData[PAYLOAD_MAX_SIZE + 1];  // +1 to allow room for a terminating NULL char
 #endif
 
