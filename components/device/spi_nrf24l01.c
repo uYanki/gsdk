@@ -1,10 +1,6 @@
 #include "spi_nrf24l01.h"
 #include "hexdump.h"
 
-#ifndef CONFIG_DEVICE_ROLE
-#define CONFIG_DEVICE_ROLE DEVICE_ROLE_RX
-#endif
-
 //---------------------------------------------------------------------------
 // Definitions
 //---------------------------------------------------------------------------
@@ -1158,6 +1154,10 @@ void NRF24L01_MaskIRQ(spi_nrf24l01_t* pHandle, bool bTxOk, bool bTxFail, bool bR
 #if CONFIG_DEMOS_SW
 
 #define CONFIG_DYNAMIC_PAYLOADS_SW 0
+
+#ifndef CONFIG_DEVICE_ROLE
+#define CONFIG_DEVICE_ROLE DEVICE_ROLE_RX
+#endif
 
 /**
  * @brief CONFIG_DEVICE_ROLE

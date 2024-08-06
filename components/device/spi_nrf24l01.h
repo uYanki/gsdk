@@ -3,6 +3,7 @@
 
 /**
  * @brief NRF24L01 2.4GHz Wireless Transceiver
+ * @ref https://github.com/nRF24/RF24
  */
 
 #include "spimst.h"
@@ -439,7 +440,6 @@ void NRF24L01_MaskIRQ(spi_nrf24l01_t* pHandle, bool bTxOk, bool bTxFail, bool bR
  * @param[in] u8AddrWidth The address width (in bytes) to use; this can be 3, 4 or 5.
  */
 void NRF24L01_SetAddressWidth(spi_nrf24l01_t* pHandle, uint8_t u8AddrWidth);
-
 
 //---------------------------------------------------------------------------
 // Example
