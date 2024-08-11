@@ -65,7 +65,7 @@ err_t BH1750_Init(i2c_bh1750_t* pHandle)
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
-        return ERR_NOT_EXIST;  // device doesn't exist
+        return ERR_NO_DEVICE;  // device doesn't exist
     }
 
     ERRCHK_RETURN(BH1750_PowerOff(pHandle));

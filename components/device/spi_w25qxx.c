@@ -316,7 +316,7 @@ err_t W25Qxx_Init(spi_w25qxx_t* pHandle)
         }
         default:
         {
-            return ERR_NOT_EXIST;
+            return ERR_NO_DEVICE;
         }
     }
 

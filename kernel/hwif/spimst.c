@@ -100,7 +100,7 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
         extern const spimst_ops_t g_swSpiOps;
         pHandle->pOps = &g_swSpiOps;
 #else
-        return ERR_NOT_EXIST;  // swspi master module is disabled
+        return ERR_NO_DEVICE;  // swspi master module is disabled
 #endif
     }
     else
@@ -109,7 +109,7 @@ err_t SPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi_duty_cyc
         extern const spimst_ops_t g_hwSpiOps;
         pHandle->pOps = &g_hwSpiOps;
 #else
-        return ERR_NOT_EXIST;  // hwspi master module is disabled
+        return ERR_NO_DEVICE;  // hwspi master module is disabled
 #endif
     }
 

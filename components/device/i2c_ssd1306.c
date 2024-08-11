@@ -81,7 +81,7 @@ err_t SSD1306_Init(i2c_ssd1306_t* pHandle)
 
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
-        return ERR_NOT_EXIST;  // device doesn't exist
+        return ERR_NO_DEVICE;  // device doesn't exist
     }
 
     SSD1306_WriteCmd(pHandle, 0xAE);  // display off

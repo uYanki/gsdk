@@ -101,7 +101,7 @@ err_t MPU6050_Init(i2c_mpu6050_t* pHandle, mpu6050_accel_sen_e eAccelSen, mpu605
 
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
-        return ERR_NOT_EXIST;  // there is no device with valid slave address
+        return ERR_NO_DEVICE;  // there is no device with valid slave address
     }
 
     /* Reset */
@@ -121,7 +121,7 @@ err_t MPU6050_Init(i2c_mpu6050_t* pHandle, mpu6050_accel_sen_e eAccelSen, mpu605
 
     if (u8WhoAmI != MPU6050_I_AM)
     {
-        return ERR_NOT_EXIST;  // connected device with address is not MPU6050
+        return ERR_NO_DEVICE;  // connected device with address is not MPU6050
     }
 
     /* Config accelerometer */

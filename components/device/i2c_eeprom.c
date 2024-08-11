@@ -203,7 +203,7 @@ err_t EEPROM_DetectCapacity(i2c_eeprom_t* pHandle)
 
     if (EEPROM_WaitReady(pHandle, u16SlvAddr, EEPROM_TIMEOUT_MS) == false)
     {
-        return ERR_NOT_EXIST;  // eeprom doesn't exist
+        return ERR_NO_DEVICE;  // eeprom doesn't exist
     }
 
     bool bAckPre = true;

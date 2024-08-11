@@ -19,29 +19,24 @@ typedef int32_t err_t;
  * @{
  */
 
-#define ERR_NONE          0 /*!< no error */
-#define ERR_FAIL          1 /*!< generic error code indicating failure */
-
-#define ERR_NO_MEM        100 /*!< out of memory */
-#define ERR_NULLPTR       101 /*!< null pointer */
-#define ERR_INVALID_VALUE 102 /*!< invalid value */
-#define ERR_INVALID_STATE 103 /*!< invalid state */
-#define ERR_INVALID_SIZE  104 /*!< invalid size */
-#define ERR_INVALID_RANGE 105 /*!< invalid range */
-#define ERR_INVALID_CRC   106 /*!< crc or checksum was invalid */
-#define ERR_NOT_FOUND     107 /*!< requested resource not found */
-#define ERR_NOT_SUPPORTED 108 /*!< operation or feature not supported */
-#define ERR_NOT_FINISHED  109 /*!< operation has not fully completed */
-#define ERR_NOT_ALLOWED   110 /*!< operation is not allowed */
-#define ERR_NOT_CONNECTED 111 /*!< operation is not connected */
-#define ERR_NOT_EXIST     112 /*!< target doesn't exist */
-#define ERR_BUSY          113 /*!< busy state */
-#define ERR_TIMEOUT       114 /*!< operation timed out */
-#define ERR_BAD_MESSAGE   115 /*!< bad message */
-#define ERR_NO_MESSAGE    116 /*!< no message */
-#define ERR_OVERFLOW      117 /*!< address... overflow */
-#define ERR_UNDERFLOW     118 /*!< address... underflow */
-#define ERR_MISMACTH      119 /*!< content mismatch */
+#define ERR_NONE          0  /*!< no error */
+#define ERR_FAIL          1  /*!< generic error code indicating failure */
+#define ERR_NULLPTR       2  /*!< null pointer */
+#define ERR_BUSY          3  /*!< operation has not fully completed */
+#define ERR_TIMEOUT       4  /*!< operation timed out */
+#define ERR_OVERFLOW      5  /*!< memory overflow */
+#define ERR_INVALID_VALUE 6  /*!< invalid value */
+#define ERR_CRC_FAIL      7  /*!< crc or checksum was invalid */
+#define ERR_NO_MEM        8  /*!< out of memory */
+#define ERR_NO_DEVICE     9  /*!< no such device */
+#define ERR_NOT_FOUND     10 /*!< requested resource not found */
+#define ERR_NOT_SUPPORTED 11 /*!< operation or feature not supported */
+#define ERR_NOT_ALLOWED   12 /*!< operation is not allowed */
+#define ERR_NOT_CONNECTED 13 /*!< operation is not connected */
+#define ERR_NO_MESSAGE    14 /*!< no message */
+#define ERR_BAD_MESSAGE   15 /*!< unknown message */
+#define ERR_MISMACTH      16 /*!< content mismatch */
+#define ERR_ACCESS_DENIED 17 /*!< insufficient permission */
 
 /**
  * @}

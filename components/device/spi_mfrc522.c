@@ -231,7 +231,7 @@ err_t RC522_Request(spi_rc522_t* pHandle, uint8_t u8ReqCode, uint8_t* pu8TagType
 
     if (u16Length != 0x10)
     {
-        return ERR_NOT_EXIST;  // card doesn't exist
+        return ERR_NO_DEVICE;  // card doesn't exist
     }
 
     // 寻卡成功返回卡类型
@@ -272,7 +272,7 @@ err_t RC522_Anticoll(spi_rc522_t* pHandle, uint8_t* pu8SnrNum)
     }
     if (u8SnrChk != au8Buffer[i])
     {
-        return ERR_INVALID_CRC;
+        return ERR_CRC_FAIL;
     }
 
     _RC522_SetBitMask(pHandle, REG_COLLISION, 0x80);
@@ -520,7 +520,7 @@ static uint8_t _RC522_ToCard(spi_rc522_t* pHandle, uint8_t u8Command, uint8_t* p
             // 是否发生定时器中断
             if (n & irqEn & 0x01)
             {
-                return ERR_NOT_EXIST;  // no tag
+                return ERR_NO_DEVICE;  // no tag
             }
 
             if (u8Command == PCD_TRANSCEIVE)

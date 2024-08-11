@@ -27,7 +27,7 @@ err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycl
         extern const i2cmst_ops_t g_swI2cOps;
         pHandle->pOps = &g_swI2cOps;
 #else
-        return ERR_NOT_EXIST;  // swi2c master module is disabled
+        return ERR_NO_DEVICE;  // swi2c master module is disabled
 #endif
     }
     else
@@ -36,7 +36,7 @@ err_t I2C_Master_Init(i2c_mst_t* pHandle, uint32_t u32ClockFreqHz, i2c_duty_cycl
         extern const i2cmst_ops_t g_hwI2cOps;
         pHandle->pOps = &g_hwI2cOps;
 #else
-        return ERR_NOT_EXIST;  // hwi2c master module is disabled
+        return ERR_NO_DEVICE;  // hwi2c master module is disabled
 #endif
     }
 

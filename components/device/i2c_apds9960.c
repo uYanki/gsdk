@@ -224,7 +224,7 @@ err_t APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_ga
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
-        return ERR_NOT_EXIST;  // device doesn't exist
+        return ERR_NO_DEVICE;  // device doesn't exist
     }
 
     /* Make sure we're actually connected */
@@ -234,7 +234,7 @@ err_t APDS9960_Init(i2c_apds9960_t* pHandle, uint16_t u16TimeMs, apds9960_als_ga
 
     if (x != APDS9960_ID_1)
     {
-        return ERR_NOT_EXIST;  // device doesn't exist
+        return ERR_NO_DEVICE;  // device doesn't exist
     }
 
     /* Set default integration time and gain */

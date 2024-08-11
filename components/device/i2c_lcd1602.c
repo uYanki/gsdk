@@ -141,7 +141,7 @@ err_t LCD1602_Init(i2c_lcd1602_t* pHandle)
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
-        return ERR_NOT_EXIST;  // device doesn't exist
+        return ERR_NO_DEVICE;  // device doesn't exist
     }
 
     pHandle->_u8Backlight = LCD1602_BL_HIGH;

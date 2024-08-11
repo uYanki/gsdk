@@ -82,7 +82,7 @@ err_t AS5600_Init(i2c_as5600_t* pHandle)
 {
     if (I2C_Master_IsDeviceReady(pHandle->hI2C, pHandle->u8SlvAddr, I2C_FLAG_SLVADDR_7BIT) == false)
     {
-        return ERR_NOT_EXIST;  // device doesn't exist
+        return ERR_NO_DEVICE;  // device doesn't exist
     }
 
     return ERR_NONE;
