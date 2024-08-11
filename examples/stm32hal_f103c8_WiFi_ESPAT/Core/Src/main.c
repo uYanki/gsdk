@@ -117,6 +117,8 @@ int main(void)
     /* USER CODE BEGIN 2 */
 
     DelayInit();
+		
+		 ESPAT_Test();
 
 #if 1  // eeprom demo
     i2c_mst_t i2c = {

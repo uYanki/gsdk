@@ -30,9 +30,9 @@ extern "C" {
  * @brief scanf
  */
 
-#ifndef GSDK_SCANF
-#define GSDK_SCANF(...) scanf(__VA_ARGS__)
-#endif /*!< GSDK_SCANF */
+#ifndef SCANF
+#define SCANF(...) scanf(__VA_ARGS__)
+#endif /*!< SCANF */
 
 /**
  * @brief assert
@@ -68,16 +68,16 @@ extern "C" {
 /**
  * @brief memory alloc
  */
-#ifndef GSDK_MALLOC
+#ifndef MALLOC
 
-#endif /*!< GSDK_MALLOC */
+#endif /*!< MALLOC */
 
 /**
  * @brief memory free
  */
-#ifndef GSDK_MFREE
+#ifndef MFREE
 
-#endif /*!< GSDK_MFREE */
+#endif /*!< MFREE */
 
 //---------------------------------------------------------------------------
 // Functions

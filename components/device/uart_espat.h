@@ -139,17 +139,17 @@ typedef struct {
 typedef struct {
     int16_t        _eState[ESPAT_MAX_SOCK_NUM];
     espat_status_t _eStatus;
-    void (*puts)();
-
+    void (*puts)(const char*);
     uint8_t au8RxBuff[128];
 } uart_espat_t;
 
 bool ESPAT_Init(uart_espat_t* pHandle);
 
+
 ///////////////////////
 // Basic AT Commands //
 ///////////////////////
-bool    ESPAT_Test(uart_espat_t* pHandle);
+bool    ESPAT_IsExist(uart_espat_t* pHandle);
 bool    ESPAT_Reset(uart_espat_t* pHandle);
 int16_t ESPAT_GetVersion(uart_espat_t* pHandle, char* ATversion, char* SDKversion, char* compileTime);
 bool    ESPAT_Echo(uart_espat_t* pHandle, bool enable);

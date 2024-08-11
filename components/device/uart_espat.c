@@ -1,4 +1,7 @@
 #include "uart_espat.h"
+#include "usart.h"
+
+// https://blog.csdn.net/tabactivity/article/details/103341796
 
 #define ESPAT_DISABLE_ECHO
 
@@ -16,16 +19,37 @@ bool ESPAT_DataReady(uart_espat_t* pHandle)
     return __HAL_UART_GET_FLAG(&huart2, UART_FLAG_RXNE);
 }
 
+#include <stdarg.h>
+
+int ESPAT_Printf(uart_espat_t* pHandle, const char* szFormat, ...);
+
+int ESPAT_Printf(uart_espat_t* pHandle, const char* szFormat, ...)
+{
+    static char* str[128];
+
+    va_list ap;
+    va_start(ap, szFormat);
+    int n = vsnprintf(str, ARRAY_SIZE(str), szFormat, ap);
+    va_end(ap);
+
+    str[n] = '\0';
+    pHandle->puts(str);
+
+    return n;
+}
+
 char ESPAT_GetChar(uart_espat_t* pHandle)
 {
     uint8_t ch;
     HAL_UART_Receive(&huart2, &ch, 1, 0xFFFF);
+    HAL_UART_Transmit(&huart1, &ch, 1, 0xFFFF);
     return ch;
 }
 
-size_t ESPAT_PutChar(uart_espat_t* pHandle, uint8_t c)
+size_t ESPAT_PutChar(uart_espat_t* pHandle, uint8_t ch)
 {
     HAL_UART_Transmit(&huart2, &ch, 1, 0xFFFF);
+    HAL_UART_Transmit(&huart1, &ch, 1, 0xFFFF);
     return ch;
 }
 
@@ -54,6 +78,45 @@ void ESPAT_Flush(uart_espat_t* pHandle)
     // _serial->ESPAT_Flush(pHandle);
 }
 
+void ESPAT_Puts(const char* s)
+{
+    HAL_UART_Transmit(&huart1, s, strlen(s), 0xFFFF);
+    HAL_UART_Transmit(&huart2, s, strlen(s), 0xFFFF);
+}
+
+void ESPAT_Test()
+{
+    uart_espat_t espat = {
+        .puts = ESPAT_Puts,
+    };
+
+    uint8_t IP[8];
+
+    ESPAT_Printf(&espat, "AT+CIPCLOSE\r\n");
+    ESPAT_Init(&espat);
+    ESPAT_SetMode(&espat, ESPAT_MODE_STA);
+    DelayBlockS(1);
+    ESPAT_Connect(&espat, "uYanki", "12345678");
+    DelayBlockS(5);
+    ESPAT_LocalIP(&espat, IP);
+    PRINTLN("ip %d.%d.%d.%d", IP[0], IP[1], IP[2], IP[3]);
+    DelayBlockS(1);
+    // ESPAT_TcpConnect(&espat, 0, "192.168.4.2", 10086, 0); // AP
+    ESPAT_TcpConnect(&espat, 0, "192.168.43.1", 8888, 0);  // STA
+    ESPAT_Printf(&espat, "AT+CIPMODE=1\r\n");
+    ESPAT_Printf(&espat, "AT+CIPSEND\r\n");
+
+    while (1)
+    {
+        while (ESPAT_Available(&espat))
+        {
+            ESPAT_GetChar(&espat);
+        }
+
+        PeriodicTask(UNIT_S, espat.puts("hello\r\n"));
+    }
+}
+
 ////////////////////////
 // Buffer Definitions //
 ////////////////////////
@@ -72,11 +135,11 @@ bool ESPAT_Init(uart_espat_t* pHandle)
         pHandle->_eState[i] = AVAILABLE;
     }
 
-    if (ESPAT_Test(pHandle))
+    if (ESPAT_IsExist(pHandle))
     {
         // if (!ESPAT_SetTransferMode(uart_espat_t* pHandle,0))
         //	return false;
-        if (!ESPAT_SetMux(pHandle, 1))
+        if (!ESPAT_SetMux(pHandle, 0))
         {
             return false;
         }
@@ -96,7 +159,7 @@ bool ESPAT_Init(uart_espat_t* pHandle)
 // Basic AT Commands //
 ///////////////////////
 
-bool ESPAT_Test(uart_espat_t* pHandle)
+bool ESPAT_IsExist(uart_espat_t* pHandle)
 {
     ESPAT_ExecCommand(pHandle, ESPAT_CMD_TEST);  // Send AT
 
@@ -275,19 +338,14 @@ int16_t ESPAT_SetMode(uart_espat_t* pHandle, espat_wifi_mode_e mode)
 //    - Fail: <0 (esp8266_cmd_rsp)
 int16_t ESPAT_Connect(uart_espat_t* pHandle, const char* ssid, const char* pwd)
 {
-    pHandle->puts(pHandle, "AT");
-    pHandle->puts(pHandle, ESPAT_CMD_CONNECT_AP);
-    pHandle->puts(pHandle, "=\"");
-    pHandle->puts(pHandle, ssid);
-    pHandle->puts(pHandle, "\"");
+    ESPAT_Printf(pHandle, "AT%s=\"%s\"", ESPAT_CMD_CONNECT_AP, ssid);
+
     if (pwd != nullptr)
     {
-        pHandle->puts(pHandle, ',');
-        pHandle->puts(pHandle, "\"");
-        pHandle->puts(pHandle, pwd);
-        pHandle->puts(pHandle, "\"");
+        ESPAT_Printf(pHandle, ",\"%s\"", pwd);
     }
-    pHandle->puts(pHandle, "\r\n");
+
+    pHandle->puts("\r\n");
 
     return ESPAT_ReadForResponses(pHandle, ESPAT_RSP_OK, ESPAT_RSP_FAIL, WIFI_CONNECT_TIMEOUT);
 }
@@ -485,33 +543,33 @@ err_t ESPAT_LocalIP(uart_espat_t* pHandle, uint8_t returnIP[4])
     // Look for the OK:
     int16_t rsp = ESPAT_ReadForResponse(pHandle, ESPAT_RSP_OK, COMMAND_RESPONSE_TIMEOUT);
 
-    if (rsp > 0)
-    {
-        // Look for "STAIP" in the rxBuffer
-        char* p = strstr(pHandle->au8RxBuff, "STAIP");
-        if (p != nullptr)
-        {
-            p += 7;  // Move p seven places. (skip STAIP,")
-            for (uint8_t i = 0; i < 4; i++)
-            {
-                char tempOctet[4];
-                memset(tempOctet, 0, 4);  // Clear tempOctet
+    // if (rsp > 0)
+    // {
+    //     // Look for "STAIP" in the rxBuffer
+    //     char* p = strstr(pHandle->au8RxBuff, "STAIP");
+    //     if (p != nullptr)
+    //     {
+    //         p += 7;  // Move p seven places. (skip STAIP,")
+    //         for (uint8_t i = 0; i < 4; i++)
+    //         {
+    //             char tempOctet[4];
+    //             memset(tempOctet, 0, 4);  // Clear tempOctet
 
-                size_t octetLength = strspn(p, "0123456789");  // Find length of numerical string:
-                if (octetLength >= 4)                          // If it's too big, return an error
-                {
-                    return ERR_BAD_MESSAGE;
-                }
+    //             size_t octetLength = strspn(p, "0123456789");  // Find length of numerical string:
+    //             if (octetLength >= 4)                          // If it's too big, return an error
+    //             {
+    //                 return ERR_BAD_MESSAGE;
+    //             }
 
-                sprintf(tempOctet, p, octetLength);  // Copy string to temp char array:
-                returnIP[i] = atoi(tempOctet);       // Move the temp char into IP Address octet
+    //             sprintf(tempOctet, p, octetLength);  // Copy string to temp char array:
+    //             returnIP[i] = atoi(tempOctet);       // Move the temp char into IP Address octet
 
-                p += (octetLength + 1);  // Increment p to next octet
-            }
+    //             p += (octetLength + 1);  // Increment p to next octet
+    //         }
 
-            return ERR_NONE;
-        }
-    }
+    //         return ERR_NONE;
+    //     }
+    // }
 
     return rsp;
 }
@@ -548,24 +606,18 @@ int16_t ESPAT_LocalMAC(uart_espat_t* pHandle, char* mac)
 
 int16_t ESPAT_TcpConnect(uart_espat_t* pHandle, uint8_t linkID, const char* destination, uint16_t port, uint16_t keepAlive)
 {
-    pHandle->puts("AT");
-    pHandle->puts(ESPAT_CMD_TCP_CONNECT);
-    pHandle->puts('=');
-    pHandle->puts(linkID);
-    pHandle->puts(',');
-    pHandle->puts("\"TCP\",");
-    pHandle->puts("\"");
-    pHandle->puts(destination);
-    pHandle->puts("\",");
-    pHandle->puts(port);
+    ESPAT_Printf(pHandle, "AT%s=\"TCP\",\"%s\",%d", ESPAT_CMD_TCP_CONNECT, destination, port);
+    // ESPAT_Printf(pHandle, "AT%s=%d,\"TCP\",\"%s\",%d", ESPAT_CMD_TCP_CONNECT, linkID, destination, port);
+
     if (keepAlive > 0)
     {
-        pHandle->puts(',');
         // keepAlive is in units of 500 milliseconds.
         // Max is 7200 * 500 = 3600000 ms = 60 minutes.
-        pHandle->puts(keepAlive / 500);
+        ESPAT_Printf(pHandle, ",%d", keepAlive / 500);
     }
+
     pHandle->puts("\r\n");
+
     // Example good: CONNECT\r\n\r\nOK\r\n
     // Example bad: DNS Fail\r\n\r\nERROR\r\n
     // Example meh: ALREADY CONNECTED\r\n\r\nERROR\r\n
@@ -638,7 +690,7 @@ int16_t ESPAT_SetTransferMode(uart_espat_t* pHandle, uint8_t mode)
 int16_t ESPAT_SetMux(uart_espat_t* pHandle, uint8_t mux)
 {
     char params[2] = {0, 0};
-    params[0]      = (mux > 0) ? '1' : '0';
+    params[0]      = (mux > 0) ? '1' : '0';  // 0=单连接
     ESPAT_SendCommand(pHandle, ESPAT_CMD_TCP_MULTIPLE, ESPAT_CMD_SETUP, params);
 
     return ESPAT_ReadForResponse(pHandle, ESPAT_RSP_OK, COMMAND_RESPONSE_TIMEOUT);
@@ -761,18 +813,14 @@ void ESPAT_ExecCommand(uart_espat_t* pHandle, const char* cmd)
 
 void ESPAT_SendCommand(uart_espat_t* pHandle, const char* cmd, espat_command_type_e type, const char* params)
 {
-    pHandle->puts(pHandle, "AT");
-    pHandle->puts(pHandle, cmd);
-    if (type == ESPAT_CMD_QUERY)
+    switch (type)
     {
-        pHandle->puts(pHandle, '?');
+        case ESPAT_CMD_EXECUTE: ESPAT_Printf(pHandle, "AT%s", cmd); break;
+        case ESPAT_CMD_QUERY: ESPAT_Printf(pHandle, "AT%s?", cmd); break;
+        case ESPAT_CMD_SETUP: ESPAT_Printf(pHandle, "AT%s=%s", cmd, params); break;
     }
-    else if (type == ESPAT_CMD_SETUP)
-    {
-        pHandle->puts(pHandle, "=");
-        pHandle->puts(pHandle, params);
-    }
-    pHandle->puts(pHandle, "\r\n");
+
+    ESPAT_Printf(pHandle, "\r\n");
 }
 
 int16_t ESPAT_ReadForResponse(uart_espat_t* pHandle, const char* rsp, unsigned int timeout)
