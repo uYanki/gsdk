@@ -48,7 +48,7 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\Output\</OutputDirectory>
+          <OutputDirectory>.\Object\</OutputDirectory>
           <OutputName>demo</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER, STM32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>Drivers\CMSIS\CoreSupport;Drivers\DFP\2.1.0\Include;Drivers\DFP\2.1.0\Peripherals\inc;Drivers\DFP\STM32_USB-FS-Device_Driver\inc;.\Core;.\usb</IncludePath>
+              <IncludePath>Drivers\CMSIS\CoreSupport;Drivers\DFP\2.1.0\Include;Drivers\DFP\2.1.0\Peripherals\inc;Drivers\DFP\STM32_USB-FS-Device_Driver\inc;.\Core;.\Core\USB</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -461,37 +461,37 @@
             <File>
               <FileName>usb_bot.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_bot.c</FilePath>
+              <FilePath>.\Core\USB\usb_bot.c</FilePath>
             </File>
             <File>
               <FileName>usb_desc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_desc.c</FilePath>
+              <FilePath>.\Core\USB\usb_desc.c</FilePath>
             </File>
             <File>
               <FileName>usb_endp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_endp.c</FilePath>
+              <FilePath>.\Core\USB\usb_endp.c</FilePath>
             </File>
             <File>
               <FileName>usb_istr.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_istr.c</FilePath>
+              <FilePath>.\Core\USB\usb_istr.c</FilePath>
             </File>
             <File>
               <FileName>usb_prop.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_prop.c</FilePath>
+              <FilePath>.\Core\USB\usb_prop.c</FilePath>
             </File>
             <File>
               <FileName>usb_pwr.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_pwr.c</FilePath>
+              <FilePath>.\Core\USB\usb_pwr.c</FilePath>
             </File>
             <File>
               <FileName>usb_scsi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usb\usb_scsi.c</FilePath>
+              <FilePath>.\Core\USB\usb_scsi.c</FilePath>
             </File>
           </Files>
         </Group>
