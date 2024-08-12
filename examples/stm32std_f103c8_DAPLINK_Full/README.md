@@ -60,7 +60,7 @@
 
 编译 bootloader  和 daplink 工程。
 
-烧录 bootloader 会出现 U盘设备，再将 daplink 固件拖入即烧录完成。
+烧录 bootloader 后会出现 U盘设备，将 daplink 固件拖入即烧录完成。
 
 ![固件工程1.png](.assest/README/1574862569346.png)
 
