@@ -198,7 +198,7 @@
 
 ## Uart TCP Bridge
 
-详细开启方法请查看原项目文档。（_archive/wireless-esp8266-dap-master/README.md）
+详细开启方法请查看[原项目文档](README_OrgProj.md)。
 
 ```
 		|	 WirelessDAP    |
