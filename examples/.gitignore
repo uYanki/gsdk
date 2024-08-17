@@ -4,3 +4,5 @@ _inbox_at32
 stm32hal_f407ve_USB_HWBUS
 stm32hal_f407ve_slave
 _inbox_stm32
+stm32std_f407ve_MSC_IAP_
+stm32std_f407ve_MSC_IAP

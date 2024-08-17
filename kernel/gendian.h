@@ -39,7 +39,7 @@ typedef uint16_t byteorder_t, endian_t;
 #endif
 
 #if !defined(HOST_ENDIAN)
-#warning "set `HOST_ENDIAN` as `LITTLE_ENDIAN`"
+// #warning "set `HOST_ENDIAN` as `LITTLE_ENDIAN`"
 #define HOST_ENDIAN LITTLE_ENDIAN
 #endif
 

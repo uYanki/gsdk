@@ -323,7 +323,7 @@ err_t I2C_Master_Hexdump(i2c_mst_t* pHandle, uint16_t u16SlvAddr, uint16_t u16Fl
                 default:
                 case I2C_FLAG_MEMUNIT_8BIT:
                 {
-                    uint16_t u8Data;
+                    uint8_t u8Data;
 
                     if (I2C_Master_ReadByte(pHandle, u16SlvAddr, u8MemAddr, &u8Data, u16Flags) == ERR_NONE)
                     {

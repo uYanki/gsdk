@@ -77,6 +77,7 @@ static volatile tick_t m_Tick = 0U;
  */
 void $Sub$$DelayInit()
 {
+		extern void $Super$$DelayInit();
     $Super$$DelayInit();
 
     // clkin = 200MHz
