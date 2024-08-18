@@ -399,19 +399,17 @@ err_t W25Qxx_WakeUp(spi_w25qxx_t* pHandle)
  */
 err_t W25Qxx_ReadData(spi_w25qxx_t* pHandle, uint32_t u32ReadAddr, uint32_t u32Size, uint8_t* pu8Data)
 {
-	
-	LOGV("read %4d bytes at 0x%08X", u32Size, u32ReadAddr);
+    LOGV("read %4d bytes at 0x%08X", u32Size, u32ReadAddr);
 
     ERRCHK_RETURN(_W25Qxx_PollForIdle(pHandle, W25QXX_TIMEOUT_VALUE));
-	
-	
+
     SPI_Master_Select(pHandle->hSPI);
     SPI_Master_TransmitByte(pHandle->hSPI, READ_CMD);
     _W25Qxx_WriteAddr(pHandle, u32ReadAddr);
     SPI_Master_ReceiveBlock(pHandle->hSPI, pu8Data, u32Size);
     SPI_Master_Deselect(pHandle->hSPI);
-	
-	return ERR_NONE;
+
+    return ERR_NONE;
 }
 
 static bool _W25Qxx_IsNeedErase(const uint8_t* cpu8Data, uint16_t u16Size)
@@ -623,7 +621,7 @@ void W25Qxx_Test(void)
     W25Qxx_Init(&w25qxx);
 
     static uint8_t au8Data[W25QXX_SECTOR_SIZE * 10] = {0};
-    uint32_t       u32Address                      = 88;
+    uint32_t       u32Address                       = 88;
 
     W25Qxx_ReadDeviceID(&w25qxx, au8Data);
 
@@ -641,8 +639,8 @@ void W25Qxx_Test(void)
 
     PRINTLN("[first read]");
     hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, u32Address);
-		
-		return;
+
+    return;
 
     // 2. write
 

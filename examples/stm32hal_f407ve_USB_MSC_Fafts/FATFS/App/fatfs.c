@@ -24,7 +24,21 @@ FATFS   USERFatFS;   /* File system object for USER logical drive */
 FIL     USERFile;    /* File object for USER */
 
 /* USER CODE BEGIN Variables */
+
+#include "rtc.h"
+
+#include "hwif.h"
+#include "logger.h"
+#include "spi_w25qxx.h"
+
+#define LOG_LOCAL_TAG   "fafts"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE
+
+extern spi_mst_t    spi;
+extern spi_w25qxx_t w25qxx;
+
 BYTE work[_MAX_SS] = {0};
+
 /* USER CODE END Variables */
 
 void MX_FATFS_Init(void)
@@ -33,7 +47,19 @@ void MX_FATFS_Init(void)
     retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
 
     /* USER CODE BEGIN Init */
-    /* additional user code for init */
+
+    SPI_Master_Init(&spi, 500000, SPI_DUTYCYCLE_50_50, W25QXX_SPI_TIMING | SPI_FLAG_SOFT_CS);
+
+    if (W25Qxx_Init(&w25qxx) == ERR_NONE)
+    {
+#if 0  // 触发格式化系统
+        W25Qxx_EraseSector(&w25qxx, 0);
+        DelayBlockMs(1000);
+#endif
+    }
+
+    LOGD("path %s", USERPath);
+
     /* USER CODE END Init */
 }
 
@@ -45,7 +71,30 @@ void MX_FATFS_Init(void)
 DWORD get_fattime(void)
 {
     /* USER CODE BEGIN get_fattime */
-    return GetTickUs();
+
+#ifdef HAL_RTC_MODULE_ENABLED
+
+    RTC_TimeTypeDef sTime;
+    RTC_DateTypeDef sDate;
+
+    if (HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN) == HAL_OK)
+    {
+        HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+        WORD date = (2000 + sDate.Year - 1980) << 9;
+        date      = date | (sDate.Month << 5) | sDate.Date;
+
+        WORD time = sTime.Hours << 11;
+        time      = time | (sTime.Minutes << 5) | (sTime.Seconds > 1);
+        DWORD dt  = (date << 16) | time;
+
+        return dt;
+    }
+
+#endif
+
+    return 0;
+
     /* USER CODE END get_fattime */
 }
 
@@ -56,7 +105,7 @@ FRESULT CreateFile(void)
     FIL     file;
     FRESULT f_res = FR_OK;
 
-    BYTE au8WriteBuffer[32] = "hello world !!\n";
+    BYTE au8WriteBuffer[32] = "hello world !!";
     UINT bw;
 
     f_res = f_open(&file, "hello.txt", FA_OPEN_ALWAYS | FA_WRITE);
@@ -75,25 +124,8 @@ FRESULT CreateFile(void)
 
     f_res = f_close(&file);
 
- f_res = f_open(&file, "hello2.txt", FA_OPEN_ALWAYS | FA_WRITE);
+    LOGD("WR \"%s\" (%d bytes)", au8WriteBuffer, bw);
 
-    if (f_res != FR_OK)
-    {
-        return f_res;
-    }
-
-    f_res = f_write(&file, au8WriteBuffer, sizeof(au8WriteBuffer), &bw);
-
-    if (f_res != FR_OK)
-    {
-        return f_res;
-    }
-
-    f_res = f_close(&file);
-		
-		
-    printf("create file ok\r\n");
-		
     return f_res;
 }
 
@@ -116,10 +148,12 @@ FRESULT ReadFile(void)
 
     if (f_res != FR_OK)
     {
+        f_close(&file);
         return f_res;
     }
 
-    printf("create file ok");
+    LOGD("RD \"%s\"", au8ReadBuffer);
+
     f_res = f_close(&file);
 
     return f_res;
@@ -128,36 +162,37 @@ FRESULT ReadFile(void)
 FRESULT InitFileSys(void)
 {
     FRESULT res = FR_NO_FILESYSTEM;
-	
-#if 1
-	
-    res = f_mount(&USERFatFS, "", 1);
 
-#endif
-	
+    res = f_mount(&USERFatFS, USERPath, 1);
+
 #if 0
     if (res == FR_NO_FILESYSTEM)
 #else
     if (res != FR_OK)
 #endif
-	
     {
-//			printf("Init FileSystem\r\n");
-//        // No Disk file system,format disk !
-//        res = f_mkfs("0:", FM_FAT, 4096, work, sizeof work);
-//        if (res == FR_OK)
-//        {
-//            f_mount(NULL, "0:", 1);
-//            res = f_mount(&USERFatFS, "0:", 1);
-//        }
+        LOGD("Init FileSystem");
+
+        // No Disk file system,format disk !
+        res = f_mkfs(USERPath, FM_FAT, 4096, work, sizeof work);
+        if (res == FR_OK)
+        {
+            f_mount(NULL, USERPath, 1);  // unmount
+            res = f_mount(&USERFatFS, USERPath, 1);
+        }
     }
 
     if (res == FR_OK)
     {
-       CreateFile();
+        if (CreateFile() == FR_OK)
+        {
+            return ReadFile();
+        }
     }
-		
-		printf("exit\r\n");
+    else
+    {
+        LOGW("fail to mount, errcode %d", res);
+    }
 
     return res;
 }

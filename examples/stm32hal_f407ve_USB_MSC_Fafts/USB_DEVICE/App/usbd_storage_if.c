@@ -38,44 +38,44 @@
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
- * @brief Usb device.
- * @{
- */
+  * @brief Usb device.
+  * @{
+  */
 
 /** @defgroup USBD_STORAGE
- * @brief Usb mass storage device module
- * @{
- */
+  * @brief Usb mass storage device module
+  * @{
+  */
 
 /** @defgroup USBD_STORAGE_Private_TypesDefinitions
- * @brief Private types.
- * @{
- */
+  * @brief Private types.
+  * @{
+  */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
 
 /* USER CODE END PRIVATE_TYPES */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_STORAGE_Private_Defines
- * @brief Private defines.
- * @{
- */
+  * @brief Private defines.
+  * @{
+  */
 
-#define STORAGE_LUN_NBR 2
-#define STORAGE_BLK_NBR 0x10000
-#define STORAGE_BLK_SIZ 0x200
+#define STORAGE_LUN_NBR                  1
+#define STORAGE_BLK_NBR                  0x10000
+#define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
 #if STORAGE_LUN_NBR > 0
 
 #define STORAGE_SPI_FLASH 0
-#define SPI_FLASH_BLK_SIZ 4096  // sector size = 4096 Byte = 4 KB
-#define SPI_FLASH_BLK_NBR 2048  // sector count = block count * 16
+#define SPI_FLASH_BLK_SIZ 0x1000  // sector size = 4096 Byte = 4 KB
+#define SPI_FLASH_BLK_NBR 0x800   // sector count = block count * 16
 
 #endif
 
@@ -99,26 +99,26 @@ static uint8_t m_au8SramBuff[SRAM_BLK_SIZ * SRAM_BLK_NBR] = {0};
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_STORAGE_Private_Macros
- * @brief Private macros.
- * @{
- */
+  * @brief Private macros.
+  * @{
+  */
 
 /* USER CODE BEGIN PRIVATE_MACRO */
 
 /* USER CODE END PRIVATE_MACRO */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_STORAGE_Private_Variables
- * @brief Private variables.
- * @{
- */
+  * @brief Private variables.
+  * @{
+  */
 
 /* USER CODE BEGIN INQUIRY_DATA_FS */
 /** USB Mass storage Standard Inquiry Data. */
@@ -143,11 +143,14 @@ const int8_t STORAGE_Inquirydata_FS[] = {
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
 
+#include "spi.h"
+
 spi_mst_t spi = {
     .MISO = {W25Q128_MISO_PIN},
     .MOSI = {W25Q128_MOSI_PIN},
     .SCLK = {W25Q128_SCLK_PIN},
     .CS   = {W25Q128_CS_PIN},
+		.SPIx = &hspi2,
 };
 
 spi_w25qxx_t w25qxx = {
@@ -157,73 +160,82 @@ spi_w25qxx_t w25qxx = {
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_STORAGE_Exported_Variables
- * @brief Public variables.
- * @{
- */
+  * @brief Public variables.
+  * @{
+  */
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-
+#define static
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_STORAGE_Private_FunctionPrototypes
- * @brief Private functions declaration.
- * @{
- */
+  * @brief Private functions declaration.
+  * @{
+  */
+
+static int8_t STORAGE_Init_FS(uint8_t lun);
+static int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_size);
+static int8_t STORAGE_IsReady_FS(uint8_t lun);
+static int8_t STORAGE_IsWriteProtected_FS(uint8_t lun);
+static int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len);
+static int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len);
+static int8_t STORAGE_GetMaxLun_FS(void);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
-
+#undef static
 /* USER CODE END PRIVATE_FUNCTIONS_DECLARATION */
 
 /**
- * @}
- */
+  * @}
+  */
 
 USBD_StorageTypeDef USBD_Storage_Interface_fops_FS =
-    {
-        STORAGE_Init_FS,
-        STORAGE_GetCapacity_FS,
-        STORAGE_IsReady_FS,
-        STORAGE_IsWriteProtected_FS,
-        STORAGE_Read_FS,
-        STORAGE_Write_FS,
-        STORAGE_GetMaxLun_FS,
-        (int8_t*)STORAGE_Inquirydata_FS};
+{
+  STORAGE_Init_FS,
+  STORAGE_GetCapacity_FS,
+  STORAGE_IsReady_FS,
+  STORAGE_IsWriteProtected_FS,
+  STORAGE_Read_FS,
+  STORAGE_Write_FS,
+  STORAGE_GetMaxLun_FS,
+  (int8_t *)STORAGE_Inquirydata_FS
+};
 
 /* Private functions ---------------------------------------------------------*/
 /**
- * @brief  Initializes the storage unit (medium) over USB FS IP
- * @param  lun: Logical unit number.
- * @retval USBD_OK if all operations are OK else USBD_FAIL
- */
+  * @brief  Initializes the storage unit (medium) over USB FS IP
+  * @param  lun: Logical unit number.
+  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  */
 int8_t STORAGE_Init_FS(uint8_t lun)
 {
-    /* USER CODE BEGIN 2 */
+  /* USER CODE BEGIN 2 */
     UNUSED(lun);
 
     return (USBD_OK);
-    /* USER CODE END 2 */
+  /* USER CODE END 2 */
 }
 
 /**
- * @brief  Returns the medium capacity.
- * @param  lun: Logical unit number.
- * @param  block_num: Number of total block number.
- * @param  block_size: Block size.
- * @retval USBD_OK if all operations are OK else USBD_FAIL
- */
-int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t* block_num, uint16_t* block_size)
+  * @brief  Returns the medium capacity.
+  * @param  lun: Logical unit number.
+  * @param  block_num: Number of total block number.
+  * @param  block_size: Block size.
+  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  */
+int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 {
-    /* USER CODE BEGIN 3 */
+  /* USER CODE BEGIN 3 */
 
     switch (lun)
     {
@@ -255,48 +267,50 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t* block_num, uint16_t* block_
         }
     }
 
-    /* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
- * @brief   Checks whether the medium is ready.
- * @param  lun:  Logical unit number.
- * @retval USBD_OK if all operations are OK else USBD_FAIL
- */
+  * @brief   Checks whether the medium is ready.
+  * @param  lun:  Logical unit number.
+  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  */
 int8_t STORAGE_IsReady_FS(uint8_t lun)
 {
-    /* USER CODE BEGIN 4 */
+  /* USER CODE BEGIN 4 */
     UNUSED(lun);
+	
+	 // W25Qxx_ReadID() ?
 
     return (USBD_OK);
-    /* USER CODE END 4 */
+  /* USER CODE END 4 */
 }
 
 /**
- * @brief  Checks whether the medium is write protected.
- * @param  lun: Logical unit number.
- * @retval USBD_OK if all operations are OK else USBD_FAIL
- */
+  * @brief  Checks whether the medium is write protected.
+  * @param  lun: Logical unit number.
+  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  */
 int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 {
-    /* USER CODE BEGIN 5 */
+  /* USER CODE BEGIN 5 */
     UNUSED(lun);
 
     return (USBD_OK);
-    /* USER CODE END 5 */
+  /* USER CODE END 5 */
 }
 
 /**
- * @brief  Reads data from the medium.
- * @param  lun: Logical unit number.
- * @param  buf: data buffer.
- * @param  blk_addr: Logical block address.
- * @param  blk_len: Blocks number.
- * @retval USBD_OK if all operations are OK else USBD_FAIL
- */
-int8_t STORAGE_Read_FS(uint8_t lun, uint8_t* buf, uint32_t blk_addr, uint16_t blk_len)
+  * @brief  Reads data from the medium.
+  * @param  lun: Logical unit number.
+  * @param  buf: data buffer.
+  * @param  blk_addr: Logical block address.
+  * @param  blk_len: Blocks number.
+  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  */
+int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
-    /* USER CODE BEGIN 6 */
+  /* USER CODE BEGIN 6 */
 
     switch (lun)
     {
@@ -313,6 +327,7 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t* buf, uint32_t blk_addr, uint16_t bl
 
 #ifdef STORAGE_SPI_FLASH
 
+			 default:
         case STORAGE_SPI_FLASH:
         {
             return W25Qxx_ReadData(&w25qxx, blk_addr * SPI_FLASH_BLK_SIZ, blk_len * SPI_FLASH_BLK_SIZ, buf) == ERR_NONE ? USBD_OK : USBD_FAIL;
@@ -320,26 +335,26 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t* buf, uint32_t blk_addr, uint16_t bl
 
 #endif
 
-        default:
-        {
-            return USBD_FAIL;
-        }
+//        default:
+//        {
+//            return USBD_FAIL;
+//        }
     }
 
-    /* USER CODE END 6 */
+  /* USER CODE END 6 */
 }
 
 /**
- * @brief  Writes data into the medium.
- * @param  lun: Logical unit number.
- * @param  buf: data buffer.
- * @param  blk_addr: Logical block address.
- * @param  blk_len: Blocks number.
- * @retval USBD_OK if all operations are OK else USBD_FAIL
- */
-int8_t STORAGE_Write_FS(uint8_t lun, uint8_t* buf, uint32_t blk_addr, uint16_t blk_len)
+  * @brief  Writes data into the medium.
+  * @param  lun: Logical unit number.
+  * @param  buf: data buffer.
+  * @param  blk_addr: Logical block address.
+  * @param  blk_len: Blocks number.
+  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  */
+int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
-    /* USER CODE BEGIN 7 */
+  /* USER CODE BEGIN 7 */
 
     switch (lun)
     {
@@ -356,6 +371,7 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t* buf, uint32_t blk_addr, uint16_t b
 
 #ifdef STORAGE_SPI_FLASH
 
+			 default:
         case STORAGE_SPI_FLASH:
         {
             return W25Qxx_WriteData(&w25qxx, blk_addr * SPI_FLASH_BLK_SIZ, blk_len * SPI_FLASH_BLK_SIZ, buf) == ERR_NONE ? USBD_OK : USBD_FAIL;
@@ -363,25 +379,25 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t* buf, uint32_t blk_addr, uint16_t b
 
 #endif
 
-        default:
-        {
-            return USBD_FAIL;
-        }
+//        default:
+//        {
+//            return USBD_FAIL;
+//        }
     }
 
-    /* USER CODE END 7 */
+  /* USER CODE END 7 */
 }
 
 /**
- * @brief  Returns the Max Supported LUNs.
- * @param  None
- * @retval Lun(s) number.
- */
+  * @brief  Returns the Max Supported LUNs.
+  * @param  None
+  * @retval Lun(s) number.
+  */
 int8_t STORAGE_GetMaxLun_FS(void)
 {
-    /* USER CODE BEGIN 8 */
+  /* USER CODE BEGIN 8 */
     return (STORAGE_LUN_NBR - 1);
-    /* USER CODE END 8 */
+  /* USER CODE END 8 */
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
@@ -389,9 +405,10 @@ int8_t STORAGE_GetMaxLun_FS(void)
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /**
- * @}
- */
+  * @}
+  */
+

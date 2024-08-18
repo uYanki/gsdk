@@ -7,6 +7,11 @@
 extern "C" {
 #endif
 
+#if 0
+#define LOG_LOCAL_TAG   "log"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_VERBOSE
+#endif
+
 #define CONFIG_LOGGER_CSI_SW       0
 #define CONFIG_LOGGER_FUNC_NAME_SW 1
 #define CONFIG_LOGGER_TIME_FORMAT  LOGGER_TIME_FORMAT_INTEGER
