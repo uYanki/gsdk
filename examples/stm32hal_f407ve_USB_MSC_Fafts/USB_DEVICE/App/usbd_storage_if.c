@@ -71,29 +71,18 @@
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
-#if STORAGE_LUN_NBR > 0
-
+// #define STORAGE_SRAM_ID   0
 #define STORAGE_SPI_FLASH 0
+
+#ifdef STORAGE_SPI_FLASH
 #define SPI_FLASH_BLK_SIZ 0x1000  // sector size = 4096 Byte = 4 KB
 #define SPI_FLASH_BLK_NBR 0x800   // sector count = block count * 16
-
 #endif
 
-#if STORAGE_LUN_NBR > 1
-
-#define STORAGE_SRAM_ID 1
+#ifdef STORAGE_SRAM_ID
 #define SRAM_BLK_SIZ    4096  // unit: byte
-#define SRAM_BLK_NBR    10
+#define SRAM_BLK_NBR    20
 static uint8_t m_au8SramBuff[SRAM_BLK_SIZ * SRAM_BLK_NBR] = {0};
-
-#endif
-
-#if STORAGE_LUN_NBR > 2
-
-#define STORAGE_SDIO_SDCARD 2
-#define SDIO_BLK_SIZ        0
-#define SDIO_BLK_NBR        0
-
 #endif
 
 /* USER CODE END PRIVATE_DEFINES */
@@ -327,7 +316,6 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 
 #ifdef STORAGE_SPI_FLASH
 
-			 default:
         case STORAGE_SPI_FLASH:
         {
             return W25Qxx_ReadData(&w25qxx, blk_addr * SPI_FLASH_BLK_SIZ, blk_len * SPI_FLASH_BLK_SIZ, buf) == ERR_NONE ? USBD_OK : USBD_FAIL;
@@ -335,10 +323,10 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 
 #endif
 
-//        default:
-//        {
-//            return USBD_FAIL;
-//        }
+        default:
+        {
+            return USBD_FAIL;
+        }
     }
 
   /* USER CODE END 6 */
@@ -371,7 +359,6 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 
 #ifdef STORAGE_SPI_FLASH
 
-			 default:
         case STORAGE_SPI_FLASH:
         {
             return W25Qxx_WriteData(&w25qxx, blk_addr * SPI_FLASH_BLK_SIZ, blk_len * SPI_FLASH_BLK_SIZ, buf) == ERR_NONE ? USBD_OK : USBD_FAIL;
@@ -379,10 +366,10 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 
 #endif
 
-//        default:
-//        {
-//            return USBD_FAIL;
-//        }
+        default:
+        {
+            return USBD_FAIL;
+        }
     }
 
   /* USER CODE END 7 */
