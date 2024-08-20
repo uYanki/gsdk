@@ -4,3 +4,4 @@ stm32f407ve_hal_USB_HWBUS
 _inbox_at32
 _inbox_stm32
 _inbox_esp32
+build
