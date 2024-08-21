@@ -1,6 +1,7 @@
 stm32f407ve_hal_FreeModbus_Slave
 stm32f407ve_hal_canfestival
 stm32f407ve_hal_USB_HWBUS
+stm32h750xb_hal_ADC_DMA
 _inbox_at32
 _inbox_stm32
 _inbox_esp32
