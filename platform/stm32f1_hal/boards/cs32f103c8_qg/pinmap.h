@@ -13,7 +13,7 @@
 #define NRF24L01_CS_PIN  GPIOB, GPIO_PIN_2
 #define NRF24L01_CE_PIN  GPIOB, GPIO_PIN_0
 
-#define FLASH_CS_PIN     GPIOC, GPIO_PIN_13
+#define FLASH_CS_PIN     GPIOC, GPIO_PIN_13 // w25qxx
 #define TFCARD_CS_PIN    GPIOA, GPIO_PIN_4
 
 #define LCD_SCL_PIN      GPIOB, GPIO_PIN_1
@@ -23,8 +23,8 @@
 #define LCD_CS_PIN       GPIOB, GPIO_PIN_9
 #define LCD_BL_PIN       GPIOB, GPIO_PIN_11
 
-#define SPI_NSS          GPIOA, GPIO_PIN_5
-#define SPI_MOSI         GPIOA, GPIO_PIN_7
-#define SPI_MISO         GPIOA, GPIO_PIN_6
+#define SPI_SCLK_PIN     GPIOA, GPIO_PIN_5
+#define SPI_MOSI_PIN     GPIOA, GPIO_PIN_7
+#define SPI_MISO_PIN     GPIOA, GPIO_PIN_6
 
 #endif

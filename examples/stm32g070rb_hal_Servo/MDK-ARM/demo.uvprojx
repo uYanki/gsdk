@@ -340,7 +340,7 @@
               <MiscControls>-Wno-shift-negative-value -Wno-shift-count-negative -Wno-int-to-void-pointer-cast -Wno-unused-value</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,STM32G070xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../components/motspin/fixed-point;../../../platform/stm32g0_hal/board/stm32g070rb_umotion;../../../platform/stm32g0_hal/adapter;../../../components/CmBacktrace;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Device/ST/STM32G0xx/Include;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Include;../Libraries;../Database;../Bsp;../../../platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/DSP/Include;../Axis</IncludePath>
+              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../components/motspin/fixed-point;../../../platform/stm32g0_hal/board/stm32g070rb_umotion;../../../platform/stm32g0_hal/adapter;../../../components/CmBacktrace;E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc;E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy;E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Device/ST/STM32G0xx/Include;E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Include;../Libraries;../Database;../Bsp;../../../platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/DSP/Include;../Axis</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1041,7 +1041,7 @@
             <File>
               <FileName>stm32g0xx_hal_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1097,7 +1097,7 @@
             <File>
               <FileName>stm32g0xx_hal_adc_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1153,7 +1153,7 @@
             <File>
               <FileName>stm32g0xx_ll_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_adc.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_adc.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1209,7 +1209,7 @@
             <File>
               <FileName>stm32g0xx_hal_rcc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1265,7 +1265,7 @@
             <File>
               <FileName>stm32g0xx_hal_rcc_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1321,7 +1321,7 @@
             <File>
               <FileName>stm32g0xx_ll_rcc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_rcc.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_rcc.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1377,7 +1377,7 @@
             <File>
               <FileName>stm32g0xx_hal_flash.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1433,7 +1433,7 @@
             <File>
               <FileName>stm32g0xx_hal_flash_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1489,7 +1489,7 @@
             <File>
               <FileName>stm32g0xx_hal_gpio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1545,7 +1545,7 @@
             <File>
               <FileName>stm32g0xx_hal_dma.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1601,7 +1601,7 @@
             <File>
               <FileName>stm32g0xx_hal_dma_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1657,7 +1657,7 @@
             <File>
               <FileName>stm32g0xx_ll_dma.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1713,7 +1713,7 @@
             <File>
               <FileName>stm32g0xx_hal_pwr.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1769,7 +1769,7 @@
             <File>
               <FileName>stm32g0xx_hal_pwr_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1825,7 +1825,7 @@
             <File>
               <FileName>stm32g0xx_hal_cortex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1881,7 +1881,7 @@
             <File>
               <FileName>stm32g0xx_hal.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1937,7 +1937,7 @@
             <File>
               <FileName>stm32g0xx_hal_exti.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_exti.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_exti.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1993,7 +1993,7 @@
             <File>
               <FileName>stm32g0xx_hal_crc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_crc.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_crc.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2049,7 +2049,7 @@
             <File>
               <FileName>stm32g0xx_hal_crc_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_crc_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_crc_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2105,7 +2105,7 @@
             <File>
               <FileName>stm32g0xx_hal_i2c.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2161,7 +2161,7 @@
             <File>
               <FileName>stm32g0xx_hal_i2c_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2217,7 +2217,7 @@
             <File>
               <FileName>stm32g0xx_hal_spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2273,7 +2273,7 @@
             <File>
               <FileName>stm32g0xx_hal_spi_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_spi_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2329,7 +2329,7 @@
             <File>
               <FileName>stm32g0xx_hal_tim.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2385,7 +2385,7 @@
             <File>
               <FileName>stm32g0xx_hal_tim_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2441,7 +2441,7 @@
             <File>
               <FileName>stm32g0xx_hal_uart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2497,7 +2497,7 @@
             <File>
               <FileName>stm32g0xx_hal_uart_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.c</FilePath>
+              <FilePath>E:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_uart_ex.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>

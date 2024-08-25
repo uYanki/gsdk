@@ -599,15 +599,27 @@ err_t W25Qxx_EraseChip(spi_w25qxx_t* pHandle)
 
 #include "hexdump.h"
 
+#define CONFIG_DEMOS_READ_ID_ONLY_SW 1
+
 void W25Qxx_Test(void)
 {
-#ifdef BOARD_STM32F407VET6_XWS
+#if defined(BOARD_STM32F407VET6_XWS)
 
     spi_mst_t spi = {
         .MISO = {W25Q128_MISO_PIN},
         .MOSI = {W25Q128_MOSI_PIN},
         .SCLK = {W25Q128_SCLK_PIN},
         .CS   = {W25Q128_CS_PIN},
+    };
+
+#elif defined(BOARD_CS32F103C8T6_QG)
+
+    spi_mst_t spi = {
+        // .SPIx = &hspi1,
+        .MISO = {SPI_MISO_PIN},
+        .MOSI = {SPI_MOSI_PIN},
+        .SCLK = {SPI_SCLK_PIN},
+        .CS   = {FLASH_CS_PIN},
     };
 
 #endif
@@ -620,7 +632,7 @@ void W25Qxx_Test(void)
 
     W25Qxx_Init(&w25qxx);
 
-    static uint8_t au8Data[W25QXX_SECTOR_SIZE * 10] = {0};
+    static uint8_t au8Data[W25QXX_SECTOR_SIZE * 2] = {0};
     uint32_t       u32Address                       = 88;
 
     W25Qxx_ReadDeviceID(&w25qxx, au8Data);
@@ -632,6 +644,8 @@ void W25Qxx_Test(void)
 
     W25Qxx_ReadJedecID(&w25qxx, au8Data);
     hexdump(au8Data, 3, 16, 1, false, "[JedecID]:", 0);
+		
+#if !CONFIG_DEMOS_READ_ID_ONLY_SW
 
     // 1. read
 
@@ -639,8 +653,6 @@ void W25Qxx_Test(void)
 
     PRINTLN("[first read]");
     hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, u32Address);
-
-    return;
 
     // 2. write
 
@@ -662,6 +674,8 @@ void W25Qxx_Test(void)
 
     PRINTLN("[second read]");
     hexdump(au8Data, ARRAY_SIZE(au8Data), 16, 4, true, nullptr, u32Address);
+
+#endif
 
     while (1)
     {
