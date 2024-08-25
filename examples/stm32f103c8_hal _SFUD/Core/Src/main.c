@@ -23,7 +23,6 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
-#include "usb.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -47,7 +46,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SFUD_DEMO_TEST_BUFFER_SIZE                     1024
+#define SFUD_DEMO_TEST_BUFFER_SIZE 1024
 
 /* USER CODE END PD */
 
@@ -83,58 +82,86 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
  * @param size test flash size
  * @param size test flash data buffer
  */
-void sfud_demo(uint32_t addr, size_t size, uint8_t *data) {
-    sfud_err result = SFUD_SUCCESS;
-    const sfud_flash *flash = sfud_get_device_table() + 0;
-    size_t i;
+void sfud_demo(uint32_t addr, size_t size, uint8_t* data)
+{
+    sfud_err          result = SFUD_SUCCESS;
+    const sfud_flash* flash  = sfud_get_device_table() + 0;
+    size_t            i;
     /* prepare write data */
-    for (i = 0; i < size; i++) {
+    for (i = 0; i < size; i++)
+    {
         data[i] = i;
     }
     /* erase test */
     result = sfud_erase(flash, addr, size);
-    if (result == SFUD_SUCCESS) {
+    if (result == SFUD_SUCCESS)
+    {
         PRINTLN("Erase the %s flash data finish. Start from 0x%08X, size is %ld.", flash->name, addr, size);
-    } else {
+    }
+    else
+    {
         PRINTLN("Erase the %s flash data failed.", flash->name);
         return;
     }
     /* write test */
     result = sfud_write(flash, addr, size, data);
-    if (result == SFUD_SUCCESS) {
-        PRINTLN("Write the %s flash data finish. Start from 0x%08X, size is %ld.", flash->name, addr,
-                size);
-    } else {
+    if (result == SFUD_SUCCESS)
+    {
+        PRINTLN("Write the %s flash data finish. Start from 0x%08X, size is %ld.", flash->name, addr, size);
+    }
+    else
+    {
         PRINTLN("Write the %s flash data failed.", flash->name);
         return;
     }
     /* read test */
     result = sfud_read(flash, addr, size, data);
-    if (result == SFUD_SUCCESS) {
+    if (result == SFUD_SUCCESS)
+    {
         PRINTLN("Read the %s flash data success. Start from 0x%08X, size is %ld. The data is:", flash->name, addr, size);
         PRINTLN("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
-        for (i = 0; i < size; i++) {
-            if (i % 16 == 0) {
+        for (i = 0; i < size; i++)
+        {
+            if (i % 16 == 0)
+            {
                 printf("[%08X] ", addr + i);
             }
             printf("%02X ", data[i]);
-            if (((i + 1) % 16 == 0) || i == size - 1) {
+            if (((i + 1) % 16 == 0) || i == size - 1)
+            {
                 PRINTLN();
             }
         }
         PRINTLN();
-    } else {
+    }
+    else
+    {
         PRINTLN("Read the %s flash data failed.", flash->name);
     }
     /* data check */
-    for (i = 0; i < size; i++) {
-        if (data[i] != i % 256) {
+    for (i = 0; i < size; i++)
+    {
+        if (data[i] != i % 256)
+        {
             PRINTLN("Read and check write data has an error. Write the %s flash data failed.", flash->name);
-			break;
+            break;
         }
     }
-    if (i == size) {
+    if (i == size)
+    {
         PRINTLN("The %s flash test is success.", flash->name);
+    }
+}
+
+void PINMUX_PC13_GPIO(void)
+{
+    hrtc.Instance          = RTC;
+    hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
+    // hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
+    hrtc.Init.OutPut       = RTC_OUTPUTSOURCE_NONE;  // PC13 as GPIO
+    if (HAL_RTC_Init(&hrtc) != HAL_OK)
+    {
+        Error_Handler();
     }
 }
 
@@ -170,24 +197,23 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
-    MX_RTC_Init();
     MX_SPI1_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
-    MX_USB_PCD_Init();
     MX_CRC_Init();
     MX_TIM4_Init();
+    MX_RTC_Init();
     /* USER CODE BEGIN 2 */
 
     DelayInit();
-		
-		W25Qxx_Test();
-		
+		PINMUX_PC13_GPIO();
+
     /* SFUD initialize */
-    if (sfud_init() == SFUD_SUCCESS) {
+    if (sfud_init() == SFUD_SUCCESS)
+    {
         sfud_demo(0, sizeof(sfud_demo_test_buf), sfud_demo_test_buf);
     }
-		
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -240,9 +266,8 @@ void SystemClock_Config(void)
     {
         Error_Handler();
     }
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC | RCC_PERIPHCLK_USB;
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
     PeriphClkInit.RTCClockSelection    = RCC_RTCCLKSOURCE_LSI;
-    PeriphClkInit.UsbClockSelection    = RCC_USBCLKSOURCE_PLL_DIV1_5;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
     {
         Error_Handler();

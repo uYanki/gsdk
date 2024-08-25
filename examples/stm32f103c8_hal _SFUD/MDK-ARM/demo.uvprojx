@@ -15,16 +15,16 @@
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>CS32F103C8</Device>
-          <Vendor>AutoChips</Vendor>
-          <PackID>Keil.CS32F1xx_DFP.1.0.0</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IRAM(0x20000000,0x5000) IROM(0x08000000,0x10000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
+          <Device>STM32F103C8</Device>
+          <Vendor>STMicroelectronics</Vendor>
+          <PackID>Keil.STM32F1xx_DFP.2.4.1</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
+          <Cpu>IRAM(0x20000000,0x00005000) IROM(0x08000000,0x00010000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0CS32F10x_128 -FS08000000 -FL020000 -FP0($$Device:CS32F103C8$Flash\CS32F10x_128.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F10x_128 -FS08000000 -FL020000 -FP0($$Device:STM32F103C8$Flash\STM32F10x_128.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:CS32F103C8$Device\Include\cs32f10x.h</RegisterFile>
+          <RegisterFile>$$Device:STM32F103C8$Device\Include\stm32f10x.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -34,7 +34,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:CS32F103C8$SVD\CS32F103xx.svd</SFDFile>
+          <SFDFile>$$Device:STM32F103C8$SVD\STM32F103xx.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -82,7 +82,7 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
+            <RunUserProg2>1</RunUserProg2>
             <UserProg1Name></UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
@@ -111,7 +111,7 @@
         </CommonProperty>
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments> -REMAP</SimDllArguments>
+          <SimDllArguments>-REMAP</SimDllArguments>
           <SimDlgDll>DCM.DLL</SimDlgDll>
           <SimDlgDllArguments>-pCM3</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>3</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -340,7 +340,7 @@
               <MiscControls>-Wno-shift-negative-value -Wno-shift-count-negative -Wno-int-to-void-pointer-cast -Wno-unused-value</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Inc;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/CMSIS/Device/ST/STM32F1xx/Include;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/CMSIS/Include;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../platform/stm32f1_hal/boards/cs32f103c8_qg;../../../platform/stm32f1_hal/adapter;../../../components/eefs;../../../components/CmBacktrace;..\..\..\components\SEGGER_RTT;..\..\..\components\SFUD</IncludePath>
+              <IncludePath>../Core/Inc;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Inc;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/CMSIS/Device/ST/STM32F1xx/Include;E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/CMSIS/Include;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../platform/stm32f1_hal/boards/cs32f103c8_qg;../../../platform/stm32f1_hal/adapter;../../../components/eefs;../../../components/CmBacktrace;../../../components/SEGGER_RTT;../../../components/SFUD</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -464,6 +464,57 @@
               <FileName>rtc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/rtc.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>1</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
             <File>
               <FileName>spi.c</FileName>
@@ -532,11 +583,6 @@
               <FilePath>../Core/Src/usart.c</FilePath>
             </File>
             <File>
-              <FileName>usb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/usb.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f1xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_it.c</FilePath>
@@ -551,6 +597,21 @@
         <Group>
           <GroupName>Drivers/STM32F1xx_HAL_Driver</GroupName>
           <Files>
+            <File>
+              <FileName>stm32f1xx_hal_pcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f1xx_hal_pcd_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pcd_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f1xx_ll_usb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usb.c</FilePath>
+            </File>
             <File>
               <FileName>stm32f1xx_hal_gpio_ex.c</FileName>
               <FileType>1</FileType>
@@ -691,21 +752,6 @@
               <FileName>stm32f1xx_hal_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f1xx_hal_pcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pcd.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f1xx_hal_pcd_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pcd_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f1xx_ll_usb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>E:/gsdk/platform/stm32f1_hal/fwlib/STM32Cube_FW_F1_V1.8.5/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usb.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -877,11 +923,6 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\sfud_port.c</FilePath>
             </File>
-            <File>
-              <FileName>spi_w25qxx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\device\spi_w25qxx.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -894,8 +935,8 @@
   <RTE>
     <apis/>
     <components>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="6.0.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="ARM" version="6.0.0"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.5.0" condition="ARMv6_7_8-M Device">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
         <targetInfos>
           <targetInfo name="demo"/>
         </targetInfos>

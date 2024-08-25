@@ -15,11 +15,11 @@
 #endif
 
 spi_mst_t spi = {
-	  .SPIx = &hspi1,
+	 // .SPIx = &hspi1,
 		.MISO = {SPI_MISO_PIN},
 		.MOSI = {SPI_MOSI_PIN},
 		.SCLK = {SPI_SCLK_PIN},
-		.CS   = {GPIOC, GPIO_PIN_13},
+		.CS   = {FLASH_CS_PIN},
 };
 
 static char log_buf[256];
@@ -51,9 +51,8 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
 		
 		SPI_Master_Select(spi_dev);
 		
-		if (SPI_Master_TransmitBlock(spi_dev, write_buf, write_size) == ERR_NONE) return SFUD_ERR_TIMEOUT;
-		
-		if (SPI_Master_ReceiveBlock(spi_dev, read_buf, read_size) == ERR_NONE) return SFUD_ERR_TIMEOUT;
+		if (SPI_Master_TransmitBlock(spi_dev, write_buf, write_size) != ERR_NONE) return SFUD_ERR_WRITE;
+		if (SPI_Master_ReceiveBlock(spi_dev, read_buf, read_size) != ERR_NONE) return SFUD_ERR_READ;
 
 		SPI_Master_Deselect(spi_dev);
 

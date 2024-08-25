@@ -78,7 +78,7 @@ static err_t HWSPI_Master_Init(spi_mst_t* pHandle, uint32_t u32ClockSpeedHz, spi
     }
 
     // invalid instance
-    return ERR_INVALID_VALUE;  // unknown instance
+    return ERR_NO_DEVICE;  // unknown instance
 }
 
 static err_t HWSPI_Master_TransmitBlock(spi_mst_t* pHandle, const uint8_t* cpu8TxData, uint16_t u16Size)

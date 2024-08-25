@@ -599,7 +599,7 @@ err_t W25Qxx_EraseChip(spi_w25qxx_t* pHandle)
 
 #include "hexdump.h"
 
-#define CONFIG_DEMOS_READ_ID_ONLY_SW 1
+#define CONFIG_DEMOS_READ_ID_ONLY_SW 0
 
 void W25Qxx_Test(void)
 {
@@ -613,6 +613,8 @@ void W25Qxx_Test(void)
     };
 
 #elif defined(BOARD_CS32F103C8T6_QG)
+
+    extern SPI_HandleTypeDef hspi1;
 
     spi_mst_t spi = {
         // .SPIx = &hspi1,
@@ -633,7 +635,7 @@ void W25Qxx_Test(void)
     W25Qxx_Init(&w25qxx);
 
     static uint8_t au8Data[W25QXX_SECTOR_SIZE * 2] = {0};
-    uint32_t       u32Address                       = 88;
+    uint32_t       u32Address  = 88;
 
     W25Qxx_ReadDeviceID(&w25qxx, au8Data);
 
@@ -644,7 +646,7 @@ void W25Qxx_Test(void)
 
     W25Qxx_ReadJedecID(&w25qxx, au8Data);
     hexdump(au8Data, 3, 16, 1, false, "[JedecID]:", 0);
-		
+
 #if !CONFIG_DEMOS_READ_ID_ONLY_SW
 
     // 1. read
