@@ -6,6 +6,7 @@
 
 ```
 C:\Users\yourUserName\.platformio
+C:\Users\Administrator\.platformio
 ```
 
 ![1](.assest/README/1.png)

@@ -72,6 +72,11 @@
 * [ ] ini
 * [ ] foc
 * [ ] fft
+* [ ] i2c-bus-release
+* [ ] eefs
+* [ ] miniLZO 无损压缩
+* [ ] mnrtu over usbcdc
+* [ ] 
 
 
 
