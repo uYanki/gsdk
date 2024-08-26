@@ -21,7 +21,7 @@
 * [ ] protobuf
 * [ ] lua-sdcard (with filesys)
 * [ ] openblt
-* [ ] sfud
+* [x] sfud
 * [ ] mdk 下载算法
 * [ ] 差分升级
 * [ ] cJson
