@@ -80,6 +80,7 @@ err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_
             return ERR_INVALID_VALUE; // capacity is unsupported
         }
     }
+
     // clang-format on
 
     uint16_t u16SlvAddr;
@@ -176,8 +177,8 @@ err_t EEPROM_ReadBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint8_t* pu8B
 
 err_t EEPROM_Hexdump(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Size)
 {
-    uint8_t  u8Buff[16];  // 16x
-    uint16_t u16XferSize;
+    static uint8_t au8Buff[16] = {0};  // 16x
+    uint16_t       u16XferSize;
 
     ASSERT(u16Size > 0, "illegal param");
 
@@ -185,10 +186,10 @@ err_t EEPROM_Hexdump(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Siz
 
     while (u16Size > 0)
     {
-        u16XferSize = MIN(u16Size, ARRAY_SIZE(u8Buff));
+        u16XferSize = MIN(u16Size, ARRAY_SIZE(au8Buff));
 
-        ERRCHK_RETURN(EEPROM_ReadBlock(pHandle, u32MemAddr, &u8Buff[0], u16XferSize));
-        hexdump(&u8Buff[0], u16XferSize, 16, 4, true, nullptr, u32MemAddr);
+        ERRCHK_RETURN(EEPROM_ReadBlock(pHandle, u32MemAddr, &au8Buff[0], u16XferSize));
+        hexdump(&au8Buff[0], u16XferSize, u16XferSize, 1, true, nullptr, u32MemAddr);
 
         u32MemAddr += u16XferSize;
         u16Size -= u16XferSize;
@@ -243,30 +244,42 @@ err_t EEPROM_DetectCapacity(i2c_eeprom_t* pHandle)
 // Example
 //---------------------------------------------------------------------------
 
-#if CONFIG_DEMOS_SW
+#if CONFIG_DEMOS_SW  // 仅 AC5-O0&O1优化/AC6-O0优化 通过
+
+#define BUFFSIZE 256
 
 void EEPROM_Test(i2c_mst_t* hI2C)
 {
     i2c_eeprom_t eeprom = {
         .hI2C      = hI2C,
         .u8SlvAddr = AT24CXX_ADDRESS_A000,
-        .eCapacity = AT24C02,  // 根据实际容量调整（影响页大小）
+        .eCapacity = AT24CM01,  // 根据实际容量调整（影响页大小）
     };
 
-    uint8_t au8Data[128] = {0};  // 若卡住了就调大堆栈
+    static uint8_t au8WrBuff[BUFFSIZE] = {0};  // 若卡住了就调大堆栈
+    static uint8_t au8RdBuff[BUFFSIZE] = {0};
 
-    for (uint16_t i = 0; i < ARRAY_SIZE(au8Data); ++i)
+    for (uint16_t i = 0; i < BUFFSIZE; ++i)
     {
-        au8Data[i] = i;
+        au8WrBuff[i] = i;
     }
 
     EEPROM_Init(&eeprom);
-
     EEPROM_DetectCapacity(&eeprom);
 
-    EEPROM_Hexdump(&eeprom, 0, ARRAY_SIZE(au8Data));
-    EEPROM_WriteBlock(&eeprom, 0, au8Data, ARRAY_SIZE(au8Data));
-    EEPROM_Hexdump(&eeprom, 0, ARRAY_SIZE(au8Data));
+    EEPROM_WriteBlock(&eeprom, 0, au8WrBuff, BUFFSIZE);
+    EEPROM_ReadBlock(&eeprom, 0, au8RdBuff, BUFFSIZE);
+
+    if (memcmp(au8WrBuff, au8RdBuff, BUFFSIZE) == 0)
+    {
+        LOGI("success");
+    }
+    else
+    {
+        LOGI("fail");
+        HEXDUMP1(au8WrBuff, BUFFSIZE);
+        HEXDUMP1(au8RdBuff, BUFFSIZE);
+    }
 }
 
 #endif

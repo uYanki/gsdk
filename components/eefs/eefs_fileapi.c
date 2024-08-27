@@ -84,7 +84,7 @@ int32_t EEFS_LibInitFS(EEFS_InodeTable_t* InodeTable, uint32_t BaseAddress)
     EEFS_FileAllocationTableHeader_t FileAllocationTableHeader;
     EEFS_FileAllocationTableEntry_t  FileAllocationTableEntry;
     uint32_t                         i;
-    int32_t                            ReturnCode;
+    int32_t                          ReturnCode;
 
     EEFS_LIB_LOCK;
     if (InodeTable != NULL)

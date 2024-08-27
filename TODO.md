@@ -61,13 +61,13 @@
 * [ ] tinyusb
 * [ ] shell
 * [ ] OfflineSWD
-* [ ] daplink
+* [x] daplink
 * [x] u8g2
 * [x] LVGL
 * [x] EmberGL
 * [x] GuiLite
 * [ ] Pico-Mac
-* [ ] FlashDB
+* [x] FlashDB
 * [ ] 频谱灯
 * [ ] ini
 * [ ] foc
@@ -75,7 +75,7 @@
 * [ ] i2c-bus-release
 * [ ] eefs
 * [ ] miniLZO 无损压缩
-* [ ] mnrtu over usbcdc
+* [ ] mbrtu over usbcdc
 * [ ] 
 
 

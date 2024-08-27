@@ -27,6 +27,7 @@ extern "C" {
 #define AT24CXX_ADDRESS_A110 0x56
 #define AT24CXX_ADDRESS_A111 0x57
 
+// unit: bytes
 typedef enum {
     AT24C01  = 128,    /* 7B */
     AT24C02  = 256,    /* 8B */

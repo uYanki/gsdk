@@ -11,6 +11,11 @@ extern "C" {
 // Definitions
 //---------------------------------------------------------------------------
 
+#define HEXDUMP1(buff, size) hexdump(buff, size, 16, 1, true, nullptr, (u32)buff);
+#define HEXDUMP2(buff, size) hexdump(buff, size, 16, 2, true, nullptr, (u32)buff);
+#define HEXDUMP4(buff, size) hexdump(buff, size, 16, 4, true, nullptr, (u32)buff);
+#define HEXDUMP8(buff, size) hexdump(buff, size, 16, 8, true, nullptr, (u32)buff);
+
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------

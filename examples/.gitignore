@@ -6,3 +6,4 @@ _inbox_at32
 _inbox_stm32
 _inbox_esp32
 build
+stm32f103c8_hal_USB_MSC_Bootlaoder

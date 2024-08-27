@@ -18,10 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "can.h"
 #include "dma.h"
-#include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -34,7 +31,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define I2C_IF 1
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -62,35 +59,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#include "gdefs.h"
-#include "hwif.h"
-#include "i2c_eeprom.h"
-// #include "i2c_ssd1306.h"
-// #include "i2c_tca9548a.h"
-// #include "i2c_pcf8574.h"
-// #include "i2c_bh1750.h"
-// #include "i2c_lcd1602.h"
-// #include "spi_ad770x.h"
-// #include "spi_st7735.h"
-// #include "gpio_hcsr04.h"
-// #include "motdrv.h"
-
-#if 1
-
-i2c_eeprom_t eefs_eeprom = {
-    .hI2C      = nullptr,
-    .u8SlvAddr = AT24CXX_ADDRESS_A000,
-    .eCapacity = AT24C02,
-};
-
-void eefs_init(i2c_mst_t* hI2C)
-{
-    eefs_eeprom.hI2C = hI2C;
-
-    EEPROM_Init(&eefs_eeprom);
-}
-
-#endif
 
 /* USER CODE END 0 */
 
@@ -128,89 +96,17 @@ int main(void)
     MX_GPIO_Init();
     MX_DMA_Init();
     MX_TIM11_Init();
-    MX_CAN1_Init();
-    MX_I2C1_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
-    MX_SPI1_Init();
     /* USER CODE BEGIN 2 */
 
     DelayInit();
-    // MX_TIM1_Init();
-
-    // AD7705_Test();
-    // RC522_Test();
+    EEFS_Test();
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-
-    // Game2048();
-    // GameSnake();
-
-    // FlexBtn_Test();
-    // Shell_Test();
-    // foc();
-
-    NRF24L01_Test();
-
-    i2c_mst_t i2c = {
-#if I2C_IF == 0
-        .SDA  = {AT24C02_SDA_PIN},
-        .SCL  = {AT24C02_SCL_PIN},
-        .I2Cx = nullptr,
-#elif I2C_IF == 1
-        .SDA  = {GPIOA, GPIO_PIN_6},
-        .SCL  = {GPIOA, GPIO_PIN_5},
-        .I2Cx = nullptr,
-#elif I2C_IF == 2
-        .SDA  = {AT24C02_SDA_PIN},
-        .SCL  = {AT24C02_SCL_PIN},
-        .I2Cx = &hi2c1,
-#endif
-    };
-
-    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
-    I2C_Master_ScanAddress(&i2c);
-    // INA219_Test(&i2c);
-    INA3221_Test(&i2c);
-    APDS9960_Test(&i2c);
-    // QRCode_Test();
-    // EEFS_Test();
-    // FlexBtn_Test();
-
-#if CONFIG_DEMOS_SW
-    // EEPROM_Test(&i2c);
-    // SSD1306_Test(&i2c);
-    // LCD1602_Test(&i2c);
-    // MPU6050_Test(&i2c);
-    // TCA9548A_Test(&i2c);
-    BH1750_Test(&i2c);
-    // PCF8574_Test(&i2c);
-    // AS5600_Test(&i2c);
-    // PCA9685_Test(&i2c);
-    // LM75_Test(&i2c);
-    // INA219_Test(&i2c);
-    // SI5351_Test(&i2c);
-#endif
-
-#if CONFIG_DEMOS_SW
-    // DHT11_Test();
-    // DS18B20_Test(); // !
-    // HCSR04_Test();
-#endif
-
-#if CONFIG_DEMOS_SW
-    // AD9833_Test();
-    // TM1638_Test();
-    // DS1302_Test();
-    // AD7705_Test();
-    // ST7735_Test();
-    // MCP2515_Test();
-    // W25Qxx_Test();
-#endif
-
     while (1)
     {
         /* USER CODE END WHILE */
