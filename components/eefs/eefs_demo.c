@@ -162,8 +162,8 @@ err_t EEFS_Test(void)
 
     ERRCHK_RETURN(EEFS_Setup());
 
-    char*       szFileWrData      = "hello world!";
-    static char szFileRdData[200] = {0};
+    char*       szFileWrData     = "hello world!";
+    static char szFileRdData[32] = {0};
 
     int32_t eefs_fd = EEFS_Creat("/disk/file.txt", 0);
 
