@@ -56,6 +56,7 @@ typedef struct {
 err_t EEPROM_Init(i2c_eeprom_t* pHandle);
 err_t EEPROM_WriteBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, const uint8_t* cpu8Buffer, uint16_t u16Size);
 err_t EEPROM_ReadBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint8_t* pu8Buffer, uint16_t u16Size);
+err_t EEPROM_FillByte(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Size, uint8_t u8Data);
 err_t EEPROM_Hexdump(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Size);
 err_t EEPROM_DetectCapacity(i2c_eeprom_t* pHandle);
 

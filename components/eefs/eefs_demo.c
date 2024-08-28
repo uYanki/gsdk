@@ -55,12 +55,31 @@ static i2c_eeprom_t eefs_eeprom = {
  *
  * @return none
  */
+
 __weak void eefs_write(void* pDest, void* pSrc, int Length)
 {
 #if CONFIG_EEFS_IO == 0
     memcpy(&m_au8FileSystemBuffer[(int32_t)pDest], (int8_t*)pSrc, Length);
 #elif CONFIG_EEFS_IO == 1
     EEPROM_WriteBlock(&eefs_eeprom, (int32_t)pDest, (int8_t*)pSrc, Length);
+
+#if 1
+
+    static uint8_t verify_buff[1024] = {0};
+
+    HEXDUMP2(pSrc, Length);
+    EEPROM_ReadBlock(&eefs_eeprom, (int32_t)pDest, verify_buff, Length);
+
+    for (u16 i = 0; i < Length; i++)
+    {
+        if (verify_buff[i] != ((u8*)pSrc)[i])
+        {
+            LOGD("diff at %d", i);
+            break;
+        }
+    }
+#endif
+
 #endif
 }
 /**
@@ -74,11 +93,12 @@ __weak void eefs_write(void* pDest, void* pSrc, int Length)
  */
 __weak void eefs_read(void* pDest, void* pSrc, int Length)
 {
-    LOGD("%d,%d", (int32_t)pSrc, Length);
 #if CONFIG_EEFS_IO == 0
     memcpy((int8_t*)pDest, &m_au8FileSystemBuffer[(int32_t)pSrc], Length);
 #elif CONFIG_EEFS_IO == 1
-    EEPROM_ReadBlock(&eefs_eeprom, (int32_t)pSrc, (int8_t*)pDest, Length);
+    EEPROM_ReadBlock(&eefs_eeprom, (int32_t)pSrc, (uint8_t*)pDest, Length);
+
+    HEXDUMP2(pDest, Length);
 #endif
 }
 
@@ -113,6 +133,7 @@ static err_t EEFS_Setup(void)
         s_FileAllocationTable.Header.FreeMemorySize = ARRAY_SIZE(m_au8FileSystemBuffer) - sizeof(EEFS_FileAllocationTable_t);
 #elif CONFIG_EEFS_IO == 1
         s_FileAllocationTable.Header.FreeMemorySize = eefs_eeprom.eCapacity - sizeof(EEFS_FileAllocationTable_t);
+        EEPROM_FillByte(&eefs_eeprom, 0, 1024 /* eefs_eeprom.eCapacity */, 0x00);  // 必须清空原有内容！！
 #endif
 
         /* Write a file allocation table to eeprom. */
@@ -123,13 +144,13 @@ static err_t EEFS_Setup(void)
 
     if (EEFS_InitFS(CONFIG_EEFS_DEVICE_NAME, 0) != EEFS_SUCCESS)
     {
-        LOGW("fail init file system");
+        LOGW("fail to init file system");
         return ERR_FAIL;  // fail to init eefs
     }
 
     if (EEFS_Mount(CONFIG_EEFS_DEVICE_NAME, CONFIG_EEFS_MOUNT_POINT) != EEFS_SUCCESS)
     {
-        LOGW("fail mount file system");
+        LOGW("fail to mount file system");
         return ERR_FAIL;  // fail to mount disk
     }
 
@@ -142,7 +163,7 @@ err_t EEFS_Test(void)
 {
 #if CONFIG_EEFS_IO == 1
 
-    // 仅 AC5-O0优化 通过
+    // AC5测试通过(若不通过，则把软件I2C的频率调小!!), AC6无法通过测试
 
     static i2c_mst_t i2c = {
         .SDA  = {GPIOA, GPIO_PIN_6},
@@ -152,11 +173,11 @@ err_t EEFS_Test(void)
 
     eefs_eeprom.hI2C = &i2c;
 
-    I2C_Master_Init(&i2c, 1e6, I2C_DUTYCYCLE_50_50);
+    I2C_Master_Init(&i2c, 1e5, I2C_DUTYCYCLE_50_50);
     I2C_Master_ScanAddress(&i2c);
     EEPROM_Init(&eefs_eeprom);
 
-    EEPROM_Test(eefs_eeprom.hI2C);
+    // EEPROM_FillByte(&eefs_eeprom, 0, 1024, 0x00);
 
 #endif
 

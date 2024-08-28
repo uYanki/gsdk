@@ -73,7 +73,7 @@
 * [ ] foc
 * [ ] fft
 * [ ] i2c-bus-release
-* [ ] eefs
+* [x] eefs
 * [ ] miniLZO 无损压缩
 * [ ] mbrtu over usbcdc
 * [ ] 

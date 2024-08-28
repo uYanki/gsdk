@@ -53,7 +53,7 @@ typedef int32_t err_t;
 
 #define ERRCHK_ABORT(expr)   \
     do {                     \
-        err_t eno = (expr);  \
+        volatile err_t eno = (expr);  \
                              \
         if (eno != ERR_NONE) \
         {                    \
@@ -64,7 +64,7 @@ typedef int32_t err_t;
 
 #define ERRCHK_EXIT(expr)    \
     do {                     \
-        err_t eno = (expr);  \
+        volatile err_t eno = (expr);  \
                              \
         if (eno != ERR_NONE) \
         {                    \
@@ -75,7 +75,7 @@ typedef int32_t err_t;
 
 #define ERRCHK_RETURN(expr)  \
     do {                     \
-        err_t eno = (expr);  \
+        volatile err_t eno = (expr);  \
                              \
         if (eno != ERR_NONE) \
         {                    \

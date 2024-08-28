@@ -175,10 +175,37 @@ err_t EEPROM_ReadBlock(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint8_t* pu8B
     return I2C_Master_ReadBlock(pHandle->hI2C, u16SlvAddr, u16MemAddr, pu8Buffer, u16Size, u16Flags);
 }
 
+err_t EEPROM_FillByte(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Size, uint8_t u8Data)
+{
+    uint8_t  au8Buff[16];  // 16x
+    uint16_t u16XferSize;
+
+    ASSERT(u16Size > 0, "illegal param");
+
+    LOGI("address = 0x%08X, size = %d bytes", u32MemAddr, u16Size);
+
+    for (uint8_t i = 0; i < ARRAY_SIZE(au8Buff); i++)
+    {
+        au8Buff[i] = u8Data;
+    }
+
+    while (u16Size > 0)
+    {
+        u16XferSize = MIN(u16Size, ARRAY_SIZE(au8Buff));
+
+        ERRCHK_RETURN(EEPROM_WriteBlock(pHandle, u32MemAddr, &au8Buff[0], u16XferSize));
+
+        u32MemAddr += u16XferSize;
+        u16Size -= u16XferSize;
+    }
+
+    return ERR_NONE;
+}
+
 err_t EEPROM_Hexdump(i2c_eeprom_t* pHandle, uint32_t u32MemAddr, uint16_t u16Size)
 {
-    static uint8_t au8Buff[16] = {0};  // 16x
-    uint16_t       u16XferSize;
+    uint8_t  au8Buff[16] = {0};  // 16x
+    uint16_t u16XferSize;
 
     ASSERT(u16Size > 0, "illegal param");
 
