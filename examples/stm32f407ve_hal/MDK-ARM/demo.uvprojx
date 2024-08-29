@@ -340,7 +340,7 @@
               <MiscControls>-Wno-shift-negative-value -Wno-shift-count-negative -Wno-int-to-void-pointer-cast -Wno-unused-value</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../platform/stm32f4_hal/boards/stm32f407ve_xws;../../../platform/stm32f4_hal/adapter;../../../components/eefs;../../../components/logicloader;../../../components/qrcode;../../../components/CmBacktrace;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/STM32F4xx_HAL_Driver/Inc;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../platform/stm32f4_hal/boards/stm32f407ve_xws;../../../platform/stm32f4_hal/adapter;../../../components/qrcode;../../../components/CmBacktrace;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/STM32F4xx_HAL_Driver/Inc;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include;E:/gsdk/platform/stm32f4_hal/fwlib/STM32Cube_FW_F4_V1.28.0/Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -2337,36 +2337,6 @@
               <FileName>cmb_fault_keil.S</FileName>
               <FileType>2</FileType>
               <FilePath>..\..\..\components\CmBacktrace\cmb_fault_keil.S</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>components/eefs</GroupName>
-          <Files>
-            <File>
-              <FileName>eefs_fileapi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\eefs\eefs_fileapi.c</FilePath>
-            </File>
-            <File>
-              <FileName>eefs_filesys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\eefs\eefs_filesys.c</FilePath>
-            </File>
-            <File>
-              <FileName>eefs_demo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\eefs\eefs_demo.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>components/logicloader</GroupName>
-          <Files>
-            <File>
-              <FileName>logic_loader.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\components\logicloader\logic_loader.c</FilePath>
             </File>
           </Files>
         </Group>

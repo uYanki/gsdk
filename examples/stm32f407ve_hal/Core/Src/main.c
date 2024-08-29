@@ -75,23 +75,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 // #include "gpio_hcsr04.h"
 // #include "motdrv.h"
 
-#if 1
-
-i2c_eeprom_t eefs_eeprom = {
-    .hI2C      = nullptr,
-    .u8SlvAddr = AT24CXX_ADDRESS_A000,
-    .eCapacity = AT24C02,
-};
-
-void eefs_init(i2c_mst_t* hI2C)
-{
-    eefs_eeprom.hI2C = hI2C;
-
-    EEPROM_Init(&eefs_eeprom);
-}
-
-#endif
-
 /* USER CODE END 0 */
 
 /**
