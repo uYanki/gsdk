@@ -2,6 +2,7 @@
 #define __LOGGER_H__
 
 #include "gdefs.h"
+#include "gstdio.h"
 
 #ifdef __cplusplus
 extern "C" {
