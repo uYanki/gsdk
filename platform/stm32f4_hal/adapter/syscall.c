@@ -69,6 +69,11 @@ void _sys_exit(int return_code)
     while (1);
 }
 
+void exit(int return_code)
+{
+    _sys_exit(return_code);
+}
+
 clock_t clock(void)
 {
     clock_t tmp;
@@ -82,6 +87,7 @@ void _clock_init(void)
 time_t time(time_t* timer)
 {
     time_t tmp;
+    tmp = GetTickUs();
     return tmp;
 }
 
