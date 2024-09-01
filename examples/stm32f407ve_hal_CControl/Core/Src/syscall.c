@@ -90,12 +90,6 @@ void _clock_init(void)
 time_t time(time_t* timer)
 {
     time_t tmp;
-
-    if (timer == 0)
-    {
-        tmp = UTC2TS(GetTickUs() / 1000000);
-    }
-
     return tmp;
 }
 

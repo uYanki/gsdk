@@ -130,7 +130,7 @@ static time_t GetTimezoneOffsetInMinute(timezone_e eTimezone)
         case TIMEZONE_AMERICA_CAYMAN: return -300;
         case TIMEZONE_AMERICA_CHICAGO: return -360;
         case TIMEZONE_AMERICA_CHIHUAHUA: return -360;
-        // case TIMEZONE_AMERICA_CIUDAD_JUAREZ: return 0;
+#case TIMEZONE_AMERICA_CIUDAD_JUAREZ : return 0;
         case TIMEZONE_AMERICA_CORAL_HARBOUR: return -300;
         case TIMEZONE_AMERICA_CORDOBA: return -180;
         case TIMEZONE_AMERICA_COSTA_RICA: return -360;
@@ -463,6 +463,7 @@ static time_t GetTimezoneOffsetInMinute(timezone_e eTimezone)
         case TIMEZONE_PACIFIC_TRUK: return 600;
         case TIMEZONE_PACIFIC_WAKE: return 720;
         case TIMEZONE_PACIFIC_WALLIS: return 720;
+        default: return 0;
     }
 }
 
@@ -615,10 +616,10 @@ void Timestamp_Test(void)
         .tm_sec  = 19,
     };
 
-    u32 ts = datatime_to_timestamp(&Time, TIMEZONE_ASIA_SHANGHAI);
+    u32 ts = datatime_to_timestamp(&Time, TIMEZONE_ASIA_SHANGHAI, TIMESTAMP_UNIT_S);
     LOGI("ts %d (%d)", ts, ts - 1725127579);
 
-    Time = timestamp_to_datatime(-11236, TIMEZONE_ASIA_SHANGHAI);  // 1970-01-01 04:52:44
+    Time = timestamp_to_datatime(-11236, TIMEZONE_ASIA_SHANGHAI, TIMESTAMP_UNIT_S);  // 1970-01-01 04:52:44
     LOGI("time %02d-%02d-%02d %02d:%02d:%02d (yday %d, wday %d)\n",
          Time.tm_year,
          Time.tm_mon,
