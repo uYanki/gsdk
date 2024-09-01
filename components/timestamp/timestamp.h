@@ -106,7 +106,7 @@ typedef enum {
     TIMEZONE_AMERICA_CAYMAN,                  // America/Cayman
     TIMEZONE_AMERICA_CHICAGO,                 // America/Chicago
     TIMEZONE_AMERICA_CHIHUAHUA,               // America/Chihuahua
-    // TIMEZONE_AMERICA_CIUDAD_JUAREZ,           // America/Ciudad_Juarez
+    // TIMEZONE_AMERICA_CIUDAD_JUAREZ,        // America/Ciudad_Juarez
     TIMEZONE_AMERICA_CORAL_HARBOUR,           // America/Coral_Harbour
     TIMEZONE_AMERICA_CORDOBA,                 // America/Cordoba
     TIMEZONE_AMERICA_COSTA_RICA,              // America/Costa_Rica

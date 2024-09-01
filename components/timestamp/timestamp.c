@@ -43,6 +43,7 @@ static bool IsLeapYear(u32 year)
 
 static time_t GetTimezoneOffsetInMinute(timezone_e eTimezone)
 {
+    // clang-format off
     switch (eTimezone)
     {
         case TIMEZONE_AFRICA_ABIDJAN: return 0;
@@ -130,7 +131,7 @@ static time_t GetTimezoneOffsetInMinute(timezone_e eTimezone)
         case TIMEZONE_AMERICA_CAYMAN: return -300;
         case TIMEZONE_AMERICA_CHICAGO: return -360;
         case TIMEZONE_AMERICA_CHIHUAHUA: return -360;
-#case TIMEZONE_AMERICA_CIUDAD_JUAREZ : return 0;
+        // case TIMEZONE_AMERICA_CIUDAD_JUAREZ: return 0;
         case TIMEZONE_AMERICA_CORAL_HARBOUR: return -300;
         case TIMEZONE_AMERICA_CORDOBA: return -180;
         case TIMEZONE_AMERICA_COSTA_RICA: return -360;
@@ -465,6 +466,7 @@ static time_t GetTimezoneOffsetInMinute(timezone_e eTimezone)
         case TIMEZONE_PACIFIC_WALLIS: return 720;
         default: return 0;
     }
+    // clang-format on
 }
 
 /**
