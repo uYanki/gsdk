@@ -609,7 +609,7 @@ void Timestamp_Test(void)
     // https://tool.lu/timestamp/
     // https://www.timetool.cn/timestamp/
 
-    struct tm Time = {
+    struct tm sTime = {
         .tm_year = 2024,
         .tm_mon  = 9,
         .tm_mday = 1,
@@ -621,16 +621,16 @@ void Timestamp_Test(void)
     u32 ts = datatime_to_timestamp(&Time, TIMEZONE_ASIA_SHANGHAI, TIMESTAMP_UNIT_S);
     LOGI("ts %d (%d)", ts, ts - 1725127579);
 
-    Time = timestamp_to_datatime(-11236, TIMEZONE_ASIA_SHANGHAI, TIMESTAMP_UNIT_S);  // 1970-01-01 04:52:44
+    sTime = timestamp_to_datatime(-11236, TIMEZONE_ASIA_SHANGHAI, TIMESTAMP_UNIT_S);  // 1970-01-01 04:52:44
     LOGI("time %02d-%02d-%02d %02d:%02d:%02d (yday %d, wday %d)\n",
-         Time.tm_year,
-         Time.tm_mon,
-         Time.tm_mday,
-         Time.tm_hour,
-         Time.tm_min,
-         Time.tm_sec,
-         Time.tm_yday,
-         Time.tm_wday);
+         sTime.tm_year,
+         sTime.tm_mon,
+         sTime.tm_mday,
+         sTime.tm_hour,
+         sTime.tm_min,
+         sTime.tm_sec,
+         sTime.tm_yday,
+         sTime.tm_wday);
 }
 
 #endif
