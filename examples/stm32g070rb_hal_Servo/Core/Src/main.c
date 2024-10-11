@@ -292,35 +292,6 @@ void MotCtrlIsr(mot_ctrl_t* pMotCtrl)
 
     RevPark(&pMotCtrl->sRevPark);
     RevClarke(&pMotCtrl->sRevClarke);
-
-#if 0
-
-    mc_t sFoc;
-
-    // sFoc.Uq           = P(0).s16Uq;
-    // sFoc.Ud           = P(0).s16Ud;
-    // sFoc.u16ElecAngle = P(0).u16ElecAngleRef;
-
-    // MC_SinCos(&sFoc);
-    // MC_InvPark(&sFoc);
-
-    sFoc.Ualpha  = P(0).s16Ualpha;
-    sFoc.Ubeta   = P(0).s16Ubeta;
-    sFoc.DutyMax = P(0).u16PwmDutyMax;
-    SVGEN_run(&sFoc, 0);
-
-    P(0).u16PwmaComp = sFoc.Ta;
-    P(0).u16PwmbComp = sFoc.Tb;
-    P(0).u16PwmcComp = sFoc.Tc;
-
-    PWM_SetDuty(
-        P(0).u16PwmaComp,
-        P(0).u16PwmbComp,
-        P(0).u16PwmcComp,
-        AXIS_0);
-
-#else
-
     Svpwm(&pMotCtrl->sSvpwm);
 
     PWM_SetDuty(
@@ -328,8 +299,6 @@ void MotCtrlIsr(mot_ctrl_t* pMotCtrl)
         *pMotCtrl->sSvpwm.u16PwmCmpB_o,
         *pMotCtrl->sSvpwm.u16PwmCmpC_o,
         AXIS_0);
-
-#endif
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -487,18 +456,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
             case AXIS_APP_OPENLOOP:
             case AXIS_APP_ENCIDENT:
             {
-                PeriodicTask(125 * UNIT_US, {
-#if 0
-                    mc_t foc;
-                    foc.Uq           = P(eAxisNo).s16Uq;
-                    foc.Ud           = P(eAxisNo).s16Ud;
-                    foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
-                    foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef;
-                    MotDrv_Isr(&foc, eAxisNo);
-#else
+              
                     MotCtrlIsr(&sMotCtrl);
-#endif
-                });
+              
                 break;
             }
 

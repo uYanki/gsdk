@@ -132,7 +132,7 @@ static inline void Svpwm(svpwm_t* pSvpwm)
 
     // 计算矢量作用时长
 
-		#if 1
+		#if 0
 		
     u16 u16HalfPrd = *pSvpwm->u16PwmPeriod >> 1;
     s16 s16Tmp1    = (s16)((s32)u16HalfPrd * (s32)(*q15UphMax_i - *q15UphMin_i) / (s32)*pSvpwm->q15Udc_i);
