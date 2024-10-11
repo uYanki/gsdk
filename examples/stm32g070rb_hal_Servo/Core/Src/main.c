@@ -50,10 +50,10 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-#define __ENC_HALL_SW   1
+#define __ENC_HALL_SW  1
 
-#define SSD1306_WIDTH   128
-#define SSD1306_HEIGHT  32
+#define SSD1306_WIDTH  128
+#define SSD1306_HEIGHT 32
 
 /* USER CODE END PTD */
 
@@ -212,6 +212,126 @@ static arm_pid_instance_f32 s_sPosPi;
 static bool                 s_bSpdInit = true;
 static bool                 s_bPosInit = true;
 
+#include "park.h"
+#include "clarke.h"
+#include "svpwm.h"
+
+typedef struct {
+    park_t    sPark;
+    ipark_t   sRevPark;
+    iclarke_t sRevClarke;
+    clarke_t  sClarke;
+    svpwm_t   sSvpwm;
+
+    PID_t sIdPid;
+    PID_t sIqPid;
+
+    s16 s16Iab[2];
+    s16 s16Idq[2];
+    s16 s16Uph[3];
+
+    q15 u16UmdcPu;
+
+} mot_ctrl_t;
+
+mot_ctrl_t sMotCtrl;
+
+void MotCtrlCreat(mot_ctrl_t* pMotCtrl, axis_e eAxisNo)
+{
+    D.u16UmdcSi = 12;
+
+    pMotCtrl->sClarke.q15PhA_i   = &P(eAxisNo).s16IaFbSi;
+    pMotCtrl->sClarke.q15PhB_i   = &P(eAxisNo).s16IbFbSi;
+    pMotCtrl->sClarke.q15PhC_i   = &P(eAxisNo).s16IcFbSi;
+    pMotCtrl->sClarke.q15Alpha_o = &pMotCtrl->s16Iab[0];
+    pMotCtrl->sClarke.q15Beta_o  = &pMotCtrl->s16Iab[1];
+
+    pMotCtrl->sPark.q15Alpha_i   = pMotCtrl->sClarke.q15Alpha_o;
+    pMotCtrl->sPark.q15Beta_i    = pMotCtrl->sClarke.q15Beta_o;
+    pMotCtrl->sPark.u16ElecAng_i = &P(eAxisNo).u16ElecAngleFb;
+    pMotCtrl->sPark.q15D_o       = &pMotCtrl->s16Idq[1];
+    pMotCtrl->sPark.q15Q_o       = &pMotCtrl->s16Idq[0];
+
+    pMotCtrl->sRevPark.q15D_i       = &P(eAxisNo).s16Ud;
+    pMotCtrl->sRevPark.q15Q_i       = &P(eAxisNo).s16Uq;
+    pMotCtrl->sRevPark.u16ElecAng_i = &P(eAxisNo).u16ElecAngleRef;
+    pMotCtrl->sRevPark.q15Alpha_o   = &P(eAxisNo).s16Ualpha;
+    pMotCtrl->sRevPark.q15Beta_o    = &P(eAxisNo).s16Ubeta;
+
+    pMotCtrl->sRevClarke.q15Alpha_i = pMotCtrl->sRevPark.q15Alpha_o;
+    pMotCtrl->sRevClarke.q15Beta_i  = pMotCtrl->sRevPark.q15Beta_o;
+    pMotCtrl->sRevClarke.q15PhA_o   = &pMotCtrl->s16Uph[0];
+    pMotCtrl->sRevClarke.q15PhB_o   = &pMotCtrl->s16Uph[1];
+    pMotCtrl->sRevClarke.q15PhC_o   = &pMotCtrl->s16Uph[2];
+
+    pMotCtrl->sSvpwm.q15Ua_i      = pMotCtrl->sRevClarke.q15PhA_o;
+    pMotCtrl->sSvpwm.q15Ub_i      = pMotCtrl->sRevClarke.q15PhB_o;
+    pMotCtrl->sSvpwm.q15Uc_i      = pMotCtrl->sRevClarke.q15PhC_o;
+    pMotCtrl->sSvpwm.q15Udc_i     = &pMotCtrl->u16UmdcPu;
+    pMotCtrl->sSvpwm.eSector_o    = &P(eAxisNo).u16Sector;
+    pMotCtrl->sSvpwm.u16PwmCmpA_o = &P(eAxisNo).u16PwmaComp;
+    pMotCtrl->sSvpwm.u16PwmCmpB_o = &P(eAxisNo).u16PwmbComp;
+    pMotCtrl->sSvpwm.u16PwmCmpC_o = &P(eAxisNo).u16PwmcComp;
+    pMotCtrl->sSvpwm.u16PwmPeriod = &P(eAxisNo).u16PwmDutyMax;
+}
+
+void MotCtrlIsr(mot_ctrl_t* pMotCtrl)
+{
+    pMotCtrl->u16UmdcPu = 32767;//GetUmdc() ;
+	
+
+#if 0
+
+    Park(&pMotDrv->sPark);
+    Clarke3(&pMotDrv->sClarke);
+
+    IdPid(&pMotDrv->sIdPid);
+    IqPid(&pMotDrv->sIqPid);
+
+#endif
+
+    RevPark(&pMotCtrl->sRevPark);
+    RevClarke(&pMotCtrl->sRevClarke);
+
+#if 0
+
+    mc_t sFoc;
+
+    // sFoc.Uq           = P(0).s16Uq;
+    // sFoc.Ud           = P(0).s16Ud;
+    // sFoc.u16ElecAngle = P(0).u16ElecAngleRef;
+
+    // MC_SinCos(&sFoc);
+    // MC_InvPark(&sFoc);
+
+    sFoc.Ualpha  = P(0).s16Ualpha;
+    sFoc.Ubeta   = P(0).s16Ubeta;
+    sFoc.DutyMax = P(0).u16PwmDutyMax;
+    SVGEN_run(&sFoc, 0);
+
+    P(0).u16PwmaComp = sFoc.Ta;
+    P(0).u16PwmbComp = sFoc.Tb;
+    P(0).u16PwmcComp = sFoc.Tc;
+
+    PWM_SetDuty(
+        P(0).u16PwmaComp,
+        P(0).u16PwmbComp,
+        P(0).u16PwmcComp,
+        AXIS_0);
+
+#else
+
+    Svpwm(&pMotCtrl->sSvpwm);
+
+    PWM_SetDuty(
+        *pMotCtrl->sSvpwm.u16PwmCmpA_o,
+        *pMotCtrl->sSvpwm.u16PwmCmpB_o,
+        *pMotCtrl->sSvpwm.u16PwmCmpC_o,
+        AXIS_0);
+
+#endif
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
     //  return;
@@ -286,7 +406,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
         switch (P(eAxisNo).u16AppSel)
         {
-            case AXIS_APP_GENERIC: {
+            case AXIS_APP_GENERIC:
+            {
                 if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
                 {
                     PeriodicTask(125 * UNIT_US, {
@@ -301,7 +422,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
-                            case CTRL_MODE_POS: {
+                            case CTRL_MODE_POS:
+                            {
                                 break;
                                 static PID_t pid = {0};
 
@@ -336,13 +458,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
                                 break;
                             }
 
-                            case CTRL_MODE_SPD: {
+                            case CTRL_MODE_SPD:
+                            {
                                 // qdAxis.pdf
-                                foc.Uq = P(eAxisNo).s32DrvSpdRef * 0.5;
+                                P(eAxisNo).s16Uq = P(eAxisNo).s32DrvSpdRef;
                                 break;
                             }
 
-                            case CTRL_MODE_TRQ: {
+                            case CTRL_MODE_TRQ:
+                            {
                                 break;
                             }
 
@@ -353,7 +477,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
                             }
                         }
 
-                        MotDrv_Isr(&foc, eAxisNo);
+                        MotCtrlIsr(&sMotCtrl);
                     });
                 }
 
@@ -361,20 +485,25 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
             }
 
             case AXIS_APP_OPENLOOP:
-            case AXIS_APP_ENCIDENT: {
+            case AXIS_APP_ENCIDENT:
+            {
                 PeriodicTask(125 * UNIT_US, {
+#if 0
                     mc_t foc;
                     foc.Uq           = P(eAxisNo).s16Uq;
                     foc.Ud           = P(eAxisNo).s16Ud;
                     foc.DutyMax      = P(eAxisNo).u16PwmDutyMax;
                     foc.u16ElecAngle = P(eAxisNo).u16ElecAngleRef;
-
                     MotDrv_Isr(&foc, eAxisNo);
+#else
+                    MotCtrlIsr(&sMotCtrl);
+#endif
                 });
                 break;
             }
 
-            default: {
+            default:
+            {
                 // AlmUpdate()
                 break;
             }
@@ -541,6 +670,8 @@ int main(void)
     eMBEnable();
     MbRtuRun();
 
+    MotCtrlCreat(&sMotCtrl, AXIS_0);
+
     // hall enc
     HallEnc_Creat(&sHallEnc);
     HallEnc_Init(&sHallEnc);
@@ -676,11 +807,13 @@ static bool IsPressed(flexbtn_t* pHandle)
     {
         case BUTTON_PREV:
         case BUTTON_OKAY:
-        case BUTTON_NEXT: {
+        case BUTTON_NEXT:
+        {
             return PIN_ReadLevel(&keys[pHandle->u8ID]) == PIN_LEVEL_LOW;
         }
 
-        default: {
+        default:
+        {
             LOGW("unknown button id");
             break;
         }

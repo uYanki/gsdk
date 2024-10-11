@@ -340,7 +340,7 @@
               <MiscControls>-Wno-shift-negative-value -Wno-shift-count-negative -Wno-int-to-void-pointer-cast -Wno-unused-value</MiscControls>
               <Define>USE_HAL_DRIVER,STM32G070xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../components/motspin/fixed-point;../../../platform/stm32g0_hal/board/stm32g070rb_umotion;../../../platform/stm32g0_hal/adapter;../../../components/CmBacktrace;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Device/ST/STM32G0xx/Include;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Include;../Libraries;../Database;../Bsp;../../../platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/DSP/Include;../Axis</IncludePath>
+              <IncludePath>../Core/Inc;../../../kernel;../../../kernel/hwif;../../../components/device;../../../components/flexbtn;../../../components/motspin/fixed-point;../../../platform/stm32g0_hal/board/stm32g070rb_umotion;../../../platform/stm32g0_hal/adapter;../../../components/CmBacktrace;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Device/ST/STM32G0xx/Include;F:/gsdk/platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/Include;../Libraries;../Database;../Bsp;../../../platform/stm32g0_hal/fwlib/STM32Cube_FW_G0_V1.6.0/Drivers/CMSIS/DSP/Include;../Axis;..\Axis\motdrv\MotorCtrl</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -3317,6 +3317,16 @@
               <FileName>drvsche.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Axis\drvsche.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>mclib</GroupName>
+          <Files>
+            <File>
+              <FileName>sintbl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Axis\motdrv\MotorCtrl\sintbl.c</FilePath>
             </File>
           </Files>
         </Group>
