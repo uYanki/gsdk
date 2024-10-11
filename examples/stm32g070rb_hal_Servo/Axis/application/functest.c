@@ -21,12 +21,12 @@
 
 void FuncTestCreat(func_test_t* pFuncTest, axis_e eAxisNo) {}
 
-void FuncTestInit(func_test_t* pFuncTest, axis_e eAxisNo) {}
+void FuncTestInit(func_test_t* pFuncTest) {}
 
-void FuncTestEnter(func_test_t* pFuncTest, axis_e eAxisNo) {}
+void FuncTestEnter(func_test_t* pFuncTest) {}
 
-void FuncTestExit(func_test_t* pFuncTest, axis_e eAxisNo) {}
+void FuncTestExit(func_test_t* pFuncTest) {}
 
-void FuncTestCycle(func_test_t* pFuncTest, axis_e eAxisNo) {}
+void FuncTestCycle(func_test_t* pFuncTest) {}
 
-void FuncTestIsr(func_test_t* pFuncTest, axis_e eAxisNo) {}
+void FuncTestIsr(func_test_t* pFuncTest) {}

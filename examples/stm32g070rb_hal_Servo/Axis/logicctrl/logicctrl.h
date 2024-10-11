@@ -30,9 +30,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void LogicCtrlCreat(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo);
-void LogicCtrlInit(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo);
-void LogicCtrlCycle(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo);
-void LogicCtrlIsr(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo);
+void LogicCtrlInit(logic_ctrl_t* pLogicCtrl);
+void LogicCtrlCycle(logic_ctrl_t* pLogicCtrl);
+void LogicCtrlIsr(logic_ctrl_t* pLogicCtrl);
 
 #ifdef __cplusplus
 }

@@ -11,3 +11,6 @@ components/shell/cmdline_parser.exe
 examples/stm32hal_f407ve_serial2can/Tool/espcantool/CAN调试器配置信息_WeChat_TC4300_QQ_43058655.ini
 examples/stm32hal_f407ve_serial2can/Tool/espcantool/CAN调试器配置信息_WeChat_TC4300_QQ_43058655.ini
 JLinkLog.txt
+toolchain/keilpack/stm32/Keil.STM32G4xx_DFP.1.1.0.pack
+toolchain/keilpack/stm32/Keil.STM32H7xx_DFP.2.8.0.pack
+toolchain/keilpack/stm32/Keil.STM32L4xx_DFP.2.2.0.pack

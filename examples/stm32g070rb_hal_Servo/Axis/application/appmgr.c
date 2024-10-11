@@ -4,10 +4,8 @@
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG        "appmgr"
-#define LOG_LOCAL_LEVEL      LOG_LEVEL_INFO
-
-#define u16AppSel_i(eAxisNo) P(eAxisNo).u16AppSel
+#define LOG_LOCAL_TAG   "appmgr"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -24,153 +22,134 @@
 void AppMgrCreat(app_mgr_t* pAppMgr, axis_e eAxisNo)
 {
     pAppMgr->u16AppSelPre = AXIS_APP_INVAILD;
+    pAppMgr->pu16AppSel_i = &P(eAxisNo).u16AppSel;
 
     OpenLoopCreat(&pAppMgr->sOpenLoop, eAxisNo);
     FuncTestCreat(&pAppMgr->sFuncTest, eAxisNo);
     MotEncIdentCreat(&pAppMgr->sMotEncIdent, eAxisNo);
 }
 
-void AppMgrInit(app_mgr_t* pAppMgr, axis_e eAxisNo)
+void AppMgrInit(app_mgr_t* pAppMgr)
 {
-    OpenLoopInit(&pAppMgr->sOpenLoop, eAxisNo);
-    FuncTestInit(&pAppMgr->sFuncTest, eAxisNo);
-    MotEncIdentInit(&pAppMgr->sMotEncIdent, eAxisNo);
+    OpenLoopInit(&pAppMgr->sOpenLoop);
+    FuncTestInit(&pAppMgr->sFuncTest);
+    MotEncIdentInit(&pAppMgr->sMotEncIdent);
 }
 
-void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo)
+void AppMgrCycle(app_mgr_t* pAppMgr)
 {
-    if (pAppMgr->u16AppSelPre != u16AppSel_i(eAxisNo))
+    if (pAppMgr->u16AppSelPre != __get_u16(pAppMgr->pu16AppSel_i))
     {
         // 切换 APP
 
         switch (pAppMgr->u16AppSelPre)
         {
-            case AXIS_APP_GENERIC:
-            {
+            case AXIS_APP_GENERIC: {
                 break;
             }
 
-            case AXIS_APP_OPENLOOP:
-            {
-                OpenLoopExit(&pAppMgr->sOpenLoop, eAxisNo);
+            case AXIS_APP_OPENLOOP: {
+                OpenLoopExit(&pAppMgr->sOpenLoop);
                 break;
             }
 
-            case AXIS_APP_FUNCTEST:
-            {
-                FuncTestExit(&pAppMgr->sFuncTest, eAxisNo);
+            case AXIS_APP_FUNCTEST: {
+                FuncTestExit(&pAppMgr->sFuncTest);
                 break;
             }
 
-            case AXIS_APP_ENCIDENT:
-            {
-                MotEncIdentExit(&pAppMgr->sMotEncIdent, eAxisNo);
+            case AXIS_APP_ENCIDENT: {
+                MotEncIdentExit(&pAppMgr->sMotEncIdent);
                 break;
             }
 
-            default:
-            {
+            default: {
                 break;
             }
         }
 
-        switch (u16AppSel_i(eAxisNo))
+        switch (__get_u16(pAppMgr->pu16AppSel_i))
         {
-            case AXIS_APP_GENERIC:
-            {
+            case AXIS_APP_GENERIC: {
                 break;
             }
 
-            case AXIS_APP_OPENLOOP:
-            {
-                OpenLoopEnter(&pAppMgr->sOpenLoop, eAxisNo);
+            case AXIS_APP_OPENLOOP: {
+                OpenLoopEnter(&pAppMgr->sOpenLoop);
                 break;
             }
 
-            case AXIS_APP_FUNCTEST:
-            {
-                FuncTestEnter(&pAppMgr->sFuncTest, eAxisNo);
+            case AXIS_APP_FUNCTEST: {
+                FuncTestEnter(&pAppMgr->sFuncTest);
                 break;
             }
 
-            case AXIS_APP_ENCIDENT:
-            {
-                MotEncIdentEnter(&pAppMgr->sMotEncIdent, eAxisNo);
+            case AXIS_APP_ENCIDENT: {
+                MotEncIdentEnter(&pAppMgr->sMotEncIdent);
                 break;
             }
 
-            default:
-            {
+            default: {
                 break;
             }
         }
 
-        pAppMgr->u16AppSelPre = u16AppSel_i(eAxisNo);
+        pAppMgr->u16AppSelPre = __get_u16(pAppMgr->pu16AppSel_i);
     }
     else
     {
-        switch (u16AppSel_i(eAxisNo))
+        switch (__get_u16(pAppMgr->pu16AppSel_i))
         {
-            case AXIS_APP_GENERIC:
-            {
+            case AXIS_APP_GENERIC: {
                 break;
             }
 
-            case AXIS_APP_OPENLOOP:
-            {
-                OpenLoopCycle(&pAppMgr->sOpenLoop, eAxisNo);
+            case AXIS_APP_OPENLOOP: {
+                OpenLoopCycle(&pAppMgr->sOpenLoop);
                 break;
             }
 
-            case AXIS_APP_FUNCTEST:
-            {
-                FuncTestCycle(&pAppMgr->sFuncTest, eAxisNo);
+            case AXIS_APP_FUNCTEST: {
+                FuncTestCycle(&pAppMgr->sFuncTest);
                 break;
             }
 
-            case AXIS_APP_ENCIDENT:
-            {
-                MotEncIdentCycle(&pAppMgr->sMotEncIdent, eAxisNo);
+            case AXIS_APP_ENCIDENT: {
+                MotEncIdentCycle(&pAppMgr->sMotEncIdent);
                 break;
             }
 
-            default:
-            {
+            default: {
                 break;
             }
         }
     }
 }
 
-void AppMgrIsr(app_mgr_t* pAppMgr, axis_e eAxisNo)
+void AppMgrIsr(app_mgr_t* pAppMgr)
 {
-    switch (u16AppSel_i(eAxisNo))
+    switch (__get_u16(pAppMgr->pu16AppSel_i))
     {
-        case AXIS_APP_GENERIC:
-        {
+        case AXIS_APP_GENERIC: {
             break;
         }
 
-        case AXIS_APP_OPENLOOP:
-        {
-            OpenLoopIsr(&pAppMgr->sOpenLoop, eAxisNo);
+        case AXIS_APP_OPENLOOP: {
+            OpenLoopIsr(&pAppMgr->sOpenLoop);
             break;
         }
 
-        case AXIS_APP_FUNCTEST:
-        {
-            FuncTestIsr(&pAppMgr->sFuncTest, eAxisNo);
+        case AXIS_APP_FUNCTEST: {
+            FuncTestIsr(&pAppMgr->sFuncTest);
             break;
         }
 
-        case AXIS_APP_ENCIDENT:
-        {
-            MotEncIdentIsr(&pAppMgr->sMotEncIdent, eAxisNo);
+        case AXIS_APP_ENCIDENT: {
+            MotEncIdentIsr(&pAppMgr->sMotEncIdent);
             break;
         }
 
-        default:
-        {
+        default: {
             break;
         }
     }

@@ -20,9 +20,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void PosCtrlCreat(pos_ctrl_t* pPosCtrl, axis_e eAxisNo);
-void PosCtrlInit(pos_ctrl_t* pPosCtrl, axis_e eAxisNo);
-void PosCtrlCycle(pos_ctrl_t* pPosCtrl, axis_e eAxisNo);
-void PosCtrlIsr(pos_ctrl_t* pPosCtrl, axis_e eAxisNo);
+void PosCtrlInit(pos_ctrl_t* pPosCtrl);
+void PosCtrlCycle(pos_ctrl_t* pPosCtrl);
+void PosCtrlIsr(pos_ctrl_t* pPosCtrl);
 
 #ifdef __cplusplus
 }

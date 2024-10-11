@@ -44,9 +44,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void MotPosCreat(mot_pos_t* pCurLoop, axis_e eAxisNo);
-void MotPosInit(mot_pos_t* pCurLoop, axis_e eAxisNo);
-void MotPosCycle(mot_pos_t* pCurLoop, axis_e eAxisNo);
-void MotPosIsr(mot_pos_t* pCurLoop, axis_e eAxisNo);
+void MotPosInit(mot_pos_t* pCurLoop);
+void MotPosCycle(mot_pos_t* pCurLoop);
+void MotPosIsr(mot_pos_t* pCurLoop);
 
 #ifdef __cplusplus
 }

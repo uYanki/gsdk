@@ -23,14 +23,14 @@ void CurSampCreat(cur_samp_t* pCurSamp, axis_e eAxisNo)
 {
 }
 
-void CurSampInit(cur_samp_t* pCurSamp, axis_e eAxisNo)
+void CurSampInit(cur_samp_t* pCurSamp)
 {
 }
 
-void CurSampCycle(cur_samp_t* pCurSamp, axis_e eAxisNo)
+void CurSampCycle(cur_samp_t* pCurSamp)
 {
 }
 
-void CurSampIsr(cur_samp_t* pCurSamp, axis_e eAxisNo)
+void CurSampIsr(cur_samp_t* pCurSamp)
 {
 }

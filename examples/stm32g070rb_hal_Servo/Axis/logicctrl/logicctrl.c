@@ -30,29 +30,29 @@ void LogicCtrlCreat(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo)
     HomingCreat(&pLogicCtrl->sHoming, eAxisNo);
 }
 
-void LogicCtrlInit(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo)
+void LogicCtrlInit(logic_ctrl_t* pLogicCtrl)
 {
-    PosCtrlInit(&pLogicCtrl->sPosCtrl, eAxisNo);
-    TrqCtrlInit(&pLogicCtrl->sTrqCtrl, eAxisNo);
-    SpdCtrlInit(&pLogicCtrl->sSpdCtrl, eAxisNo);
-    CmdCtrlInit(&pLogicCtrl->sCmdCtrl, eAxisNo);
-    HomingInit(&pLogicCtrl->sHoming, eAxisNo);
+    PosCtrlInit(&pLogicCtrl->sPosCtrl);
+    TrqCtrlInit(&pLogicCtrl->sTrqCtrl);
+    SpdCtrlInit(&pLogicCtrl->sSpdCtrl);
+    CmdCtrlInit(&pLogicCtrl->sCmdCtrl);
+    HomingInit(&pLogicCtrl->sHoming);
 }
 
-void LogicCtrlCycle(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo)
+void LogicCtrlCycle(logic_ctrl_t* pLogicCtrl)
 {
-    PosCtrlCycle(&pLogicCtrl->sPosCtrl, eAxisNo);
-    TrqCtrlCycle(&pLogicCtrl->sTrqCtrl, eAxisNo);
-    SpdCtrlCycle(&pLogicCtrl->sSpdCtrl, eAxisNo);
-    CmdCtrlCycle(&pLogicCtrl->sCmdCtrl, eAxisNo);
-    HomingCycle(&pLogicCtrl->sHoming, eAxisNo);
+    PosCtrlCycle(&pLogicCtrl->sPosCtrl);
+    TrqCtrlCycle(&pLogicCtrl->sTrqCtrl);
+    SpdCtrlCycle(&pLogicCtrl->sSpdCtrl);
+    CmdCtrlCycle(&pLogicCtrl->sCmdCtrl);
+    HomingCycle(&pLogicCtrl->sHoming);
 }
 
-void LogicCtrlIsr(logic_ctrl_t* pLogicCtrl, axis_e eAxisNo)
+void LogicCtrlIsr(logic_ctrl_t* pLogicCtrl)
 {
-    PosCtrlIsr(&pLogicCtrl->sPosCtrl, eAxisNo);
-    TrqCtrlIsr(&pLogicCtrl->sTrqCtrl, eAxisNo);
-    SpdCtrlIsr(&pLogicCtrl->sSpdCtrl, eAxisNo);
-    CmdCtrlIsr(&pLogicCtrl->sCmdCtrl, eAxisNo);
-    HomingIsr(&pLogicCtrl->sHoming, eAxisNo);
+    PosCtrlIsr(&pLogicCtrl->sPosCtrl);
+    TrqCtrlIsr(&pLogicCtrl->sTrqCtrl);
+    SpdCtrlIsr(&pLogicCtrl->sSpdCtrl);
+    CmdCtrlIsr(&pLogicCtrl->sCmdCtrl);
+    HomingIsr(&pLogicCtrl->sHoming);
 }

@@ -13,6 +13,10 @@ extern "C" {
 
 typedef struct {
     u32 u32CommCmdPre;
+
+    u32* pu32CommCmd_i;
+    u16* pu16AxisFSM_io;
+    u16* pu16CtrlCmdSrc_i;
 } cmd_ctrl_t;
 
 //---------------------------------------------------------------------------
@@ -20,9 +24,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void CmdCtrlCreat(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo);
-void CmdCtrlInit(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo);
-void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo);
-void CmdCtrlIsr(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo);
+void CmdCtrlInit(cmd_ctrl_t* pCmdCtrl);
+void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl);
+void CmdCtrlIsr(cmd_ctrl_t* pCmdCtrl);
 
 #ifdef __cplusplus
 }

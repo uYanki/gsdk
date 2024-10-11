@@ -78,8 +78,7 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 
             switch (eMode)
             {
-                case MB_REG_READ:
-                {
+                case MB_REG_READ: {
                     while (u16Count > 0)
                     {
                         uint8_t u8Step, _u8Step;
@@ -98,20 +97,17 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 #endif
                             }
 
-                            case V_SIG:
-                            {
+                            case V_SIG: {
                                 u8Step = 1;
                                 break;
                             }
 
-                            case V_DOB0:
-                            {
+                            case V_DOB0: {
                                 u8Step = 2;
                                 break;
                             }
 
-                            case V_QUD0:
-                            {
+                            case V_QUD0: {
                                 u8Step = 4;
                                 break;
                             }
@@ -138,8 +134,7 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 
                     break;
                 }
-                case MB_REG_WRITE:
-                {
+                case MB_REG_WRITE: {
                     while (u16Count > 0)
                     {
                         uint8_t u8Step, _u8Step;
@@ -158,20 +153,17 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
 #endif
                             }
 
-                            case V_SIG:
-                            {
+                            case V_SIG: {
                                 u8Step = 1;
                                 break;
                             }
 
-                            case V_DOB0:
-                            {
+                            case V_DOB0: {
                                 u8Step = 2;
                                 break;
                             }
 
-                            case V_QUD0:
-                            {
+                            case V_QUD0: {
                                 u8Step = 4;
                                 break;
                             }
@@ -193,8 +185,7 @@ eMBErrorCode eMBRegHoldingCB(u8* pu8Buffer, u16 u16Address, u16 u16Count, eMBReg
                             }
                             case V_RW_M0:
                             case V_RW_M1:
-                            case V_RW_M2:
-                            {
+                            case V_RW_M2: {
                                 _u8Step = u8Step;
 
                                 while (_u8Step--)

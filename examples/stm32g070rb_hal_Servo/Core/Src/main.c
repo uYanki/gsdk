@@ -50,10 +50,10 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-#define __ENC_HALL_SW  1
+#define __ENC_HALL_SW   1
 
-#define SSD1306_WIDTH  128
-#define SSD1306_HEIGHT 32
+#define SSD1306_WIDTH   128
+#define SSD1306_HEIGHT  32
 
 /* USER CODE END PTD */
 
@@ -214,7 +214,7 @@ static bool                 s_bPosInit = true;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-  //  return;
+    //  return;
     tick_t t = GetTick100ns();
 
     s16 _Resv100Pre = D._Resv100;
@@ -226,6 +226,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     D._Resv103 = ADConv[3];
     D._Resv104 = ADConv[4];
     D._Resv105 = ADConv[5];
+
+    GetCurU(AXIS_0);
 
     //    D._Resv104 = GetCurU(AXIS_0);
     //    D._Resv105 = GetCurV(AXIS_0);
@@ -277,15 +279,14 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
         D._Resv113++;  // 中断次数
         DrvScheIsr();
         P(0).s32SpdDigRef04 = GetTick100ns() - t;
-				
-				axis_e eAxisNo = AXIS_0;
-				
-				void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo);
-				
-    switch (P(eAxisNo).u16AppSel)
+
+        axis_e eAxisNo = AXIS_0;
+
+        void MotDrv_Isr(mc_t * pMotDrv, axis_e eAxisNo);
+
+        switch (P(eAxisNo).u16AppSel)
         {
-            case AXIS_APP_GENERIC:
-            {
+            case AXIS_APP_GENERIC: {
                 if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
                 {
                     PeriodicTask(125 * UNIT_US, {
@@ -300,8 +301,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
                         switch ((ctrl_mode_e)P(eAxisNo).u16CtrlMode)
                         {
-                            case CTRL_MODE_POS:
-                            {
+                            case CTRL_MODE_POS: {
+                                break;
                                 static PID_t pid = {0};
 
                                 pid.Kp = P(eAxisNo).u16PosLoopKp / 1000.f;
@@ -335,15 +336,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
                                 break;
                             }
 
-                            case CTRL_MODE_SPD:
-                            {
+                            case CTRL_MODE_SPD: {
                                 // qdAxis.pdf
-                                foc.Uq = P(eAxisNo).s32DrvSpdRef;
+                                foc.Uq = P(eAxisNo).s32DrvSpdRef * 0.5;
                                 break;
                             }
 
-                            case CTRL_MODE_TRQ:
-                            {
+                            case CTRL_MODE_TRQ: {
                                 break;
                             }
 
@@ -361,8 +360,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
                 break;
             }
 
-            case AXIS_APP_ENCIDENT:
-            {
+            case AXIS_APP_OPENLOOP:
+            case AXIS_APP_ENCIDENT: {
                 PeriodicTask(125 * UNIT_US, {
                     mc_t foc;
                     foc.Uq           = P(eAxisNo).s16Uq;
@@ -374,40 +373,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
                 });
                 break;
             }
-            case AXIS_APP_OPENLOOP:
-            {
-                if (P(eAxisNo).u16AxisFSM == AXIS_STATE_ENABLE)
-                {
-                    // P(eAxisNo).u16ElecAngle = P(eAxisNo).s16OpenElecAngInit;
 
-                    PeriodicTask(P(eAxisNo).u16OpenPeriod * UNIT_US, {
-                        mc_t foc;
-
-                        foc.Uq = P(eAxisNo).s16OpenUqRef;
-                        foc.Ud = P(eAxisNo).s16OpenUdRef;
-
-                        foc.DutyMax = P(eAxisNo).u16PwmDutyMax;
-
-                        P(eAxisNo).s16OpenElecAngInc = 20;
-                        foc.u16ElecAngle             = P(eAxisNo).u16ElecAngleRef + P(eAxisNo).s16OpenElecAngInc;
-
-                        MotDrv_Isr(&foc, eAxisNo);
-
-                    });
-                }
-
-                break;
-            }
-
-            default:
-            {
+            default: {
                 // AlmUpdate()
                 break;
             }
         }
-
-     
-
     }
 }
 
@@ -452,23 +423,33 @@ void MotDrv_Isr(mc_t* pMotDrv, axis_e eAxisNo)
     P(eAxisNo).u16PwmcComp = pMotDrv->Tc;
 }
 
-
-
 #include "axis.h"
 #include "axis_defs.h"
 
 #include "spi_mt6701.h"
+#include "i2c_as5600.h"
 
 spi_mst_t spi = {
     .SPIx = &hspi1,
     .MISO = {GPIOB,             GPIO_PIN_4 }, /* DAT */
     .MOSI = {GPIOB,             GPIO_PIN_4 },
     .SCLK = {GPIOB,             GPIO_PIN_3 }, /* CLK */
-    .CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* RST */
+    .CS   = {SPI1_CS_GPIO_Port, SPI1_CS_Pin}, /* CS */
 };
 
 spi_mt6701_t mt6701 = {
     .hSPI = &spi,
+};
+
+static i2c_mst_t i2c_ = {
+    .SDA  = {SWI2C_SDA_GPIO_Port, SWI2C_SDA_Pin},
+    .SCL  = {SWI2C_SCL_GPIO_Port, SWI2C_SCL_Pin},
+    .I2Cx = nullptr,
+};
+
+i2c_as5600_t as5600 = {
+    .hI2C      = &i2c_,
+    .u8SlvAddr = AS5600_ADDRESS_LOW,
 };
 
 /* USER CODE END 0 */
@@ -489,15 +470,15 @@ int main(void)
     HAL_Init();
 
     /* USER CODE BEGIN Init */
-   // SEGGER_RTT_Init();
-    //  cm_backtrace_init("demo", "stm32", "V0.01");
+    // SEGGER_RTT_Init();
+    cm_backtrace_init("demo", "stm32", "V0.01");
     /* USER CODE END Init */
 
     /* Configure the system clock */
     SystemClock_Config();
-	
+
     /* USER CODE BEGIN SysInit */
-	HAL_NVIC_DisableIRQ(SysTick_IRQn);
+    HAL_NVIC_DisableIRQ(SysTick_IRQn);
     /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
@@ -516,12 +497,16 @@ int main(void)
     MX_TIM3_Init();
     MX_TIM14_Init();
     /* USER CODE BEGIN 2 */
+
     DelayInit();
 
     ParaTblInit();
 
     SPI_Master_Init(&spi, 50000, SPI_DUTYCYCLE_50_50, MT6701_SPI_TIMING | SPI_FLAG_FAST_CLOCK_ENABLE | SPI_FLAG_SOFT_CS);
     MT6701_Init(&mt6701);
+
+    I2C_Master_Init(&i2c_, 400000, I2C_DUTYCYCLE_50_50);
+    AS5600_Init(&as5600);
 
 #if 0
 
@@ -550,7 +535,8 @@ int main(void)
 
     // modbus(rtu)
     RO u8 ucSlaveID[] = {0xAA, 0xBB, 0xCC};
-    eMBInit(MB_RTU, D.u16MbSlvId, 1, D.u32MbBaudrate, MB_PAR_EVEN /* P.u16MbParity */);
+    eMBInit(MB_RTU, D.u16MbSlvId, 1, D.u32MbBaudrate, MB_PAR_EVEN /* D.u16MbParity */);
+    //  eMBInit(MB_RTU, 1, 1, 19200, MB_PAR_EVEN /* D.u16MbParity */);
     eMBSetSlaveID(0x34, true, ucSlaveID, ARRAY_SIZE(ucSlaveID));
     eMBEnable();
     MbRtuRun();
@@ -575,7 +561,10 @@ int main(void)
 
     //	HAL_TIM_Base_Start(&htim1); // TRGO for ADC
     HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4);  // TRGO for ADC
-                                              /* USER CODE END 2 */
+
+    //  AS5600_Init(&as5600);
+
+    /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
@@ -592,11 +581,11 @@ int main(void)
     P(eAxisNo).u32EncRes       = 6 * P(eAxisNo).u16MotPolePairs;
 #endif
 
-    P(eAxisNo).u32EncPosOffset = 642;
+    P(eAxisNo).u32EncPosOffset = 748;
 
 #if 1
 
-    P(eAxisNo).u16AppSel = 0;
+    P(eAxisNo).u16AppSel = 2;
 
 //	P(eAxisNo).u32CommCmd = 1;
 #endif
@@ -626,10 +615,9 @@ int main(void)
 
         P(eAxisNo).s32SpdDigRef01 = P(eAxisNo).s64EncMultPos;
 
-      //  PeriodicTask(125 * UNIT_US, DrvScheIsr());
+        //  PeriodicTask(125 * UNIT_US, DrvScheIsr());
 
-    
-				/* USER CODE END WHILE */
+        /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
     }
@@ -688,13 +676,11 @@ static bool IsPressed(flexbtn_t* pHandle)
     {
         case BUTTON_PREV:
         case BUTTON_OKAY:
-        case BUTTON_NEXT:
-        {
+        case BUTTON_NEXT: {
             return PIN_ReadLevel(&keys[pHandle->u8ID]) == PIN_LEVEL_LOW;
         }
 
-        default:
-        {
+        default: {
             LOGW("unknown button id");
             break;
         }

@@ -1,7 +1,7 @@
-#ifndef __FUNC_TEST_H__
-#define __FUNC_TEST_H__
+#ifndef __SINTBL_H__
+#define __SINTBL_H__
 
-#include "paratbl.h"
+#include "def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,20 +11,11 @@ extern "C" {
 // Definitions
 //---------------------------------------------------------------------------
 
-typedef struct {
-    u16 _Resv;
-} func_test_t;
+extern RO q15 c_q15SinTbl[];
 
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------
-
-void FuncTestCreat(func_test_t* pFuncTest, axis_e eAxisNo);
-void FuncTestInit(func_test_t* pFuncTest);
-void FuncTestEnter(func_test_t* pFuncTest);
-void FuncTestExit(func_test_t* pFuncTest);
-void FuncTestCycle(func_test_t* pFuncTest);
-void FuncTestIsr(func_test_t* pFuncTest);
 
 #ifdef __cplusplus
 }

@@ -1,24 +1,96 @@
 #include "./adconv.h"
 
-#define AD_CUR_C (ADConv[0])
-#define AD_CUR_A (ADConv[1])
-#define AD_NTC   (ADConv[2])
-#define AD_VBUS  (ADConv[3])
-#define AD_POT1  (ADConv[4])
-#define AD_POT2  (ADConv[5])
+#include "motdrv.h"
 
 __IO u16 ADConv[6] = {0};
+
+#define AD_CUR_C             (ADConv[0])
+#define AD_CUR_A             (ADConv[1])
+#define AD_NTC               (ADConv[2])
+#define AD_VBUS              (ADConv[3])
+#define AD_POT1              (ADConv[4])
+#define AD_POT2              (ADConv[5])
+
+//-----------------------------------------------------------------------------
+
+#define SAMP_TYPE_NULL       0  // 无 null
+#define SAMP_TYPE_SARADC_12B 1  // 运放 sar adc (q12)
+#define SAMP_TYPE_SARADC_16B 2  // 运放 sar adc (q15)
+#define SAMP_TYPE_SDADC_16B  3  // 调制器 sigma-delta adc
+
+/**
+ * @note
+ *
+ * 调制器时钟分主动输出和被动输入。
+ *
+ * 对于被动输入的调制器，主控使用PWM产生频率20M占空比50%的PWM，给到调制器的时钟引脚，同时给到自身SDFM模块的时钟引脚。
+ *
+ */
+
+#define CONFIG_UCDC_SAMP_IF  SAMP_TYPE_NULL        // 控制电电压
+#define CONFIG_UMDC_SAMP_IF  SAMP_TYPE_SARADC_12B  // 主回路电压
+#define CONFIG_CUR_SAMP_IF   SAMP_TYPE_SARADC_12B  // 电流
+#define CONFIG_UAI_SAMP_IF   SAMP_TYPE_SARADC_12B  // 模拟量输入
+
+q15 GetCurPu(u16 u16Ind)
+{
+    u16 u16Data = ADConv[u16Ind];
+
+    /**
+     * @note
+     *
+     * ① SarAdc 只能采正电压，需减去运放的偏置电压 0x8000 (Pu)
+     * ② SdAdc 采的是正负电压，不需要减 0x8000
+     *
+     *  满量程标幺到 [-32768,32767]
+     *
+     */
+
+#if CONFIG_CUR_SAMP_IF == SAMP_TYPE_NULL
+    return 0;
+#elif CONFIG_CUR_SAMP_IF == SAMP_TYPE_SARADC_12B
+    return (q15)(u16Data << 4) - 0x8000;
+#elif CONFIG_CUR_SAMP_IF == SAMP_TYPE_SARADC_16B
+    return (q15)u16Data - 0x8000;
+#elif CONFIG_CUR_SAMP_IF == SAMP_TYPE_SDADC_16B
+    return (q15)u16Data;
+#endif
+}
+
+q15 GetUmdcPu(u16 u16Ind)
+{
+    u16 u16Data = ADConv[u16Ind];
+
+#if CONFIG_UMDC_SAMP_IF == SAMP_TYPE_NULL
+    return 0;
+#elif CONFIG_UMDC_SAMP_IF == SAMP_TYPE_SARADC_12B
+    return (q15)(u16Data << 3);
+#elif CONFIG_UMDC_SAMP_IF == SAMP_TYPE_SDADC_16B
+    return (q15)u16Data >> 1;
+#endif
+}
+
+q15 GetUaiPu(u16 u16Ind)
+{
+    u16 u16Data = ADConv[u16Ind];
+
+#if CONFIG_UMDC_SAMP_IF == SAMP_TYPE_SARADC_12B
+    return u16Data << 3;
+#endif
+}
+
+//-----------------------------------------------------------------------------
 
 #if (CONFIG_EXT_AI_NUM >= 1)
 s16 GetUai1(void)
 {
-    return AD_POT1 << 3;  // Q15
+    return GetUaiPu(4);
 }
 #endif
 #if (CONFIG_EXT_AI_NUM >= 2)
 s16 GetUai2(void)
 {
-    return AD_POT2 << 3;  // Q15
+    return GetUaiPu(5);
 }
 #endif
 #if (CONFIG_EXT_AI_NUM >= 3)
@@ -50,13 +122,12 @@ u16 GetUcdc(void)
 
 #if __CUR_SAMP_SHUNT_1
 
-s16 GetCurX(axis_e eAxisNo, u8 nSampIdx)  // Q15
+s16 GetCurX(axis_e eAxisNo, u8 nSampIdx)  // Pu
 {
     switch (eAxisNo)
     {
 #if CONFIG_AXIS_NUM >= 1
-        case AXIS_0:
-        {
+        case AXIS_0: {
             if (nSampIdx == 0)
             {
                 return (s16)(AD_CUR_0 << 4) - 0x8000;
@@ -72,9 +143,11 @@ s16 GetCurX(axis_e eAxisNo, u8 nSampIdx)  // Q15
         }
 #endif
 #if CONFIG_AXIS_NUM >= 2
-        case AXIS_1: return 0;
+        case AXIS_1:
+            return 0;
 #endif
-        default: return 0;
+        default:
+            return 0;
     }
 }
 
@@ -82,46 +155,19 @@ s16 GetCurX(axis_e eAxisNo, u8 nSampIdx)  // Q15
 
 #if __CUR_SAMP_SHUNT_2 || __CUR_SAMP_SHUNT_3
 
-s16 GetCurU(axis_e eAxisNo)  // Q15
+s16 GetCurU(axis_e eAxisNo)  // Pu
 {
-    switch (eAxisNo)
-    {
-#if CONFIG_AXIS_NUM >= 1
-        case AXIS_0: return (s16)(AD_CUR_A << 4) - 0x8000;
-#endif
-#if CONFIG_AXIS_NUM >= 2
-        case AXIS_1: return 0;
-#endif
-        default: return 0;
-    }
+    return GetCurPu(1);
 }
 
-s16 GetCurV(axis_e eAxisNo)  // Q15
+s16 GetCurV(axis_e eAxisNo)  // Pu
 {
-    switch (eAxisNo)
-    {
-#if CONFIG_AXIS_NUM >= 1
-        case AXIS_0: return 0;
-#endif
-#if CONFIG_AXIS_NUM >= 2
-        case AXIS_1: return 0;
-#endif
-        default: return 0;
-    }
+    return 0;
 }
 
-s16 GetCurW(axis_e eAxisNo)  // Q15
+s16 GetCurW(axis_e eAxisNo)  // Pu
 {
-    switch (eAxisNo)
-    {
-#if CONFIG_AXIS_NUM >= 1
-        case AXIS_0: return (s16)(AD_CUR_C << 4) - 0x8000;
-#endif
-#if CONFIG_AXIS_NUM >= 2
-        case AXIS_1: return 0;
-#endif
-        default: return 0;
-    }
+    return GetCurPu(0);
 }
 
 #endif

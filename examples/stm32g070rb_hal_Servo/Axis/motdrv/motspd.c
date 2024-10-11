@@ -22,7 +22,7 @@
 /**
  * @brief 过速检测：反馈速度超过电机最高速度的1.2倍
  */
-static void _ErrorDetect_OverSpeed(mot_spd_t* pMotSpd, axis_e eAxisNo)
+static void _ErrorDetect_OverSpeed(mot_spd_t* pMotSpd)
 {
 }
 
@@ -30,15 +30,15 @@ void MotSpdCreat(mot_spd_t* pMotSpd, axis_e eAxisNo)
 {
 }
 
-void MotSpdInit(mot_spd_t* pMotSpd, axis_e eAxisNo)
+void MotSpdInit(mot_spd_t* pMotSpd)
 {
 }
 
-void MotSpdCycle(mot_spd_t* pMotSpd, axis_e eAxisNo)
+void MotSpdCycle(mot_spd_t* pMotSpd)
 {
-    _ErrorDetect_OverSpeed(pMotSpd, eAxisNo);
+    _ErrorDetect_OverSpeed(pMotSpd);
 }
 
-void MotSpdIsr(mot_spd_t* pMotSpd, axis_e eAxisNo)
+void MotSpdIsr(mot_spd_t* pMotSpd)
 {
 }

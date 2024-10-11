@@ -20,9 +20,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void PosPlanCreat(pos_plan_t* pPosPlan, axis_e eAxisNo);
-void PosPlanInit(pos_plan_t* pPosPlan, axis_e eAxisNo);
-void PosPlanCycle(pos_plan_t* pPosPlan, axis_e eAxisNo);
-void PosPlanIsr(pos_plan_t* pPosPlan, axis_e eAxisNo);
+void PosPlanInit(pos_plan_t* pPosPlan);
+void PosPlanCycle(pos_plan_t* pPosPlan);
+void PosPlanIsr(pos_plan_t* pPosPlan);
 
 #ifdef __cplusplus
 }

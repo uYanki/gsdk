@@ -4,11 +4,8 @@
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG             "trqplan"
-#define LOG_LOCAL_LEVEL           LOG_LEVEL_INFO
-
-#define s16LogicTrqRef_i(eAxisNo) P(eAxisNo).s16LogicTrqRef
-#define s32DrvTrqRef_o(eAxisNo)   P(eAxisNo).s32DrvTrqRef
+#define LOG_LOCAL_TAG   "trqplan"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -24,17 +21,20 @@
 
 void TrqPlanCreat(trq_plan_t* pTrqPlan, axis_e eAxisNo)
 {
+    pTrqPlan->ps16LogicTrqRef_i = &P(eAxisNo).s16LogicTrqRef;
+
+    pTrqPlan->ps32DrvTrqRef_o = &P(eAxisNo).s32DrvTrqRef;
 }
 
-void TrqPlanInit(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void TrqPlanInit(trq_plan_t* pTrqPlan)
 {
 }
 
-void TrqPlanCycle(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void TrqPlanCycle(trq_plan_t* pTrqPlan)
 {
 }
 
-void TrqPlanIsr(trq_plan_t* pTrqPlan, axis_e eAxisNo)
+void TrqPlanIsr(trq_plan_t* pTrqPlan)
 {
-    s32DrvTrqRef_o(eAxisNo) = s16LogicTrqRef_i(eAxisNo);
+    __set_s32(pTrqPlan->ps32DrvTrqRef_o, __get_s16(pTrqPlan->ps16LogicTrqRef_i));
 }

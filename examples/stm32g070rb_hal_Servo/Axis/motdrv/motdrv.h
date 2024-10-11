@@ -26,9 +26,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void MotDrvCreat(motdrv_t* pTrqLoop, axis_e eAxisNo);
-void MotDrvInit(motdrv_t* pTrqLoop, axis_e eAxisNo);
-void MotDrvCycle(motdrv_t* pTrqLoop, axis_e eAxisNo);
-void MotDrvIsr(motdrv_t* pTrqLoop, axis_e eAxisNo);
+void MotDrvInit(motdrv_t* pTrqLoop);
+void MotDrvCycle(motdrv_t* pTrqLoop);
+void MotDrvIsr(motdrv_t* pTrqLoop);
 
 #ifdef __cplusplus
 }

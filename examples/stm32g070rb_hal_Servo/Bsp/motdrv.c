@@ -165,50 +165,45 @@ void MC_RebuildCurrent(mc_t* p, q15 Ix[])
         {
             switch (p->eSector)
             {
-                case SECTOR_1:
-                {
+                case SECTOR_1: {
                     p->Ia = +(Ix[0] - p->IxZero) << 1;
                     p->Ic = -(Ix[1] - p->IxZero) << 1;
                     p->Ib = -(p->Ia + p->Ic);
                     break;
                 }
-                case SECTOR_2:
-                {
+                case SECTOR_2: {
                     p->Ib = +(Ix[0] - p->IxZero) << 1;
                     p->Ic = -(Ix[1] - p->IxZero) << 1;
                     p->Ia = -(p->Ib + p->Ic);
                     break;
                 }
-                case SECTOR_3:
-                {
+                case SECTOR_3: {
                     p->Ib = +(Ix[0] - p->IxZero) << 1;
                     p->Ia = -(Ix[1] - p->IxZero) << 1;
                     p->Ic = -(p->Ia + p->Ib);
                     break;
                 }
-                case SECTOR_4:
-                {
+                case SECTOR_4: {
                     p->Ic = +(Ix[0] - p->IxZero) << 1;
                     p->Ia = -(Ix[1] - p->IxZero) << 1;
                     p->Ib = -(p->Ia + p->Ic);
                     break;
                 }
-                case SECTOR_5:
-                {
+                case SECTOR_5: {
                     p->Ic = +(Ix[0] - p->IxZero) << 1;
                     p->Ib = -(Ix[1] - p->IxZero) << 1;
                     p->Ia = -(p->Ib + p->Ic);
                     break;
                 }
-                case SECTOR_6:
-                {
+                case SECTOR_6: {
                     p->Ia = +(Ix[0] - p->IxZero) << 1;
                     p->Ib = -(Ix[1] - p->IxZero) << 1;
                     p->Ic = -(p->Ia + p->Ib);
                     break;
                 }
 
-                default: break;
+                default:
+                    break;
             }
 
             break;
@@ -244,7 +239,8 @@ void MC_RebuildCurrent(mc_t* p, q15 Ix[])
             break;
         }
 
-        default: break;
+        default:
+            break;
     }
 }
 
@@ -363,7 +359,8 @@ void MC_MinMaxU(mc_t* p)
 }
 
 void MC_OverMod(mc_t* p)
-{}
+{
+}
 
 /**
  * @brief circle limitation
@@ -447,7 +444,8 @@ void MC_ZeroSeqInj(mc_t* p)
 }
 
 void MC_SVPWM5(mc_t* p)
-{}
+{
+}
 
 #if 0
 
@@ -523,8 +521,8 @@ u16 hTimePhA = 0, hTimePhB = 0, hTimePhC = 0;
 #define T_SQRT3    (u16)(T * SQRT_3)
 
 /***************SVM 5段 7段**************/
-#define SECTION_5 0
-#define SECTION_7 1
+#define SECTION_5  0
+#define SECTION_7  1
 
 void svm(mc_t* pfoc)
 {

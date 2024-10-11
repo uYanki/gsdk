@@ -4,12 +4,8 @@
 // Definitions
 //---------------------------------------------------------------------------
 
-#define LOG_LOCAL_TAG            "cmdctrl"
-#define LOG_LOCAL_LEVEL          LOG_LEVEL_INFO
-
-#define u32CommCmd_i(eAxisNo)    P(eAxisNo).u32CommCmd
-#define u16AxisFSM_i(eAxisNo)    P(eAxisNo).u16AxisFSM
-#define u16CtrlCmdSrc_i(eAxisNo) P(eAxisNo).u16CtrlCmdSrc
+#define LOG_LOCAL_TAG   "cmdctrl"
+#define LOG_LOCAL_LEVEL LOG_LEVEL_INFO
 
 //---------------------------------------------------------------------------
 // Prototypes
@@ -25,23 +21,25 @@
 
 void CmdCtrlCreat(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
 {
+    pCmdCtrl->pu16AxisFSM_io = &P(eAxisNo).u16AxisFSM;
+
+    pCmdCtrl->pu16CtrlCmdSrc_i = &P(eAxisNo).u16CtrlCmdSrc;
+    pCmdCtrl->pu32CommCmd_i    = &P(eAxisNo).u32CommCmd;
 }
 
-void CmdCtrlInit(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
+void CmdCtrlInit(cmd_ctrl_t* pCmdCtrl)
 {
 }
 
-void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
+void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl)
 {
-    switch (u16CtrlCmdSrc_i(eAxisNo))
+    switch (__get_u16(pCmdCtrl->pu16CtrlCmdSrc_i))
     {
-        case CTRL_CMD_SRC_DI:
-        {
+        case CTRL_CMD_SRC_DI: {
             break;
         }
-        case CTRL_CMD_SRC_COMM:
-        {
-            u32 u32CommCmdCur = u32CommCmd_i(eAxisNo);
+        case CTRL_CMD_SRC_COMM: {
+            u32 u32CommCmdCur = __get_u32(pCmdCtrl->pu32CommCmd_i);
 
             if (pCmdCtrl->u32CommCmdPre ^ u32CommCmdCur)
             {
@@ -49,13 +47,13 @@ void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
 
                 if (pCtrlWord->u32Bit.Enable)
                 {
-                    u16AxisFSM_i(eAxisNo) = AXIS_STATE_ENABLE;
-                    PWM_Start(eAxisNo);
+                    __set_u16(pCmdCtrl->pu16AxisFSM_io, AXIS_STATE_ENABLE);
+                    PWM_Start(AXIS_0);
                 }
                 else
                 {
-                    u16AxisFSM_i(eAxisNo) = AXIS_STATE_STANDBY;
-                    PWM_Stop(eAxisNo);
+                    __set_u16(pCmdCtrl->pu16AxisFSM_io, AXIS_STATE_STANDBY);
+                    PWM_Stop(AXIS_0);
                 }
 
                 pCmdCtrl->u32CommCmdPre = u32CommCmdCur;
@@ -63,13 +61,12 @@ void CmdCtrlCycle(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
 
             break;
         }
-        default:
-        {
+        default: {
             break;
         }
     }
 }
 
-void CmdCtrlIsr(cmd_ctrl_t* pCmdCtrl, axis_e eAxisNo)
+void CmdCtrlIsr(cmd_ctrl_t* pCmdCtrl)
 {
 }

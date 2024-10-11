@@ -26,23 +26,23 @@ void MotDrvCreat(motdrv_t* pMotDrv, axis_e eAxisNo)
     CurLoopCreat(&pMotDrv->sCurLoop, eAxisNo);
 }
 
-void MotDrvInit(motdrv_t* pMotDrv, axis_e eAxisNo)
+void MotDrvInit(motdrv_t* pMotDrv)
 {
-    PosLoopInit(&pMotDrv->sPosLoop, eAxisNo);
-    SpdLoopInit(&pMotDrv->sSpdLoop, eAxisNo);
-    CurLoopInit(&pMotDrv->sCurLoop, eAxisNo);
+    PosLoopInit(&pMotDrv->sPosLoop);
+    SpdLoopInit(&pMotDrv->sSpdLoop);
+    CurLoopInit(&pMotDrv->sCurLoop);
 }
 
-void MotDrvCycle(motdrv_t* pMotDrv, axis_e eAxisNo)
+void MotDrvCycle(motdrv_t* pMotDrv)
 {
-    PosLoopCycle(&pMotDrv->sPosLoop, eAxisNo);
-    SpdLoopCycle(&pMotDrv->sSpdLoop, eAxisNo);
-    CurLoopCycle(&pMotDrv->sCurLoop, eAxisNo);
+    PosLoopCycle(&pMotDrv->sPosLoop);
+    SpdLoopCycle(&pMotDrv->sSpdLoop);
+    CurLoopCycle(&pMotDrv->sCurLoop);
 }
 
-void MotDrvIsr(motdrv_t* pMotDrv, axis_e eAxisNo)
+void MotDrvIsr(motdrv_t* pMotDrv)
 {
-    PosLoopIsr(&pMotDrv->sPosLoop, eAxisNo);
-    SpdLoopIsr(&pMotDrv->sSpdLoop, eAxisNo);
-    CurLoopIsr(&pMotDrv->sCurLoop, eAxisNo);
+    PosLoopIsr(&pMotDrv->sPosLoop);
+    SpdLoopIsr(&pMotDrv->sSpdLoop);
+    CurLoopIsr(&pMotDrv->sCurLoop);
 }

@@ -33,24 +33,24 @@ void AxisCreat(axis_t* pAxis)
 
 void AxisInit(axis_t* pAxis)
 {
-    AppMgrInit(&pAxis->sAppMgr, pAxis->eAxisNo);
-    LogicCtrlInit(&pAxis->sLogicCtrl, pAxis->eAxisNo);
-    PathPlanInit(&pAxis->sPathPlan, pAxis->eAxisNo);
-    MotDrvInit(&pAxis->sMotDrv, pAxis->eAxisNo);
+    AppMgrInit(&pAxis->sAppMgr);
+    LogicCtrlInit(&pAxis->sLogicCtrl);
+    PathPlanInit(&pAxis->sPathPlan);
+    MotDrvInit(&pAxis->sMotDrv);
 }
 
 void AxisCycle(axis_t* pAxis)
 {
-    AppMgrCycle(&pAxis->sAppMgr, pAxis->eAxisNo);
-    LogicCtrlCycle(&pAxis->sLogicCtrl, pAxis->eAxisNo);
-    PathPlanCycle(&pAxis->sPathPlan, pAxis->eAxisNo);
-    MotDrvCycle(&pAxis->sMotDrv, pAxis->eAxisNo);
+    AppMgrCycle(&pAxis->sAppMgr);
+    LogicCtrlCycle(&pAxis->sLogicCtrl);
+    PathPlanCycle(&pAxis->sPathPlan);
+    MotDrvCycle(&pAxis->sMotDrv);
 }
 
 void AxisIsr(axis_t* pAxis)
 {
-    AppMgrIsr(&pAxis->sAppMgr, pAxis->eAxisNo);
-    LogicCtrlIsr(&pAxis->sLogicCtrl, pAxis->eAxisNo);
-    PathPlanIsr(&pAxis->sPathPlan, pAxis->eAxisNo);
-    MotDrvIsr(&pAxis->sMotDrv, pAxis->eAxisNo);
+    AppMgrIsr(&pAxis->sAppMgr);
+    LogicCtrlIsr(&pAxis->sLogicCtrl);
+    PathPlanIsr(&pAxis->sPathPlan);
+    MotDrvIsr(&pAxis->sMotDrv);
 }

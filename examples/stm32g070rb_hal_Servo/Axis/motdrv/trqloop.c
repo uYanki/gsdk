@@ -23,14 +23,14 @@ void CurLoopCreat(cur_loop_t* pCurLoop, axis_e eAxisNo)
 {
 }
 
-void CurLoopInit(cur_loop_t* pCurLoop, axis_e eAxisNo)
+void CurLoopInit(cur_loop_t* pCurLoop)
 {
 }
 
-void CurLoopCycle(cur_loop_t* pCurLoop, axis_e eAxisNo)
+void CurLoopCycle(cur_loop_t* pCurLoop)
 {
 }
 
-void CurLoopIsr(cur_loop_t* pCurLoop, axis_e eAxisNo)
+void CurLoopIsr(cur_loop_t* pCurLoop)
 {
 }

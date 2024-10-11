@@ -16,6 +16,7 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
+    u16*            pu16AppSel_i;
     u16             u16AppSelPre;
     open_loop_t     sOpenLoop;
     mot_enc_ident_t sMotEncIdent;
@@ -27,9 +28,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void AppMgrCreat(app_mgr_t* pAppMgr, axis_e eAxisNo);
-void AppMgrInit(app_mgr_t* pAppMgr, axis_e eAxisNo);
-void AppMgrCycle(app_mgr_t* pAppMgr, axis_e eAxisNo);
-void AppMgrIsr(app_mgr_t* pAppMgr, axis_e eAxisNo);
+void AppMgrInit(app_mgr_t* pAppMgr);
+void AppMgrCycle(app_mgr_t* pAppMgr);
+void AppMgrIsr(app_mgr_t* pAppMgr);
 
 #ifdef __cplusplus
 }

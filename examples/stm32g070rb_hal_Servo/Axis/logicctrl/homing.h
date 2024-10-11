@@ -20,9 +20,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void HomingCreat(homing_t* pHoming, axis_e eAxisNo);
-void HomingInit(homing_t* pHoming, axis_e eAxisNo);
-void HomingCycle(homing_t* pHoming, axis_e eAxisNo);
-void HomingIsr(homing_t* pHoming, axis_e eAxisNo);
+void HomingInit(homing_t* pHoming);
+void HomingCycle(homing_t* pHoming);
+void HomingIsr(homing_t* pHoming);
 
 #ifdef __cplusplus
 }

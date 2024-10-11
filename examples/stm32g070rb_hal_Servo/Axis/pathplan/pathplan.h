@@ -26,9 +26,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void PathPlanCreat(path_plan_t* pPlanPlan, axis_e eAxisNo);
-void PathPlanInit(path_plan_t* pPlanPlan, axis_e eAxisNo);
-void PathPlanCycle(path_plan_t* pPlanPlan, axis_e eAxisNo);
-void PathPlanIsr(path_plan_t* pPlanPlan, axis_e eAxisNo);
+void PathPlanInit(path_plan_t* pPlanPlan);
+void PathPlanCycle(path_plan_t* pPlanPlan);
+void PathPlanIsr(path_plan_t* pPlanPlan);
 
 #ifdef __cplusplus
 }

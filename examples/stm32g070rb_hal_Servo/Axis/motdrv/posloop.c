@@ -23,14 +23,14 @@ void PosLoopCreat(pos_loop_t* pPosLoop, axis_e eAxisNo)
 {
 }
 
-void PosLoopInit(pos_loop_t* pPosLoop, axis_e eAxisNo)
+void PosLoopInit(pos_loop_t* pPosLoop)
 {
 }
 
-void PosLoopCycle(pos_loop_t* pPosLoop, axis_e eAxisNo)
+void PosLoopCycle(pos_loop_t* pPosLoop)
 {
 }
 
-void PosLoopIsr(pos_loop_t* pPosLoop, axis_e eAxisNo)
+void PosLoopIsr(pos_loop_t* pPosLoop)
 {
 }

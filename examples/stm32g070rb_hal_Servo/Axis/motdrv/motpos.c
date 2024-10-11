@@ -1,5 +1,6 @@
 #include "motpos.h"
 #include "spi_mt6701.h"
+#include "i2c_as5600.h"
 
 //---------------------------------------------------------------------------
 // Definitions
@@ -38,6 +39,7 @@ typedef union {
 //---------------------------------------------------------------------------
 
 extern spi_mt6701_t mt6701;
+extern i2c_as5600_t as5600;
 
 //---------------------------------------------------------------------------
 // Variables
@@ -49,27 +51,42 @@ extern spi_mt6701_t mt6701;
 
 static void AbsEncSyncSamp(axis_e eAxisNo)
 {
+#if 1
+	
     u32EncPos_io(eAxisNo) = MT6701_ReadAngle(&mt6701);
+
+#else
+
+    u16 u16Pos;
+
+    if (AS5600_ReadRawAngle(&as5600, &u16Pos) == ERR_NONE)
+    {
+        u32EncPos_io(eAxisNo) = u16Pos;
+    }
+
+#endif
 }
 
-static void AbsEncCreat(abs_enc_t* pAbsEnc, axis_e eAxisNo)
-{}
+#define eAxisNo 0
 
-static void AbsEncInit(abs_enc_t* pAbsEnc, axis_e eAxisNo)
+static void AbsEncCreat(abs_enc_t* pAbsEnc)
+{
+}
+
+static void AbsEncInit(abs_enc_t* pAbsEnc)
 {
     AbsEncSyncSamp(eAxisNo);
 }
 
-static void AbsEncCycle(abs_enc_t* pAbsEnc, axis_e eAxisNo)
+static void AbsEncCycle(abs_enc_t* pAbsEnc)
 {
-   
 }
 
 // 正方向定义: 编码器递增方向和电角度递增方向相同。若方向相反，则任意调换电机的两根相线
-static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
+static void AbsEncIsr(abs_enc_t* pAbsEnc)
 {
-	AbsEncSyncSamp(eAxisNo);
-	
+    AbsEncSyncSamp(eAxisNo);
+
     // 1. 单圈值
 
     s32 s32PosPreCur = u32EncPos_io(eAxisNo);
@@ -101,11 +118,9 @@ static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
 
         PosPre = s64EncMultPos_o(eAxisNo);
     });
-		
- PeriodicTask(250 * UNIT_US, {
-        // 1. 位置采样
 
-        
+    PeriodicTask(250 * UNIT_US, {
+        // 1. 位置采样
 
         // 2. 计算电角度
 
@@ -137,36 +152,40 @@ static void AbsEncIsr(abs_enc_t* pAbsEnc, axis_e eAxisNo)
     });
 }
 
+#undef eAxisNo
+
 void MotPosCreat(mot_pos_t* pMotPos, axis_e eAxisNo)
 {
 #if (CONFIG_ENCODER_TYPE == ENC_INC)
     IncEncCreat(&pMotPos->sIncEnc, eAxisNo);
 #elif (CONFIG_ENCODER_TYPE == ENC_ABS)
-    AbsEncCreat(&pMotPos->sAbsEnc, eAxisNo);
+    AbsEncCreat(&pMotPos->sAbsEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ROT)
     RotEncCreat(&pMotPos->sRotEnc, eAxisNo);
 #endif
 }
 
-void MotPosInit(mot_pos_t* pMotPos, axis_e eAxisNo)
+#define eAxisNo 0
+
+void MotPosInit(mot_pos_t* pMotPos)
 {
 #if (CONFIG_ENCODER_TYPE == ENC_INC)
-    IncEncInit(&pMotPos->sIncEnc, eAxisNo);
+    IncEncInit(&pMotPos->sIncEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ABS)
-    AbsEncInit(&pMotPos->sAbsEnc, eAxisNo);
+    AbsEncInit(&pMotPos->sAbsEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ROT)
-    RotEncInit(&pMotPos->sRotEnc, eAxisNo);
+    RotEncInit(&pMotPos->sRotEnc);
 #endif
 }
 
-void MotPosCycle(mot_pos_t* pMotPos, axis_e eAxisNo)
+void MotPosCycle(mot_pos_t* pMotPos)
 {
 #if (CONFIG_ENCODER_TYPE == ENC_INC)
-    IncEncCycle(&pMotPos->sIncEnc, eAxisNo);
+    IncEncCycle(&pMotPos->sIncEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ABS)
-    AbsEncCycle(&pMotPos->sAbsEnc, eAxisNo);
+    AbsEncCycle(&pMotPos->sAbsEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ROT)
-    RotEncCycle(&pMotPos->sRotEnc, eAxisNo);
+    RotEncCycle(&pMotPos->sRotEnc);
 #endif
 
     if (pMotPos->u16CmdPre ^ u16EncCmd_i(eAxisNo))  // 边沿触发
@@ -203,14 +222,14 @@ void MotPosCycle(mot_pos_t* pMotPos, axis_e eAxisNo)
 #endif
 }
 
-void MotPosIsr(mot_pos_t* pMotPos, axis_e eAxisNo)
+void MotPosIsr(mot_pos_t* pMotPos)
 {
 #if (CONFIG_ENCODER_TYPE == ENC_INC)
-    IncEncIsr(&pMotPos->sIncEnc, eAxisNo);
+    IncEncIsr(&pMotPos->sIncEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ABS)
-    AbsEncIsr(&pMotPos->sAbsEnc, eAxisNo);
+    AbsEncIsr(&pMotPos->sAbsEnc);
 #elif (CONFIG_ENCODER_TYPE == ENC_ROT)
-    RotEncIsr(&pMotPos->sRotEnc, eAxisNo);
+    RotEncIsr(&pMotPos->sRotEnc);
 #endif
 
     P(eAxisNo).s64DrvPosFb = s64EncMultPos_o(eAxisNo);

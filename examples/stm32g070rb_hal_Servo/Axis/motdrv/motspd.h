@@ -20,9 +20,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void MotSpdCreat(mot_spd_t* pMotSpd, axis_e eAxisNo);
-void MotSpdInit(mot_spd_t* pMotSpd, axis_e eAxisNo);
-void MotSpdCycle(mot_spd_t* pMotSpd, axis_e eAxisNo);
-void MotSpdIsr(mot_spd_t* pMotSpd, axis_e eAxisNo);
+void MotSpdInit(mot_spd_t* pMotSpd);
+void MotSpdCycle(mot_spd_t* pMotSpd);
+void MotSpdIsr(mot_spd_t* pMotSpd);
 
 #ifdef __cplusplus
 }

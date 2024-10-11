@@ -12,7 +12,8 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 typedef struct {
-    u16 _Resv;
+    s16* ps16LogicTrqRef_i;
+    s32* ps32DrvTrqRef_o;
 } trq_plan_t;
 
 //---------------------------------------------------------------------------
@@ -20,9 +21,9 @@ typedef struct {
 //---------------------------------------------------------------------------
 
 void TrqPlanCreat(trq_plan_t* pTrqPlan, axis_e eAxisNo);
-void TrqPlanInit(trq_plan_t* pTrqPlan, axis_e eAxisNo);
-void TrqPlanCycle(trq_plan_t* pTrqPlan, axis_e eAxisNo);
-void TrqPlanIsr(trq_plan_t* pTrqPlan, axis_e eAxisNo);
+void TrqPlanInit(trq_plan_t* pTrqPlan);
+void TrqPlanCycle(trq_plan_t* pTrqPlan);
+void TrqPlanIsr(trq_plan_t* pTrqPlan);
 
 #ifdef __cplusplus
 }
